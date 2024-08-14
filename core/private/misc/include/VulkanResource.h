@@ -8,20 +8,28 @@
 #include <iostream>
 
 struct VulkanAppContext;
-template <typename T> class VulkanResource {
+
+template<typename T>
+class VulkanResource {
 protected:
     T resource;
+    VulkanAppContext& ctx;
 public:
-    VulkanResource(){
+    explicit VulkanResource(VulkanAppContext& context) : ctx(context){
         std::cout << "Initializing " << typeid(this).name() << std::endl;
     }
-    virtual ~VulkanResource() = default;
-    operator T() const {return resource;}
-    operator T*() const {return &resource;}
-    virtual T getRaw() const{
+
+    virtual ~VulkanResource() {
+        std::cout << "Cleaning up " << typeid(this).name() << std::endl;
+    }
+    operator T() const { return resource; }
+    operator const T *() const { return &resource; }
+
+    virtual T getRaw() const {
         return resource;
     }
-    virtual T* getRawPtr() {
+
+    virtual T *getRawPtr() {
         return &resource;
     }
 };

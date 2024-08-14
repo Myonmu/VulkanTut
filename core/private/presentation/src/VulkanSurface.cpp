@@ -7,17 +7,16 @@
 #include "VulkanAppContext.h"
 
 void VulkanSurface::createSurface(VulkanAppContext& context){
-    if(glfwCreateWindowSurface(context.vulkanInstance->getRaw(),
+    if(glfwCreateWindowSurface(context.vulkanInstance,
                                context.window, nullptr, &resource) != VK_SUCCESS){
         throw std::runtime_error("failed to create window surface");
     }
 }
 
-VulkanSurface::VulkanSurface(VulkanAppContext &context) : VulkanResource<VkSurfaceKHR>(){
-    ctx = &context;
+VulkanSurface::VulkanSurface(VulkanAppContext &context): VulkanResource<VkSurfaceKHR_T*>(context) {
     createSurface(context);
 }
 
 VulkanSurface::~VulkanSurface() {
-    vkDestroySurfaceKHR(ctx->vulkanInstance->getRaw(), resource, nullptr);
+    vkDestroySurfaceKHR(ctx.vulkanInstance, resource, nullptr);
 }

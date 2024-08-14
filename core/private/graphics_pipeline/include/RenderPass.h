@@ -14,8 +14,6 @@ class RenderPass : public VulkanResource<VkRenderPass>{
 public:
     explicit RenderPass(VulkanAppContext& context);
     ~RenderPass() override;
-private:
-    VulkanAppContext* ctx;
 };
 
 

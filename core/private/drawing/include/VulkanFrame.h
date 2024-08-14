@@ -19,8 +19,8 @@ public:
     void drawFrame();
     void signalResize();
 private:
-    VulkanAppContext* context;
-    CommandBuffer* commandBuffer;
+    VulkanAppContext& context;
+    CommandBuffer commandBuffer;
     CommandBufferRecorder commandBufferRecorder{};
 
     VkSemaphore imageAvailableSemaphore{};

@@ -15,6 +15,7 @@ set(INCLUDE_DIRS
 
 # Source files
 set(SOURCES
+        private/setup/src/GlfwWindow.cpp
         private/graphics_pipeline/src/GraphicsPipeline.cpp
         private/graphics_pipeline/src/RenderPass.cpp
         private/graphics_pipeline/src/ShaderModule.cpp

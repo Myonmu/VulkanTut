@@ -7,25 +7,21 @@
 #include "Vertex.h"
 #include "VulkanAppContext.h"
 
-VulkanPipeline::VulkanPipeline(VulkanAppContext &context) {
-
-    ctx = &context;
-
-    auto vertShaderCode = FileUtility::ReadFile("../shaders/vert.spv");
-    auto fragShaderCode = FileUtility::ReadFile("../shaders/frag.spv");
-    frag = new ShaderModule(fragShaderCode, context);
-    vert = new ShaderModule(vertShaderCode, context);
+VulkanPipeline::VulkanPipeline(VulkanAppContext &context)
+    : VulkanResource<VkPipeline_T *>(context),
+      frag("../shaders/frag.spv", ctx),
+      vert("../shaders/vert.spv", ctx) {
 
     VkPipelineShaderStageCreateInfo vertShaderStageInfo{};
     vertShaderStageInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
     vertShaderStageInfo.stage = VK_SHADER_STAGE_VERTEX_BIT;
-    vertShaderStageInfo.module = vert->getRaw();
+    vertShaderStageInfo.module = vert;
     vertShaderStageInfo.pName = "main";
 
     VkPipelineShaderStageCreateInfo fragShaderStageInfo{};
     fragShaderStageInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
     fragShaderStageInfo.stage = VK_SHADER_STAGE_FRAGMENT_BIT;
-    fragShaderStageInfo.module = frag->getRaw();
+    fragShaderStageInfo.module = frag;
     fragShaderStageInfo.pName = "main";
 
     VkPipelineShaderStageCreateInfo shaderStages[] = {vertShaderStageInfo, fragShaderStageInfo};
@@ -57,14 +53,14 @@ VulkanPipeline::VulkanPipeline(VulkanAppContext &context) {
     VkViewport viewport{};
     viewport.x = 0.0f;
     viewport.y = 0.0f;
-    viewport.width = static_cast<float>(context.swapChain->swapChainExtent.width);
-    viewport.height = static_cast<float>(context.swapChain->swapChainExtent.height);
+    viewport.width = static_cast<float>(context.swapChain.swapChainExtent.width);
+    viewport.height = static_cast<float>(context.swapChain.swapChainExtent.height);
     viewport.minDepth = 0.0f;
     viewport.maxDepth = 1.0f;
 
     VkRect2D scissor{};
     scissor.offset = {0, 0};
-    scissor.extent = context.swapChain->swapChainExtent;
+    scissor.extent = context.swapChain.swapChainExtent;
 
     /*
     VkPipelineViewportStateCreateInfo viewportState{};
@@ -103,7 +99,8 @@ VulkanPipeline::VulkanPipeline(VulkanAppContext &context) {
     multisampling.alphaToOneEnable = VK_FALSE; // Optional
 
     VkPipelineColorBlendAttachmentState colorBlendAttachment{};
-    colorBlendAttachment.colorWriteMask = VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT;
+    colorBlendAttachment.colorWriteMask = VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT
+                                          | VK_COLOR_COMPONENT_A_BIT;
     colorBlendAttachment.blendEnable = VK_FALSE;
     colorBlendAttachment.srcColorBlendFactor = VK_BLEND_FACTOR_ONE; // Optional
     colorBlendAttachment.dstColorBlendFactor = VK_BLEND_FACTOR_ZERO; // Optional
@@ -140,26 +137,23 @@ VulkanPipeline::VulkanPipeline(VulkanAppContext &context) {
     pipelineInfo.pColorBlendState = &colorBlending;
     pipelineInfo.pDynamicState = &dynamicState;
 
-    pipelineInfo.layout = context.graphicsPipeline->getRaw();
+    pipelineInfo.layout = context.graphicsPipeline;
 
-    pipelineInfo.renderPass = context.renderPass->getRaw();
+    pipelineInfo.renderPass = context.renderPass;
     pipelineInfo.subpass = 0;
 
     pipelineInfo.basePipelineHandle = VK_NULL_HANDLE; // Optional
     pipelineInfo.basePipelineIndex = -1; // Optional
 
-    if (vkCreateGraphicsPipelines(context.logicalDevice->getRaw()
+    if (vkCreateGraphicsPipelines(context.logicalDevice
                                   , VK_NULL_HANDLE, 1,
                                   &pipelineInfo, nullptr,
                                   &resource) != VK_SUCCESS) {
         throw std::runtime_error("failed to create graphics pipeline!");
     }
-
 }
 
 VulkanPipeline::~VulkanPipeline() {
-    vkDestroyPipeline(ctx->logicalDevice->getRaw(),
+    vkDestroyPipeline(ctx.logicalDevice,
                       resource, nullptr);
-    delete frag;
-    delete vert;
 }

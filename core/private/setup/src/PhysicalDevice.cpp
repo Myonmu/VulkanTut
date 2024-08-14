@@ -47,7 +47,7 @@ int PhysicalDevice::rateDeviceSuitability(VkPhysicalDevice device, VulkanAppCont
         return 0;
     }else{
         SwapChain::SwapChainSupportDetails swapChainSupport =
-                context.swapChain->querySwapChainSupport(device,context.vulkanSurface->getRaw());
+                SwapChain::querySwapChainSupport(device,context.vulkanSurface);
         if(swapChainSupport.formats.empty()||swapChainSupport.presentModes.empty()){
             return 0;
         }
@@ -63,9 +63,9 @@ int PhysicalDevice::rateDeviceSuitability(VkPhysicalDevice device, VulkanAppCont
 
 void PhysicalDevice::pickPhysicalDevice(VulkanAppContext& context){
     uint32_t  deviceCount = 0;
-    vkEnumeratePhysicalDevices(context.vulkanInstance->getRaw(), &deviceCount, nullptr);
+    vkEnumeratePhysicalDevices(context.vulkanInstance, &deviceCount, nullptr);
     std::vector<VkPhysicalDevice> devices(deviceCount);
-    vkEnumeratePhysicalDevices(context.vulkanInstance->getRaw(), &deviceCount, devices.data());
+    vkEnumeratePhysicalDevices(context.vulkanInstance, &deviceCount, devices.data());
 
     // Use an ordered map to automatically sort candidates by increasing score
     std::multimap<int, VkPhysicalDevice> candidates;
@@ -87,6 +87,6 @@ void PhysicalDevice::pickPhysicalDevice(VulkanAppContext& context){
     std::cout << "Selected Physical Device : " << properties.deviceName << std::endl;
 }
 
-PhysicalDevice::PhysicalDevice(VulkanAppContext &context): VulkanResource<VkPhysicalDevice>() {
+PhysicalDevice::PhysicalDevice(VulkanAppContext &context): VulkanResource<VkPhysicalDevice_T*>(context) {
     pickPhysicalDevice(context);
 }

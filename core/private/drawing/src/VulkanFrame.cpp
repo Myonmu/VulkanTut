@@ -8,23 +8,21 @@
 
 #include "CommandBuffer.h"
 
-VulkanFrame::VulkanFrame(VulkanAppContext &context) {
-    commandBuffer = new CommandBuffer(context);
-    this->context = &context;
+VulkanFrame::VulkanFrame(VulkanAppContext &context): context(context),
+                                                     commandBuffer(context) {
     VkSemaphoreCreateInfo semaphoreInfo{};
     semaphoreInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
-
     VkFenceCreateInfo fenceInfo{};
     fenceInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
     fenceInfo.flags = VK_FENCE_CREATE_SIGNALED_BIT;
     //Initially signaled so that we don't wait for the fence on first frame
 
     if (
-        vkCreateSemaphore(context.logicalDevice->getRaw(), &semaphoreInfo, nullptr, &imageAvailableSemaphore) !=
+        vkCreateSemaphore(context.logicalDevice, &semaphoreInfo, nullptr, &imageAvailableSemaphore) !=
         VK_SUCCESS ||
-        vkCreateSemaphore(context.logicalDevice->getRaw(), &semaphoreInfo, nullptr, &renderFinishedSemaphore) !=
+        vkCreateSemaphore(context.logicalDevice, &semaphoreInfo, nullptr, &renderFinishedSemaphore) !=
         VK_SUCCESS ||
-        vkCreateFence(context.logicalDevice->getRaw(), &fenceInfo, nullptr, &inFlightFence) != VK_SUCCESS) {
+        vkCreateFence(context.logicalDevice, &fenceInfo, nullptr, &inFlightFence) != VK_SUCCESS) {
         throw std::runtime_error("failed to create semaphores!");
     }
 }
@@ -35,15 +33,15 @@ void VulkanFrame::signalResize() {
 
 
 void VulkanFrame::drawFrame() {
-    auto device = context->logicalDevice->getRaw();
-    auto swapChain = context->swapChain->getRaw();
+    const auto& device = context.logicalDevice;
+    const auto& swapChain = context.swapChain;
     vkWaitForFences(device, 1, &inFlightFence, VK_TRUE, UINT64_MAX);
 
     // Acquire image from swap chain
     auto result = vkAcquireNextImageKHR(device, swapChain, UINT64_MAX, imageAvailableSemaphore, VK_NULL_HANDLE,
                                         &imageIndex);
     if (result == VK_ERROR_OUT_OF_DATE_KHR) {
-        context->resize();
+        context.resize();
         return;
     } else if (result != VK_SUCCESS && result != VK_SUBOPTIMAL_KHR) {
         throw std::runtime_error("failed to aquire swap chain image");
@@ -51,7 +49,7 @@ void VulkanFrame::drawFrame() {
 
     vkResetFences(device, 1, &inFlightFence);
     // record command buffer
-    vkResetCommandBuffer(commandBuffer->getRaw(), 0);
+    vkResetCommandBuffer(commandBuffer, 0);
     commandBufferRecorder.recordCommandBuffer(context, commandBuffer, imageIndex);
     // Submit command buffer
     VkSubmitInfo submitInfo{};
@@ -62,13 +60,13 @@ void VulkanFrame::drawFrame() {
     submitInfo.pWaitSemaphores = waitSemaphores;
     submitInfo.pWaitDstStageMask = waitStages;
     submitInfo.commandBufferCount = 1;
-    submitInfo.pCommandBuffers = commandBuffer->getRawPtr();
+    submitInfo.pCommandBuffers = commandBuffer;
 
     VkSemaphore signalSemaphores[] = {renderFinishedSemaphore};
     submitInfo.signalSemaphoreCount = 1;
     submitInfo.pSignalSemaphores = signalSemaphores;
 
-    if (vkQueueSubmit(context->logicalDevice->graphicsQueue, 1, &submitInfo, inFlightFence) != VK_SUCCESS) {
+    if (vkQueueSubmit(context.logicalDevice.graphicsQueue, 1, &submitInfo, inFlightFence) != VK_SUCCESS) {
         throw std::runtime_error("failed to submit draw command buffer");
     }
 
@@ -83,17 +81,17 @@ void VulkanFrame::drawFrame() {
     presentInfo.pImageIndices = &imageIndex;
     presentInfo.pResults = nullptr;
 
-    result = vkQueuePresentKHR(context->logicalDevice->presentQueue, &presentInfo);
+    result = vkQueuePresentKHR(context.logicalDevice.presentQueue, &presentInfo);
     if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR || frameBufferResized) {
         frameBufferResized = false;
-        context->resize();
+        context.resize();
     } else if (result != VK_SUCCESS) {
         throw std::runtime_error("failed to present swap chain image");
     }
 }
 
 VulkanFrame::~VulkanFrame() {
-    const auto device = context->logicalDevice->getRaw();
+    const auto& device = context.logicalDevice;
     vkDestroySemaphore(device, imageAvailableSemaphore, nullptr);
     vkDestroySemaphore(device, renderFinishedSemaphore, nullptr);
     vkDestroyFence(device, inFlightFence, nullptr);

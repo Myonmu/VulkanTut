@@ -13,8 +13,6 @@ class CommandPool: public VulkanResource<VkCommandPool> {
 public:
     explicit CommandPool(VulkanAppContext& context);
     ~CommandPool() override;
-private:
-    VulkanAppContext* context;
 };
 
 

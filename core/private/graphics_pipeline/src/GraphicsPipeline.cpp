@@ -5,9 +5,7 @@
 #include "GraphicsPipeline.h"
 #include "VulkanAppContext.h"
 
-GraphicsPipeline::GraphicsPipeline(VulkanAppContext &context) {
-    ctx = &context;
-
+GraphicsPipeline::GraphicsPipeline(VulkanAppContext &context): VulkanResource(context) {
     VkPipelineLayoutCreateInfo pipelineLayoutInfo{};
     pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
     pipelineLayoutInfo.setLayoutCount = 0; // Optional
@@ -15,7 +13,7 @@ GraphicsPipeline::GraphicsPipeline(VulkanAppContext &context) {
     pipelineLayoutInfo.pushConstantRangeCount = 0; // Optional
     pipelineLayoutInfo.pPushConstantRanges = nullptr; // Optional
 
-    if (vkCreatePipelineLayout(context.logicalDevice->getRaw(),
+    if (vkCreatePipelineLayout(context.logicalDevice,
                                &pipelineLayoutInfo,
                                nullptr, &resource) != VK_SUCCESS) {
         throw std::runtime_error("failed to create pipeline layout!");
@@ -23,5 +21,5 @@ GraphicsPipeline::GraphicsPipeline(VulkanAppContext &context) {
 }
 
 GraphicsPipeline::~GraphicsPipeline() {
-    vkDestroyPipelineLayout(ctx->logicalDevice->getRaw(), resource, nullptr);
+    vkDestroyPipelineLayout(ctx.logicalDevice, resource, nullptr);
 }

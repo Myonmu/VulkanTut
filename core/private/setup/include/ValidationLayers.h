@@ -19,7 +19,6 @@ public:
     void AttachToDeviceCreation(VkDeviceCreateInfo& createInfo);
 
 private:
-    VulkanAppContext* ctx = nullptr;
     static const std::vector<const char *> validationLayers;
 
     static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(VkDebugUtilsMessageSeverityFlagBitsEXT severity,

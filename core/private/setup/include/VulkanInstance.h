@@ -17,7 +17,7 @@ public:
     ~VulkanInstance() override;
 private:
     void createInstance(VulkanAppContext& context);
-    [[nodiscard]] static std::vector<const char *> getRequiredExtensions(VulkanAppContext& context) ;
+    [[nodiscard]] static std::vector<const char *> getRequiredExtensions(const VulkanAppContext& context) ;
 };
 
 

@@ -7,9 +7,8 @@
 #include <QueueFamilyIndices.h>
 #include <VulkanAppContext.h>
 
-CommandPool::CommandPool(VulkanAppContext &context) {
-    this->context = &context;
-    auto queueFamilyIndices =QueueFamilyIndices::FindQueueFamilies(context.physicalDevice->getRaw(), context);
+CommandPool::CommandPool(VulkanAppContext &context) : VulkanResource<VkCommandPool_T*>(context){
+    auto queueFamilyIndices =QueueFamilyIndices::FindQueueFamilies(context.physicalDevice, context);
     VkCommandPoolCreateInfo poolInfo{};
 
     poolInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
@@ -33,11 +32,11 @@ CommandPool::CommandPool(VulkanAppContext &context) {
     Each command pool can only allocate command buffers that are submitted on a single type of queue.
     We're going to record commands for drawing, which is why we've chosen the graphics queue family.
      */
-    if (vkCreateCommandPool(context.logicalDevice->getRaw(), &poolInfo, nullptr, &resource) != VK_SUCCESS) {
+    if (vkCreateCommandPool(context.logicalDevice, &poolInfo, nullptr, &resource) != VK_SUCCESS) {
         throw std::runtime_error("failed to create command pool!");
     }
 }
 
 CommandPool::~CommandPool() {
-    vkDestroyCommandPool(context->logicalDevice->getRaw(), resource, nullptr);
+    vkDestroyCommandPool(ctx.logicalDevice, resource, nullptr);
 }

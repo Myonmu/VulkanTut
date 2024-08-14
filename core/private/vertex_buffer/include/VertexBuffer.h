@@ -7,15 +7,18 @@
 #include <Buffer.h>
 #include <VulkanResource.h>
 
-class VertexBuffer{
-public:
-    explicit VertexBuffer(VulkanAppContext& context);
-    ~VertexBuffer();
-    Buffer* vertexBuffer;
+class VertexBuffer {
 private:
-    VulkanAppContext* context;
-};
+    VkDeviceSize size;
+    VulkanAppContext &ctx;
 
+public:
+    explicit VertexBuffer(VulkanAppContext &context);
+
+    ~VertexBuffer();
+
+    Buffer vertexBuffer;
+};
 
 
 #endif //VERTEXBUFFER_H

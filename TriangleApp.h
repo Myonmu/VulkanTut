@@ -8,7 +8,6 @@
 #include <vector>
 #include <optional>
 #include <algorithm>
-#include <VulkanRenderer.h>
 
 #include "GLFW/glfw3.h"
 #include "VulkanAppContext.h"
@@ -32,7 +31,7 @@ private:
             context->drawFrame();
         }
 
-        vkDeviceWaitIdle(context->logicalDevice->getRaw());
+        vkDeviceWaitIdle(context->logicalDevice);
     }
 };
 

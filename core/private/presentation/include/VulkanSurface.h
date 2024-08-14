@@ -15,7 +15,6 @@ public:
     explicit VulkanSurface(VulkanAppContext &context);
     ~VulkanSurface() override;
 private:
-    VulkanAppContext* ctx;
     void createSurface(VulkanAppContext& context);
 };
 

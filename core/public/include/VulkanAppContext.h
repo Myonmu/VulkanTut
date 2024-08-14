@@ -6,6 +6,7 @@
 #define VULKANTUT_VULKANAPPCONTEXT_H
 #include <CommandPool.h>
 #include <FrameBuffers.h>
+#include <GlfwWindow.h>
 #include <vector>
 #include <VertexBuffer.h>
 #include <VulkanRenderer.h>
@@ -23,35 +24,34 @@
 
 
 struct VulkanAppContext {
+    const std::vector<const char *> deviceExtensions = {
+        VK_KHR_SWAPCHAIN_EXTENSION_NAME
+    };
     const int MAX_FRAMES_IN_FLIGHT = 2;
 #ifdef NDEBUG
     const bool enableValidationLayers = false;
 #else
     const bool enableValidationLayers = true;
 #endif
-    const char* name;
+    const char *name;
     int width;
     int height;
-    GLFWwindow* window = nullptr;
-    PhysicalDevice* physicalDevice = nullptr;
-    LogicalDevice* logicalDevice = nullptr;
-    SwapChain* swapChain = nullptr;
-    ValidationLayers* validationLayers = nullptr;
-    VulkanInstance* vulkanInstance = nullptr;
-    VulkanSurface* vulkanSurface = nullptr;
-    GraphicsPipeline* graphicsPipeline = nullptr;
-    RenderPass* renderPass = nullptr;
-    VulkanPipeline* vulkanPipeline = nullptr;
-    FrameBuffers* frameBuffers = nullptr;
-    CommandPool* commandPool = nullptr;
-    VertexBuffer* vertexBuffer = nullptr;
-    VulkanRenderer* renderer = nullptr;
+    GlfwWindow window {*this, width, height, name, frameBufferResizeCallback};
+    VulkanInstance vulkanInstance{*this};
+    ValidationLayers validationLayers{*this};
+    VulkanSurface vulkanSurface{*this};
+    PhysicalDevice physicalDevice{*this};
+    LogicalDevice logicalDevice{*this};
+    SwapChain swapChain{*this};
+    GraphicsPipeline graphicsPipeline{*this};
+    RenderPass renderPass{*this};
+    VulkanPipeline vulkanPipeline{*this};
+    FrameBuffers frameBuffers{*this};
+    CommandPool commandPool{*this};
+    VertexBuffer vertexBuffer{*this};
+    VulkanRenderer renderer{*this};
 
-    const std::vector<const char*> deviceExtensions = {
-            VK_KHR_SWAPCHAIN_EXTENSION_NAME
-    };
-
-    VulkanAppContext(int w, int h, const char* appName);
+    VulkanAppContext(int w, int h, const char *appName);
 
     ~VulkanAppContext();
 
@@ -61,7 +61,7 @@ struct VulkanAppContext {
 
     void resize();
 
-    void drawFrame() const;
+    void drawFrame();
 };
 
 

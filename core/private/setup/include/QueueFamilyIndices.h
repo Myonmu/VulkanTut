@@ -31,7 +31,7 @@ struct QueueFamilyIndices{
         for (const auto & queueFamily : queueFamilies){
             VkBool32 presentSupport = false;
             vkGetPhysicalDeviceSurfaceSupportKHR
-            (device, i, context.vulkanSurface->getRaw(), &presentSupport);
+            (device, i, context.vulkanSurface, &presentSupport);
             if(presentSupport){
                 indices.presentFamily = i;
             }

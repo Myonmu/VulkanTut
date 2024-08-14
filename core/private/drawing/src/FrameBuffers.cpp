@@ -7,34 +7,48 @@
 #include <VulkanAppContext.h>
 #include <SwapChain.h>
 
-FrameBuffers::FrameBuffers(VulkanAppContext &context) {
-    this->context = &context;
-    resource.resize(context.swapChain->getSize());
-    for (size_t i = 0; i < context.swapChain->getSize(); i++) {
+void FrameBuffers::createFrameBuffers() {
+    resource.resize(ctx.swapChain.getSize());
+    for (size_t i = 0; i < ctx.swapChain.getSize(); i++) {
         VkImageView attachments[] = {
-            context.swapChain->swapChainImageViews[i]
+            ctx.swapChain.swapChainImageViews[i]
         };
 
         VkFramebufferCreateInfo framebufferInfo{};
         framebufferInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
-        framebufferInfo.renderPass = context.renderPass->getRaw();
+        framebufferInfo.renderPass = ctx.renderPass;
         framebufferInfo.attachmentCount = 1;
         framebufferInfo.pAttachments = attachments;
-        framebufferInfo.width = context.swapChain->swapChainExtent.width;
-        framebufferInfo.height = context.swapChain->swapChainExtent.height;
+        framebufferInfo.width = ctx.swapChain.swapChainExtent.width;
+        framebufferInfo.height = ctx.swapChain.swapChainExtent.height;
         framebufferInfo.layers = 1;
 
-        if (vkCreateFramebuffer(context.logicalDevice->getRaw(), &framebufferInfo,
+        if (vkCreateFramebuffer(ctx.logicalDevice, &framebufferInfo,
             nullptr, &resource[i]) != VK_SUCCESS) {
             throw std::runtime_error("failed to create framebuffer!");
         }
     }
 }
 
-FrameBuffers::~FrameBuffers() {
+void FrameBuffers::destroyFrameBuffers() {
     for (auto framebuffer : resource) {
-        vkDestroyFramebuffer(context->logicalDevice->getRaw(), framebuffer, nullptr);
+        vkDestroyFramebuffer(ctx.logicalDevice, framebuffer, nullptr);
     }
 
 }
+
+
+FrameBuffers::FrameBuffers(VulkanAppContext &context): VulkanResource<std::vector<VkFramebuffer_T*>>(context) {
+    createFrameBuffers();
+}
+
+FrameBuffers::~FrameBuffers() {
+    destroyFrameBuffers();
+}
+
+void FrameBuffers::recreate() {
+    destroyFrameBuffers();
+    createFrameBuffers();
+}
+
 

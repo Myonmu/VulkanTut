@@ -15,12 +15,17 @@ class CommandBuffer;
 
 class CommandBufferRecorder {
 public:
-    void recordCommandBuffer(VulkanAppContext *context, CommandBuffer* commandBuffer, uint32_t imageId);
-    void beginRecordCommandBuffer(CommandBuffer *commandBuffer);
-    void endRecordCommandBuffer(CommandBuffer *commandBuffer);
-    void bindVertexBuffer(CommandBuffer* commandBuffer, VertexBuffer* vertexBuffer);
-    void setViewport(CommandBuffer *commandBuffer, SwapChain* swapChain);
-    void setScissors(CommandBuffer *commandBuffer, SwapChain* swapChain);
+    void recordCommandBuffer(VulkanAppContext &context, CommandBuffer &commandBuffer, uint32_t imageId);
+
+    void beginRecordCommandBuffer(CommandBuffer &commandBuffer);
+
+    void endRecordCommandBuffer(CommandBuffer &commandBuffer);
+
+    void bindVertexBuffer(CommandBuffer &commandBuffer, VertexBuffer &vertexBuffer);
+
+    void setViewport(CommandBuffer &commandBuffer, SwapChain &swapChain);
+
+    void setScissors(CommandBuffer &commandBuffer, SwapChain &swapChain);
 };
 
 

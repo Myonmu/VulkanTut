@@ -14,8 +14,10 @@ class FrameBuffers: public VulkanResource<std::vector<VkFramebuffer>>{
 public:
     explicit FrameBuffers(VulkanAppContext& context);
     ~FrameBuffers() override;
+    void recreate();
 private:
-    VulkanAppContext* context;
+    void createFrameBuffers();
+    void destroyFrameBuffers();
 };
 
 

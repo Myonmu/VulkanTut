@@ -6,10 +6,10 @@
 
 #include <VulkanAppContext.h>
 
-CommandBuffer::CommandBuffer(VulkanAppContext &context) {
+CommandBuffer::CommandBuffer(VulkanAppContext &context): VulkanResource<VkCommandBuffer_T*>(context) {
     VkCommandBufferAllocateInfo info{};
     info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
-    info.commandPool = context.commandPool->getRaw();
+    info.commandPool = context.commandPool;
     /*
     The level parameter specifies if the allocated command buffers are primary or secondary command buffers.
 
@@ -26,7 +26,7 @@ CommandBuffer::CommandBuffer(VulkanAppContext &context) {
     info.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
     info.commandBufferCount = 1;
 
-    if(vkAllocateCommandBuffers(context.logicalDevice->getRaw(), &info, &resource) != VK_SUCCESS) {
+    if(vkAllocateCommandBuffers(context.logicalDevice, &info, &resource) != VK_SUCCESS) {
         throw std::runtime_error("failed to allocate command buffers!");
     }
 }

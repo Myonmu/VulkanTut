@@ -27,9 +27,8 @@ public:
     VkExtent2D swapChainExtent{};
     VkFormat swapChainImageFormat {};
     std::vector<VkImageView> swapChainImageViews;
-
+    void recreate();
 private:
-    VulkanAppContext* ctx;
     std::vector<VkImage> swapChainImages;
 
     void createSwapChain(VulkanAppContext& context);

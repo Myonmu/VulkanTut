@@ -15,11 +15,10 @@ public:
     explicit Buffer(VulkanAppContext& context, VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags props);
     ~Buffer() override;
     void bindBufferMemory(const void* sourceData) const;
-    static void copyBuffer(Buffer* srcBuffer, Buffer* dstBuffer, VulkanAppContext* ctx, VkDeviceSize size);
+    static void copyBuffer(Buffer& srcBuffer, Buffer& dstBuffer, VulkanAppContext& ctx, VkDeviceSize size);
 protected:
     VkDeviceSize size;
     VkDeviceMemory bufferMemory{};
-    VulkanAppContext* context;
     [[nodiscard]] uint32_t findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties) const;
 };
 

@@ -62,9 +62,9 @@ VkExtent2D SwapChain::chooseSwapExtend(const VkSurfaceCapabilitiesKHR& capabilit
 
 
 void SwapChain::createSwapChain(VulkanAppContext& context){
-    auto physicalDevice = context.physicalDevice->getRaw();
-    auto surface = context.vulkanSurface->getRaw();
-    auto logicalDevice = context.logicalDevice->getRaw();
+    auto& physicalDevice = context.physicalDevice;
+    auto& surface = context.vulkanSurface;
+    auto& logicalDevice = context.logicalDevice;
     SwapChainSupportDetails swapChainSupport = querySwapChainSupport(physicalDevice, surface);
 
     VkSurfaceFormatKHR surfaceFormat = chooseSwapSurfaceFormat(swapChainSupport.formats);
@@ -144,16 +144,25 @@ void SwapChain::createImageViews(VkDevice logicalDevice){
 
 SwapChain::~SwapChain() {
     for (auto imageView : swapChainImageViews) {
-        vkDestroyImageView(ctx->logicalDevice->getRaw(), imageView, nullptr);
+        vkDestroyImageView(ctx.logicalDevice, imageView, nullptr);
     }
-    vkDestroySwapchainKHR(ctx->logicalDevice->getRaw(), resource, nullptr);
+    vkDestroySwapchainKHR(ctx.logicalDevice, resource, nullptr);
 }
 
-SwapChain::SwapChain(VulkanAppContext &context) {
-    ctx = &context;
+SwapChain::SwapChain(VulkanAppContext &context): VulkanResource(context) {
     createSwapChain(context);
-    createImageViews(context.logicalDevice->getRaw());
+    createImageViews(context.logicalDevice);
 }
+
+void SwapChain::recreate() {
+    for (auto imageView : swapChainImageViews) {
+        vkDestroyImageView(ctx.logicalDevice, imageView, nullptr);
+    }
+    vkDestroySwapchainKHR(ctx.logicalDevice, resource, nullptr);
+    createSwapChain(ctx);
+    createImageViews(ctx.logicalDevice);
+}
+
 
 size_t SwapChain::getSize() const {
     return swapChainImageViews.size();

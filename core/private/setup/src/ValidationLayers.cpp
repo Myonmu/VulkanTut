@@ -68,11 +68,13 @@ void ValidationLayers::PopulateDebugMessengerCreateInfo(VkDebugUtilsMessengerCre
 }
 
 void ValidationLayers::setupDebugMessenger(const VulkanAppContext &context) {
+    // ReSharper disable once CppDFAConstantConditions
+    // ReSharper disable once CppDFAUnreachableCode
     if (!context.enableValidationLayers) return;
     VkDebugUtilsMessengerCreateInfoEXT createInfo{};
     PopulateDebugMessengerCreateInfo(createInfo);
 
-    if (CreateDebugUtilsMessengerEXT(context.vulkanInstance->getRaw(), &createInfo, nullptr,
+    if (CreateDebugUtilsMessengerEXT(context.vulkanInstance, &createInfo, nullptr,
                                      &resource) != VK_SUCCESS) {
         throw std::runtime_error("failed to set up debug messenger!");
     }
@@ -100,13 +102,12 @@ void ValidationLayers::AttachToDeviceCreation(VkDeviceCreateInfo &createInfo) {
     createInfo.ppEnabledLayerNames = Names();
 }
 
-ValidationLayers::ValidationLayers(VulkanAppContext &context): VulkanResource<VkDebugUtilsMessengerEXT>() {
-    ctx = &context;
+ValidationLayers::ValidationLayers(VulkanAppContext &context):VulkanResource<VkDebugUtilsMessengerEXT_T*>(context){
     setupDebugMessenger(context);
 }
 
 ValidationLayers::~ValidationLayers() {
-    DestroyDebugUtilsMessengerEXT(ctx->vulkanInstance->getRaw(), resource, nullptr);
+    DestroyDebugUtilsMessengerEXT(ctx.vulkanInstance, resource, nullptr);
 }
 
 VkBool32 ValidationLayers::debugCallback(VkDebugUtilsMessageSeverityFlagBitsEXT severity,

@@ -9,7 +9,7 @@
 #include "QueueFamilyIndices.h"
 
 void LogicalDevice::createLogicalDevice(VulkanAppContext& context){
-    QueueFamilyIndices indices = QueueFamilyIndices::FindQueueFamilies(context.physicalDevice->getRaw(),
+    QueueFamilyIndices indices = QueueFamilyIndices::FindQueueFamilies(context.physicalDevice,
                                                                        context);
 
     std::vector<VkDeviceQueueCreateInfo> queueCreateInfos;
@@ -39,12 +39,12 @@ void LogicalDevice::createLogicalDevice(VulkanAppContext& context){
     createInfo.ppEnabledExtensionNames = context.deviceExtensions.data();
 
     if(context.enableValidationLayers){
-        context.validationLayers->AttachToDeviceCreation(createInfo);
+        context.validationLayers.AttachToDeviceCreation(createInfo);
     }else{
         createInfo.enabledLayerCount = 0;
     }
 
-    if (vkCreateDevice(context.physicalDevice->getRaw(), &createInfo, nullptr, &resource)!=VK_SUCCESS){
+    if (vkCreateDevice(context.physicalDevice, &createInfo, nullptr, &resource)!=VK_SUCCESS){
         throw std::runtime_error("failed to create logical device.");
     }
 
@@ -53,7 +53,7 @@ void LogicalDevice::createLogicalDevice(VulkanAppContext& context){
     vkGetDeviceQueue(resource, indices.presentFamily.value(), 0, &presentQueue);
 }
 
-LogicalDevice::LogicalDevice(VulkanAppContext& context) : VulkanResource<VkDevice>(){
+LogicalDevice::LogicalDevice(VulkanAppContext& context) : VulkanResource(context){
     createLogicalDevice(context);
 }
 

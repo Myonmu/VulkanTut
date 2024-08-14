@@ -11,10 +11,9 @@
 #include <vector>
 class ShaderModule : public VulkanResource<VkShaderModule>{
 public:
+    ShaderModule(std::string shaderPath, VulkanAppContext& context);
     ShaderModule(const std::vector<char>& code ,VulkanAppContext& context);
     ~ShaderModule() override;
-private:
-    VulkanAppContext* ctx;
 };
 
 

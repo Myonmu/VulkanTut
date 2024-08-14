@@ -18,7 +18,7 @@ public:
     void drawFrame();
     void signalResize();
 private:
-    VulkanAppContext* context;
+    VulkanAppContext& ctx;
     std::vector<VulkanFrame*> frames;
     uint32_t currentFrame = 0;
 };

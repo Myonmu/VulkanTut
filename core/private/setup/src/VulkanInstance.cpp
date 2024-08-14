@@ -9,10 +9,11 @@
 #include "ValidationLayers.h"
 #include "VulkanAppContext.h"
 
-[[nodiscard]] std::vector<const char *> VulkanInstance::getRequiredExtensions(VulkanAppContext& context) {
+[[nodiscard]] std::vector<const char *> VulkanInstance::getRequiredExtensions(const VulkanAppContext& context) {
     uint32_t glfwExtensionCount = 0;
     const char **glfwExtensions = glfwGetRequiredInstanceExtensions(&glfwExtensionCount);
     std::vector extensions(glfwExtensions, glfwExtensions + glfwExtensionCount);
+    // ReSharper disable once CppDFAConstantConditions
     if (context.enableValidationLayers) {
         extensions.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
     }
@@ -59,7 +60,7 @@ void VulkanInstance::createInstance(VulkanAppContext& context) {
 
 }
 
-VulkanInstance::VulkanInstance(VulkanAppContext &context) : VulkanResource<VkInstance>(){
+VulkanInstance::VulkanInstance(VulkanAppContext &context) : VulkanResource(context){
     createInstance(context);
 }
 
