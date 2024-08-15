@@ -7,6 +7,7 @@
 #include <CommandPool.h>
 #include <FrameBuffers.h>
 #include <GlfwWindow.h>
+#include <IndexBuffer.h>
 #include <vector>
 #include <VertexBuffer.h>
 #include <VulkanRenderer.h>
@@ -49,6 +50,7 @@ struct VulkanAppContext {
     FrameBuffers frameBuffers{*this};
     CommandPool commandPool{*this};
     VertexBuffer vertexBuffer{*this};
+    IndexBuffer indexBuffer{*this};
     VulkanRenderer renderer{*this};
 
     VulkanAppContext(int w, int h, const char *appName);

@@ -7,6 +7,7 @@
 #define COMMANDBUFFERRECORDER_H
 #include <CommandBuffer.h>
 #include <cstdint>
+#include <IndexBuffer.h>
 
 class VertexBuffer;
 class SwapChain;
@@ -15,17 +16,19 @@ class CommandBuffer;
 
 class CommandBufferRecorder {
 public:
-    void recordCommandBuffer(VulkanAppContext &context, CommandBuffer &commandBuffer, uint32_t imageId);
+    void recordCommandBuffer(const VulkanAppContext &context, const CommandBuffer &commandBuffer, uint32_t imageId);
 
-    void beginRecordCommandBuffer(CommandBuffer &commandBuffer);
+    void beginRecordCommandBuffer(const CommandBuffer &commandBuffer);
 
-    void endRecordCommandBuffer(CommandBuffer &commandBuffer);
+    void endRecordCommandBuffer(const CommandBuffer &commandBuffer);
 
-    void bindVertexBuffer(CommandBuffer &commandBuffer, VertexBuffer &vertexBuffer);
+    void bindVertexBuffer(const CommandBuffer &commandBuffer, const VertexBuffer &vertexBuffer);
 
-    void setViewport(CommandBuffer &commandBuffer, SwapChain &swapChain);
+    void setViewport(const CommandBuffer &commandBuffer, const SwapChain &swapChain);
 
-    void setScissors(CommandBuffer &commandBuffer, SwapChain &swapChain);
+    void setScissors(const CommandBuffer &commandBuffer, const SwapChain &swapChain);
+
+    void bindIndexBuffer(const CommandBuffer &commandBuffer, const IndexBuffer &indexBuffer);
 };
 
 

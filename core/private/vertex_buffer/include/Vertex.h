@@ -36,6 +36,8 @@ struct Vertex {
     }
 
     static const std::vector<Vertex> testVerts;
+
+    static const std::vector<uint32_t> testIndices;
 };
 
 #endif //VERTEX_H

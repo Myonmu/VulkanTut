@@ -8,15 +8,14 @@
 
 #include "Vertex.h"
 
-VertexBuffer::VertexBuffer(VulkanAppContext &context) : ctx(context),
-                                                        size(sizeof(Vertex::testVerts[0]) * Vertex::testVerts.size()),
-                                                        vertexBuffer(
-                                                            context, size,
-                                                            VK_BUFFER_USAGE_TRANSFER_DST_BIT |
-                                                            VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
-                                                            VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |
-                                                            VK_MEMORY_PROPERTY_HOST_COHERENT_BIT
-                                                        ) {
+VertexBuffer::VertexBuffer(VulkanAppContext &context)
+    : size(sizeof(Vertex::testVerts[0]) * Vertex::testVerts.size()),
+      ctx(context),
+      vertexBuffer(
+          context, size,
+          VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
+          VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT
+      ) {
     auto stagingBuffer = Buffer(
         context, size,
         VK_BUFFER_USAGE_TRANSFER_SRC_BIT,

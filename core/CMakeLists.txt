@@ -40,6 +40,7 @@ set(SOURCES
         private/vertex_buffer/src/Vertex.cpp
         private/vertex_buffer/src/Buffer.cpp
         private/misc/include/vk_mem_alloc.h
+        private/vertex_buffer/src/IndexBuffer.cpp
 )
 
 # Create static library

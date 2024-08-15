@@ -9,7 +9,7 @@
 #include "CommandBuffer.h"
 #include "Vertex.h"
 
-void CommandBufferRecorder::beginRecordCommandBuffer(CommandBuffer& commandBuffer) {
+void CommandBufferRecorder::beginRecordCommandBuffer(const CommandBuffer& commandBuffer) {
     VkCommandBufferBeginInfo beginInfo{};
     beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
     beginInfo.flags = 0;
@@ -19,13 +19,13 @@ void CommandBufferRecorder::beginRecordCommandBuffer(CommandBuffer& commandBuffe
     }
 }
 
-void CommandBufferRecorder::endRecordCommandBuffer(CommandBuffer& commandBuffer) {
+void CommandBufferRecorder::endRecordCommandBuffer(const CommandBuffer& commandBuffer) {
     if(vkEndCommandBuffer(commandBuffer)!=VK_SUCCESS) {
         throw std::runtime_error("failed to record command buffer");
     }
 }
 
-void CommandBufferRecorder::setViewport(CommandBuffer& commandBuffer, SwapChain& swapChain) {
+void CommandBufferRecorder::setViewport(const CommandBuffer& commandBuffer, const SwapChain& swapChain) {
     VkViewport viewport{};
     viewport.x = 0.0f;
     viewport.y = 0.0f;
@@ -36,21 +36,25 @@ void CommandBufferRecorder::setViewport(CommandBuffer& commandBuffer, SwapChain&
     vkCmdSetViewport(commandBuffer, 0,1,&viewport);
 }
 
-void CommandBufferRecorder::setScissors(CommandBuffer& commandBuffer, SwapChain& swapChain) {
+void CommandBufferRecorder::setScissors(const CommandBuffer& commandBuffer, const SwapChain& swapChain) {
      VkRect2D scissor{};
     scissor.offset = {0,0};
     scissor.extent = swapChain.swapChainExtent;
     vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
 }
 
-void CommandBufferRecorder::bindVertexBuffer(CommandBuffer& commandBuffer, VertexBuffer& vertexBuffer) {
-    VkBuffer vertexBuffers[] = {(VkBuffer)vertexBuffer.vertexBuffer};
-    VkDeviceSize offsets[] = {0};
+void CommandBufferRecorder::bindVertexBuffer(const CommandBuffer& commandBuffer, const VertexBuffer& vertexBuffer) {
+    const VkBuffer vertexBuffers[] = {(VkBuffer)vertexBuffer.vertexBuffer};
+    const VkDeviceSize offsets[] = {0};
     vkCmdBindVertexBuffers(commandBuffer,0,1,vertexBuffers,offsets);
 }
 
+void CommandBufferRecorder::bindIndexBuffer(const CommandBuffer &commandBuffer, const IndexBuffer &indexBuffer) {
+    vkCmdBindIndexBuffer(commandBuffer, indexBuffer, 0, VK_INDEX_TYPE_UINT32);
+}
 
-void CommandBufferRecorder::recordCommandBuffer(VulkanAppContext& context, CommandBuffer& commandBuffer, uint32_t imageId) {
+
+void CommandBufferRecorder::recordCommandBuffer(const VulkanAppContext& context, const CommandBuffer& commandBuffer, const uint32_t imageId) {
     beginRecordCommandBuffer(commandBuffer);
 
     VkRenderPassBeginInfo renderPassInfo{};
@@ -72,9 +76,10 @@ void CommandBufferRecorder::recordCommandBuffer(VulkanAppContext& context, Comma
     setScissors(commandBuffer, context.swapChain);
 
     bindVertexBuffer(commandBuffer, context.vertexBuffer);
+    bindIndexBuffer(commandBuffer, context.indexBuffer);
 
-    vkCmdDraw(commandBuffer, static_cast<uint32_t>(Vertex::testVerts.size())
-        , 1, 0 , 0);
+    vkCmdDrawIndexed(commandBuffer, static_cast<uint32_t>(Vertex::testIndices.size())
+        , 1, 0 , 0, 0);
 
     vkCmdEndRenderPass(commandBuffer);
 
