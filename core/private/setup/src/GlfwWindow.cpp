@@ -3,7 +3,6 @@
 //
 
 #include "GlfwWindow.h"
-
 #include <iostream>
 #include <VulkanAppContext.h>
 
