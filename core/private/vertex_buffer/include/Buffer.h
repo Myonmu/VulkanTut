@@ -16,6 +16,8 @@ public:
     ~Buffer() override;
     void bindBufferMemory(const void* sourceData) const;
     static void copyBuffer(Buffer& srcBuffer, Buffer& dstBuffer, VulkanAppContext& ctx, VkDeviceSize size);
+    // this is a reference to a pointer, because mapping buffer memory would set the pointer as well.
+    void mapBufferMemory(void*& source) const;
 protected:
     VkDeviceSize size;
     VkDeviceMemory bufferMemory{};

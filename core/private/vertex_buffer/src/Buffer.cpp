@@ -57,6 +57,10 @@ void Buffer::bindBufferMemory(const void* sourceData) const {
     vkUnmapMemory(ctx.logicalDevice, bufferMemory);
 }
 
+void Buffer::mapBufferMemory(void*& source) const {
+    vkMapMemory(ctx.logicalDevice, bufferMemory, 0, size, 0, &source);
+}
+
 void Buffer::copyBuffer(Buffer &srcBuffer, Buffer &dstBuffer, VulkanAppContext& ctx, VkDeviceSize size) {
     VkCommandBufferAllocateInfo allocInfo{};
     allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;

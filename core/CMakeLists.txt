@@ -10,6 +10,8 @@ set(INCLUDE_DIRS
         ${CMAKE_CURRENT_SOURCE_DIR}/private/setup/include
         ${CMAKE_CURRENT_SOURCE_DIR}/private/drawing/include
         ${CMAKE_CURRENT_SOURCE_DIR}/private/vertex_buffer/include
+        ${CMAKE_CURRENT_SOURCE_DIR}/private/uniform_buffer/include
+        ${CMAKE_CURRENT_SOURCE_DIR}/private/texture_mapping/include
         ${CMAKE_CURRENT_SOURCE_DIR}/public/include
 )
 
@@ -41,6 +43,15 @@ set(SOURCES
         private/vertex_buffer/src/Buffer.cpp
         private/misc/include/vk_mem_alloc.h
         private/vertex_buffer/src/IndexBuffer.cpp
+        private/misc/src/VmaInstance.cpp
+        private/uniform_buffer/src/UniformBufferObject.cpp
+        private/uniform_buffer/src/DescriptorSetLayout.cpp
+        private/uniform_buffer/include/UniformBufferGroup.h
+        private/uniform_buffer/src/UniformBufferGroup.cpp
+        private/uniform_buffer/src/DescriptorPool.cpp
+        private/uniform_buffer/src/DescriptorSets.cpp
+        private/texture_mapping/src/Texture2D.cpp
+        private/texture_mapping/src/TextureImage.cpp
 )
 
 # Create static library
@@ -57,6 +68,7 @@ set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
 # Include GLFW and GLM
 include_directories(${CMAKE_SOURCE_DIR}/libs/glfw-3.3.9/include)
 include_directories(${CMAKE_SOURCE_DIR}/libs/glm-1.0.0/include)
+include_directories(${CMAKE_SOURCE_DIR}/libs/stb)
 
 # Link GLFW, Vulkan, and GLM with the library
 target_link_libraries(Vk glfw Vulkan::Vulkan glm)

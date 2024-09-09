@@ -4,9 +4,13 @@
 
 #include "VulkanFrame.h"
 
+#include <chrono>
+#include <UniformBufferObject.h>
 #include <VulkanAppContext.h>
 
 #include "CommandBuffer.h"
+#define GLM_ENABLE_EXPERIMENTAL
+#include "glm/gtx/quaternion.hpp"
 
 VulkanFrame::VulkanFrame(VulkanAppContext &context): context(context),
                                                      commandBuffer(context) {
@@ -32,7 +36,7 @@ void VulkanFrame::signalResize() {
 }
 
 
-void VulkanFrame::drawFrame() {
+void VulkanFrame::drawFrame(uint32_t currentFrameIndex) {
     const auto& device = context.logicalDevice;
     const auto& swapChain = context.swapChain;
     vkWaitForFences(device, 1, &inFlightFence, VK_TRUE, UINT64_MAX);
@@ -44,13 +48,13 @@ void VulkanFrame::drawFrame() {
         context.resize();
         return;
     } else if (result != VK_SUCCESS && result != VK_SUBOPTIMAL_KHR) {
-        throw std::runtime_error("failed to aquire swap chain image");
+        throw std::runtime_error("failed to acquire swap chain image");
     }
-
+    updateUniformBuffer(currentFrameIndex);
     vkResetFences(device, 1, &inFlightFence);
     // record command buffer
     vkResetCommandBuffer(commandBuffer, 0);
-    commandBufferRecorder.recordCommandBuffer(context, commandBuffer, imageIndex);
+    commandBufferRecorder.recordCommandBuffer(context, commandBuffer, imageIndex, currentFrameIndex);
     // Submit command buffer
     VkSubmitInfo submitInfo{};
     submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
@@ -89,6 +93,28 @@ void VulkanFrame::drawFrame() {
         throw std::runtime_error("failed to present swap chain image");
     }
 }
+
+void VulkanFrame::updateUniformBuffer(uint32_t currentFrame) {
+    static auto startTime = std::chrono::high_resolution_clock::now();
+    auto currentTime = std::chrono::high_resolution_clock::now();
+    auto time = std::chrono::duration<float, std::chrono::seconds::period> (currentTime - startTime).count();
+    UniformBufferObject ubo{};
+    ubo.model = glm::rotate(glm::mat4(1.0f), time*glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+    ubo.view = glm::lookAt(glm::vec3(2.0f,2,2), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+    ubo.projection = glm::perspective(glm::radians(45.0f),
+        context.swapChain.swapChainExtent.width/(float)context.swapChain.swapChainExtent.height, 0.1f, 10.0f);
+    /*
+     *GLM was originally designed for OpenGL,
+     *where the Y coordinate of the clip coordinates is inverted.
+     *The easiest way to compensate for that is to
+     *flip the sign on the scaling factor of the Y axis in the projection matrix.
+     *If you don't do this, then the image will be rendered upside down.
+     */
+    ubo.projection[1][1] *= -1;
+
+    context.uniformBufferGroup.CopyMemoryToBuffer(currentFrame, &ubo, sizeof(ubo));
+}
+
 
 VulkanFrame::~VulkanFrame() {
     const auto& device = context.logicalDevice;

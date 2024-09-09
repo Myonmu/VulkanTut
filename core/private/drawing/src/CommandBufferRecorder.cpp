@@ -4,6 +4,7 @@
 
 #include "CommandBufferRecorder.h"
 
+#include <DescriptorSets.h>
 #include <VulkanAppContext.h>
 
 #include "CommandBuffer.h"
@@ -53,8 +54,17 @@ void CommandBufferRecorder::bindIndexBuffer(const CommandBuffer &commandBuffer, 
     vkCmdBindIndexBuffer(commandBuffer, indexBuffer, 0, VK_INDEX_TYPE_UINT32);
 }
 
+void CommandBufferRecorder::bindDescriptorSets(const CommandBuffer &commandBuffer,
+    const GraphicsPipeline& graphicsPipeline,
+    const DescriptorSets& descriptorSets,
+    size_t frame) {
+    vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, graphicsPipeline,
+        0, 1, &descriptorSets.getRaw()[frame],
+        0, nullptr);
+}
 
-void CommandBufferRecorder::recordCommandBuffer(const VulkanAppContext& context, const CommandBuffer& commandBuffer, const uint32_t imageId) {
+void CommandBufferRecorder::recordCommandBuffer(const VulkanAppContext& context,
+    const CommandBuffer& commandBuffer, const uint32_t imageId, const uint32_t currentFrameIndex) {
     beginRecordCommandBuffer(commandBuffer);
 
     VkRenderPassBeginInfo renderPassInfo{};
@@ -78,6 +88,7 @@ void CommandBufferRecorder::recordCommandBuffer(const VulkanAppContext& context,
     bindVertexBuffer(commandBuffer, context.vertexBuffer);
     bindIndexBuffer(commandBuffer, context.indexBuffer);
 
+    bindDescriptorSets(commandBuffer, context.graphicsPipeline, context.descriptorSets, currentFrameIndex);
     vkCmdDrawIndexed(commandBuffer, static_cast<uint32_t>(Vertex::testIndices.size())
         , 1, 0 , 0, 0);
 

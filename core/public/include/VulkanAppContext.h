@@ -5,6 +5,8 @@
 #ifndef VULKANTUT_VULKANAPPCONTEXT_H
 #define VULKANTUT_VULKANAPPCONTEXT_H
 #include <CommandPool.h>
+#include <DescriptorPool.h>
+#include <DescriptorSetLayout.h>
 #include <FrameBuffers.h>
 #include <GlfwWindow.h>
 #include <IndexBuffer.h>
@@ -20,6 +22,7 @@
 #include "LogicalDevice.h"
 #include "GraphicsPipeline.h"
 #include "RenderPass.h"
+#include "UniformBufferGroup.h"
 #include "VulkanPipeline.h"
 #include "GLFW/glfw3.h"
 
@@ -38,11 +41,18 @@ struct VulkanAppContext {
     int width;
     int height;
     GlfwWindow window {*this, width, height, name, frameBufferResizeCallback};
+
     VulkanInstance vulkanInstance{*this};
     ValidationLayers validationLayers{*this};
     VulkanSurface vulkanSurface{*this};
     PhysicalDevice physicalDevice{*this};
     LogicalDevice logicalDevice{*this};
+
+    // ------------ Logical device created -------------------
+    DescriptorSetLayout descriptorSetLayout{*this};
+    DescriptorPool descriptorPool {*this};
+    UniformBufferGroup uniformBufferGroup{*this};
+    DescriptorSets descriptorSets {*this};
     SwapChain swapChain{*this};
     GraphicsPipeline graphicsPipeline{*this};
     RenderPass renderPass{*this};

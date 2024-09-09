@@ -4,8 +4,10 @@
 
 #include "VulkanRenderer.h"
 
+#include <chrono>
 #include <VulkanAppContext.h>
 #include <VulkanFrame.h>
+
 
 VulkanRenderer::VulkanRenderer(VulkanAppContext &context) : ctx(context){
     frames.resize(context.MAX_FRAMES_IN_FLIGHT);
@@ -26,6 +28,6 @@ void VulkanRenderer::signalResize() {
 
 
 void VulkanRenderer::drawFrame() {
-    frames[currentFrame]->drawFrame();
+    frames[currentFrame]->drawFrame(currentFrame);
     currentFrame = (currentFrame + 1) % ctx.MAX_FRAMES_IN_FLIGHT;
 }

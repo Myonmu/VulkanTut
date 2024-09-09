@@ -16,7 +16,10 @@ public:
     explicit VulkanFrame(VulkanAppContext& context);
     ~VulkanFrame();
 
-    void drawFrame();
+    void drawFrame(uint32_t currentFrameIndex);
+
+    void updateUniformBuffer(uint32_t currentFrame);
+
     void signalResize();
 private:
     VulkanAppContext& context;

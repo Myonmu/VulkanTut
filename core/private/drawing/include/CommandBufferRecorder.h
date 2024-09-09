@@ -7,6 +7,8 @@
 #define COMMANDBUFFERRECORDER_H
 #include <CommandBuffer.h>
 #include <cstdint>
+#include <DescriptorSets.h>
+#include <GraphicsPipeline.h>
 #include <IndexBuffer.h>
 
 class VertexBuffer;
@@ -16,7 +18,7 @@ class CommandBuffer;
 
 class CommandBufferRecorder {
 public:
-    void recordCommandBuffer(const VulkanAppContext &context, const CommandBuffer &commandBuffer, uint32_t imageId);
+    void recordCommandBuffer(const VulkanAppContext &context, const CommandBuffer &commandBuffer, uint32_t imageId, uint32_t currentFrameIndex);
 
     void beginRecordCommandBuffer(const CommandBuffer &commandBuffer);
 
@@ -29,6 +31,9 @@ public:
     void setScissors(const CommandBuffer &commandBuffer, const SwapChain &swapChain);
 
     void bindIndexBuffer(const CommandBuffer &commandBuffer, const IndexBuffer &indexBuffer);
+
+    void bindDescriptorSets(const CommandBuffer &commandBuffer, const GraphicsPipeline &graphicsPipeline,
+                            const DescriptorSets &descriptorSets, size_t frame);
 };
 
 
