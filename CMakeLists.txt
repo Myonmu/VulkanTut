@@ -10,8 +10,8 @@ set(GLFW_BUILD_TESTS OFF CACHE BOOL "" FORCE)
 set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
 
 # Add subdirectories
-add_subdirectory(libs/glfw-3.3.9)
-add_subdirectory(libs/glm-1.0.0)
+add_subdirectory(libs/glfw)
+add_subdirectory(libs/glm)
 add_subdirectory(core)
 
 # Application executable
