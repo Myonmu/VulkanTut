@@ -9,6 +9,12 @@
 #include <optional>
 #include <algorithm>
 
+#include "BindDescriptorSet.h"
+#include "BindIndexBuffer.h"
+#include "BindVertexBuffer.h"
+#include "DrawIndexed.h"
+#include "SetScissors.h"
+#include "SetViewport.h"
 #include "GLFW/glfw3.h"
 #include "VulkanAppContext.h"
 
@@ -20,6 +26,15 @@ class TriangleApp {
 public :
     void Run() {
         context = new VulkanAppContext(WIDTH, HEIGHT, "Vulkan");
+        //TODO: stub
+        auto& recorder = context->commandBufferRecorder;
+        recorder.enqueueCommand<SetViewport>();
+        recorder.enqueueCommand<SetScissors>();
+        recorder.enqueueCommand<BindVertexBuffer>();
+        recorder.enqueueCommand<BindIndexBuffer>();
+        recorder.enqueueCommand<BindDescriptorSet>();
+        recorder.enqueueCommand<DrawIndexed>();
+
         mainLoop();
     }
 

@@ -24,7 +24,6 @@ public:
 private:
     VulkanAppContext& context;
     CommandBuffer commandBuffer;
-    CommandBufferRecorder commandBufferRecorder{};
 
     VkSemaphore imageAvailableSemaphore{};
     VkSemaphore renderFinishedSemaphore{};

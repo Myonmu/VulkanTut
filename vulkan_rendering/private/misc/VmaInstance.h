@@ -6,6 +6,7 @@
 #define VMAINSTANCE_H
 #include "vk_mem_alloc.h"
 
+// TODO: Stub.
 class VmaInstance{
   VmaAllocator allocator;
 public:

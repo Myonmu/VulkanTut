@@ -7,6 +7,7 @@
 #include <CommandPool.h>
 #include <DescriptorPool.h>
 #include <DescriptorSetLayout.h>
+#include <DescriptorSets.h>
 #include <FrameBuffers.h>
 #include <GlfwWindow.h>
 #include <IndexBuffer.h>
@@ -62,6 +63,8 @@ struct VulkanAppContext {
     VertexBuffer vertexBuffer{*this};
     IndexBuffer indexBuffer{*this};
     VulkanRenderer renderer{*this};
+
+    CommandBufferRecorder commandBufferRecorder{};
 
     VulkanAppContext(int w, int h, const char *appName);
 

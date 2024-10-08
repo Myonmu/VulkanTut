@@ -7,6 +7,8 @@
 #include "Vertex.h"
 #include "VulkanAppContext.h"
 
+//TODO: Hardcoded shader path
+//TODO: Refactor pipeline stage construction into smaller methods
 VulkanPipeline::VulkanPipeline(VulkanAppContext &context)
     : VulkanResource<VkPipeline_T *>(context),
       frag("../shaders/frag.spv", ctx),

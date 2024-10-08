@@ -6,34 +6,34 @@
 #ifndef COMMANDBUFFERRECORDER_H
 #define COMMANDBUFFERRECORDER_H
 #include <CommandBuffer.h>
-#include <cstdint>
-#include <DescriptorSets.h>
-#include <GraphicsPipeline.h>
-#include <IndexBuffer.h>
+#include <vector>
 
+#include "CommandBufferCmd.h"
+
+struct FrameInfo;
 class VertexBuffer;
 class SwapChain;
 struct VulkanAppContext;
 class CommandBuffer;
 
 class CommandBufferRecorder {
+    static void beginRecordCommandBuffer(const CommandBuffer &commandBuffer);
+
+    static void endRecordCommandBuffer(const CommandBuffer &commandBuffer);
+
+    std::vector<CommandBufferCmd*> commands;
+
 public:
-    void recordCommandBuffer(const VulkanAppContext &context, const CommandBuffer &commandBuffer, uint32_t imageId, uint32_t currentFrameIndex);
+    CommandBufferRecorder() = default;
+    ~CommandBufferRecorder();
+    void recordCommandBuffer(const VulkanAppContext &context, const CommandBuffer &commandBuffer,
+                             const FrameInfo &frameInfo);
 
-    void beginRecordCommandBuffer(const CommandBuffer &commandBuffer);
-
-    void endRecordCommandBuffer(const CommandBuffer &commandBuffer);
-
-    void bindVertexBuffer(const CommandBuffer &commandBuffer, const VertexBuffer &vertexBuffer);
-
-    void setViewport(const CommandBuffer &commandBuffer, const SwapChain &swapChain);
-
-    void setScissors(const CommandBuffer &commandBuffer, const SwapChain &swapChain);
-
-    void bindIndexBuffer(const CommandBuffer &commandBuffer, const IndexBuffer &indexBuffer);
-
-    void bindDescriptorSets(const CommandBuffer &commandBuffer, const GraphicsPipeline &graphicsPipeline,
-                            const DescriptorSets &descriptorSets, size_t frame);
+    template<typename T>
+    void enqueueCommand() {
+        static_assert(std::is_base_of_v<CommandBufferCmd, T>, "T must be a CommandBufferCmd");
+        commands.push_back(new T());
+    }
 };
 
 

@@ -13,6 +13,7 @@ set(INCLUDE_DIRS
         ${CMAKE_CURRENT_SOURCE_DIR}/private/uniform_buffer
         ${CMAKE_CURRENT_SOURCE_DIR}/private/texture_mapping
         ${CMAKE_CURRENT_SOURCE_DIR}/public
+        ${CMAKE_CURRENT_SOURCE_DIR}/public/CommandBufferCmds
 )
 
 # Source files
@@ -35,7 +36,7 @@ set(SOURCES
         private/drawing/CommandBufferRecorder.cpp
         private/drawing/VulkanFrame.cpp
         private/VulkanRenderer.cpp
-        public/CommandBufferCommand.h
+        public/CommandBufferCmd.h
         private/VulkanAppContext.cpp
         private/vertex_buffer/Vertex.h
         private/vertex_buffer/VertexBuffer.cpp
@@ -50,8 +51,15 @@ set(SOURCES
         private/uniform_buffer/UniformBufferGroup.cpp
         private/uniform_buffer/DescriptorPool.cpp
         private/uniform_buffer/DescriptorSets.cpp
-        private/texture_mapping/Texture2D.cpp
+        private/Texture2D.cpp
         private/texture_mapping/TextureImage.cpp
+        public/CommandBufferCmds/BindDescriptorSet.h
+        public/FrameInfo.h
+        public/CommandBufferCmds/BindIndexBuffer.h
+        public/CommandBufferCmds/BindVertexBuffer.h
+        public/CommandBufferCmds/SetScissors.h
+        public/CommandBufferCmds/SetViewport.h
+        public/CommandBufferCmds/DrawIndexed.h
 )
 
 # Create static library

@@ -10,6 +10,7 @@
 
 #include "CommandBuffer.h"
 #define GLM_ENABLE_EXPERIMENTAL
+#include "FrameInfo.h"
 #include "glm/gtx/quaternion.hpp"
 
 VulkanFrame::VulkanFrame(VulkanAppContext &context): context(context),
@@ -35,7 +36,7 @@ void VulkanFrame::signalResize() {
     frameBufferResized = true;
 }
 
-
+//TODO: Could this be modular?
 void VulkanFrame::drawFrame(uint32_t currentFrameIndex) {
     const auto& device = context.logicalDevice;
     const auto& swapChain = context.swapChain;
@@ -54,7 +55,10 @@ void VulkanFrame::drawFrame(uint32_t currentFrameIndex) {
     vkResetFences(device, 1, &inFlightFence);
     // record command buffer
     vkResetCommandBuffer(commandBuffer, 0);
-    commandBufferRecorder.recordCommandBuffer(context, commandBuffer, imageIndex, currentFrameIndex);
+    FrameInfo frameInfo{};
+    frameInfo.imageIndex = imageIndex;
+    frameInfo.currentFrameIndex = currentFrameIndex;
+    context.commandBufferRecorder.recordCommandBuffer(context, commandBuffer, frameInfo);
     // Submit command buffer
     VkSubmitInfo submitInfo{};
     submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
