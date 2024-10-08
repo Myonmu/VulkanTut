@@ -12,7 +12,7 @@ set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
 # Add subdirectories
 add_subdirectory(libs/glfw)
 add_subdirectory(libs/glm)
-add_subdirectory(core)
+add_subdirectory(vulkan_rendering)
 
 # Application executable
 add_executable(VulkanTut
