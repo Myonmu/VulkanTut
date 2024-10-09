@@ -11,7 +11,7 @@
 VertexBuffer::VertexBuffer(VulkanAppContext &context)
     : size(sizeof(Vertex::testVerts[0]) * Vertex::testVerts.size()),
       ctx(context),
-      vertexBuffer(
+      buffer(
           context, size,
           VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
           VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT
@@ -24,7 +24,7 @@ VertexBuffer::VertexBuffer(VulkanAppContext &context)
 
     stagingBuffer.bindBufferMemory(Vertex::testVerts.data());
 
-    Buffer::copyBuffer(stagingBuffer, vertexBuffer, context, size);
+    Buffer::copyBuffer(stagingBuffer, buffer, context, size);
 }
 
 VertexBuffer::~VertexBuffer() = default;

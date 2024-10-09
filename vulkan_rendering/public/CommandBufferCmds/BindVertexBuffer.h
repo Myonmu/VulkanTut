@@ -15,7 +15,7 @@ public:
 };
 
 inline void BindVertexBuffer::execute(const CommandBuffer &commandBuffer, const VulkanAppContext &context, const FrameInfo &frameInfo) {
-    const VkBuffer vertexBuffers[] = {static_cast<VkBuffer>(context.vertexBuffer.vertexBuffer)};
+    const VkBuffer vertexBuffers[] = {context.vertexBuffer};
     const VkDeviceSize offsets[] = {0};
     vkCmdBindVertexBuffers(commandBuffer,0,1,vertexBuffers,offsets);
 }

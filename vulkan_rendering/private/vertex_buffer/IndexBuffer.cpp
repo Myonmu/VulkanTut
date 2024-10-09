@@ -9,7 +9,7 @@
 IndexBuffer::IndexBuffer(VulkanAppContext &ctx)
     : size(sizeof(Vertex::testIndices[0]) * Vertex::testIndices.size()),
       ctx(ctx),
-      indexBuffer(
+      buffer(
           ctx, size,
           VK_BUFFER_USAGE_TRANSFER_DST_BIT |
           VK_BUFFER_USAGE_INDEX_BUFFER_BIT,
@@ -22,7 +22,7 @@ IndexBuffer::IndexBuffer(VulkanAppContext &ctx)
     );
 
     stagingBuffer.bindBufferMemory(Vertex::testIndices.data());
-    Buffer::copyBuffer(stagingBuffer, indexBuffer, ctx, size);
+    Buffer::copyBuffer(stagingBuffer, buffer, ctx, size);
 }
 
 IndexBuffer::~IndexBuffer() = default;

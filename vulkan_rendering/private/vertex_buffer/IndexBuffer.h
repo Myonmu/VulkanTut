@@ -16,8 +16,8 @@ private:
 public:
     explicit IndexBuffer(VulkanAppContext& ctx);
     ~IndexBuffer();
-    Buffer indexBuffer;
-    operator VkBuffer() const {return indexBuffer;}
+    Buffer buffer;
+    operator VkBuffer() const {return buffer;}
 };
 
 

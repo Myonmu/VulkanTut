@@ -29,10 +29,10 @@ public:
     void recordCommandBuffer(const VulkanAppContext &context, const CommandBuffer &commandBuffer,
                              const FrameInfo &frameInfo);
 
-    template<typename T>
-    void enqueueCommand() {
+    template<typename T, typename... Args>
+    void enqueueCommand(Args&&... args) {
         static_assert(std::is_base_of_v<CommandBufferCmd, T>, "T must be a CommandBufferCmd");
-        commands.push_back(new T());
+        commands.push_back(new T(std::forward<Args>(args)...));
     }
 };
 

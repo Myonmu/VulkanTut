@@ -11,13 +11,16 @@
 
 
 class DrawIndexed : public CommandBufferCmd{
+    uint32_t indicesCount;
 public:
+    explicit DrawIndexed(uint32_t indicesCount): CommandBufferCmd() {
+        this->indicesCount = indicesCount;
+    }
     void execute(const CommandBuffer &commandBuffer, const VulkanAppContext &context, const FrameInfo &frameInfo) override;
 };
 
 inline void DrawIndexed::execute(const CommandBuffer &commandBuffer, const VulkanAppContext &context, const FrameInfo &frameInfo) {
-    vkCmdDrawIndexed(commandBuffer, static_cast<uint32_t>(Vertex::testIndices.size())
-        , 1, 0 , 0, 0);
+    vkCmdDrawIndexed(commandBuffer, indicesCount, 1, 0 , 0, 0);
 }
 
 

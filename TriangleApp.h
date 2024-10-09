@@ -7,7 +7,6 @@
 
 #include <vector>
 #include <optional>
-#include <algorithm>
 
 #include "BindDescriptorSet.h"
 #include "BindIndexBuffer.h"
@@ -33,7 +32,7 @@ public :
         recorder.enqueueCommand<BindVertexBuffer>();
         recorder.enqueueCommand<BindIndexBuffer>();
         recorder.enqueueCommand<BindDescriptorSet>();
-        recorder.enqueueCommand<DrawIndexed>();
+        recorder.enqueueCommand<DrawIndexed>(static_cast<uint32_t>(Vertex::testIndices.size()));
 
         mainLoop();
     }

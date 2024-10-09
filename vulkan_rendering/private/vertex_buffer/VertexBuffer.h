@@ -17,7 +17,8 @@ public:
 
     ~VertexBuffer();
 
-    Buffer vertexBuffer;
+    Buffer buffer;
+    operator VkBuffer() const {return buffer;}
 };
 
 
