@@ -13,7 +13,7 @@ set(INCLUDE_DIRS
         ${CMAKE_CURRENT_SOURCE_DIR}/private/uniform_buffer
         ${CMAKE_CURRENT_SOURCE_DIR}/private/texture_mapping
         ${CMAKE_CURRENT_SOURCE_DIR}/public
-        ${CMAKE_CURRENT_SOURCE_DIR}/public/CommandBufferCmds
+        ${CMAKE_CURRENT_SOURCE_DIR}/public/command_buffer_cmds
 )
 
 # Source files
@@ -53,18 +53,18 @@ set(SOURCES
         private/uniform_buffer/DescriptorSets.cpp
         private/Texture2D.cpp
         private/texture_mapping/TextureImage.cpp
-        public/CommandBufferCmds/BindDescriptorSet.h
+        public/command_buffer_cmds/BindDescriptorSet.h
         public/FrameInfo.h
-        public/CommandBufferCmds/BindIndexBuffer.h
-        public/CommandBufferCmds/BindVertexBuffer.h
-        public/CommandBufferCmds/SetScissors.h
-        public/CommandBufferCmds/SetViewport.h
-        public/CommandBufferCmds/DrawIndexed.h
-        public/CommandBufferCmds/BindPipeline.h
+        public/command_buffer_cmds/BindIndexBuffer.h
+        public/command_buffer_cmds/BindVertexBuffer.h
+        public/command_buffer_cmds/SetScissors.h
+        public/command_buffer_cmds/SetViewport.h
+        public/command_buffer_cmds/DrawIndexed.h
+        public/command_buffer_cmds/BindPipeline.h
         private/drawing/RenderPassRecorder.cpp
         private/drawing/RenderPassRecorder.h
-        public/CommandBufferCmds/EnqueueRenderPass.h
-        public/CommandBufferCmds/CopyBuffer.h
+        public/command_buffer_cmds/EnqueueRenderPass.h
+        public/command_buffer_cmds/CopyBuffer.h
 )
 
 # Create static library
