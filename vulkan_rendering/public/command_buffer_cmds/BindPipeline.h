@@ -4,6 +4,7 @@
 
 #ifndef BINDPIPELINE_H
 #define BINDPIPELINE_H
+#include <vulkan/vulkan_core.h>
 #include "CommandBufferCmd.h"
 
 
