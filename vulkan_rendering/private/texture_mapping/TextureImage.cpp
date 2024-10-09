@@ -7,19 +7,17 @@
 #include <VulkanAppContext.h>
 
 TextureImage::TextureImage(VulkanAppContext &ctx,
-    const int& width, const int& height, const int& channels,
-    VkFormat textureFormat,
-    VkImageTiling tiling,
-    VkImageUsageFlags usage,
-    VkMemoryPropertyFlags memoryProperties
-    ):
-VulkanResource<VkImage_T*>(ctx),
-stagingBuffer(ctx,
-    width * height * channels,
-    VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
-    VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT
-)
-{
+                           const int &width, const int &height, const int &channels,
+                           VkFormat textureFormat,
+                           VkImageTiling tiling,
+                           VkImageUsageFlags usage,
+                           VkMemoryPropertyFlags memoryProperties
+): VulkanResource<VkImage_T *>(ctx),
+   stagingBuffer(ctx,
+                 width * height * channels,
+                 VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
+                 VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT
+   ) {
     VkImageCreateInfo imageInfo = {};
     imageInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
     imageInfo.imageType = VK_IMAGE_TYPE_2D;
@@ -36,7 +34,7 @@ stagingBuffer(ctx,
     imageInfo.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
     imageInfo.flags = 0;
 
-    if(vkCreateImage(ctx.logicalDevice, &imageInfo, nullptr, &resource ) != VK_SUCCESS) {
+    if (vkCreateImage(ctx.logicalDevice, &imageInfo, nullptr, &resource) != VK_SUCCESS) {
         throw std::runtime_error("failed to create image!");
     }
 
@@ -48,19 +46,18 @@ stagingBuffer(ctx,
     allocInfo.allocationSize = memRequirements.size;
     allocInfo.memoryTypeIndex = findMemoryType(memRequirements.memoryTypeBits, memoryProperties);
 
-    if(vkAllocateMemory(ctx.logicalDevice, &allocInfo, nullptr, &textureImageMemory) != VK_SUCCESS) {
+    if (vkAllocateMemory(ctx.logicalDevice, &allocInfo, nullptr, &textureImageMemory) != VK_SUCCESS) {
         throw std::runtime_error("failed to allocate memory!");
     }
 
     vkBindImageMemory(ctx.logicalDevice, resource, textureImageMemory, 0);
-
 }
 
 uint32_t TextureImage::findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties) const {
     VkPhysicalDeviceMemoryProperties memProperties;
     vkGetPhysicalDeviceMemoryProperties(ctx.physicalDevice, &memProperties);
-    for(auto i = 0; i < memProperties.memoryTypeCount; i++) {
-        if( (typeFilter & 1 << i) && (memProperties.memoryTypes[i].propertyFlags & properties) == properties ) {
+    for (auto i = 0; i < memProperties.memoryTypeCount; i++) {
+        if ((typeFilter & 1 << i) && (memProperties.memoryTypes[i].propertyFlags & properties) == properties) {
             return i;
         }
     }

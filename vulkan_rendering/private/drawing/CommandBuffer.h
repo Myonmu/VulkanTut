@@ -13,6 +13,7 @@ class CommandBuffer : public VulkanResource<VkCommandBuffer>{
 public:
     explicit CommandBuffer(VulkanAppContext& context);
     ~CommandBuffer() override;
+    void executeImmediate();
 };
 
 

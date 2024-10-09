@@ -6,6 +6,9 @@
 
 #include <vector>
 #include "ValidationLayers.h"
+
+#include <string.h>
+
 #include "VulkanAppContext.h"
 
 // Proxy functions to load not-

@@ -60,6 +60,11 @@ set(SOURCES
         public/CommandBufferCmds/SetScissors.h
         public/CommandBufferCmds/SetViewport.h
         public/CommandBufferCmds/DrawIndexed.h
+        public/CommandBufferCmds/BindPipeline.h
+        private/drawing/RenderPassRecorder.cpp
+        private/drawing/RenderPassRecorder.h
+        public/CommandBufferCmds/EnqueueRenderPass.h
+        public/CommandBufferCmds/CopyBuffer.h
 )
 
 # Create static library

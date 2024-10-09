@@ -58,7 +58,7 @@ void VulkanFrame::drawFrame(uint32_t currentFrameIndex) {
     FrameInfo frameInfo{};
     frameInfo.imageIndex = imageIndex;
     frameInfo.currentFrameIndex = currentFrameIndex;
-    context.commandBufferRecorder.recordCommandBuffer(context, commandBuffer, frameInfo);
+    context.commandBufferRecorder.recordCommandBuffer(commandBuffer, context,  frameInfo);
     // Submit command buffer
     VkSubmitInfo submitInfo{};
     submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;

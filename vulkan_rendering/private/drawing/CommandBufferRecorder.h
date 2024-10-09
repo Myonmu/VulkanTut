@@ -23,11 +23,14 @@ class CommandBufferRecorder {
 
     std::vector<CommandBufferCmd*> commands;
 
+    VkCommandBufferUsageFlags flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
+
 public:
-    CommandBufferRecorder() = default;
+    CommandBufferRecorder();
+    explicit CommandBufferRecorder(VkCommandBufferUsageFlags flags);
     ~CommandBufferRecorder();
-    void recordCommandBuffer(const VulkanAppContext &context, const CommandBuffer &commandBuffer,
-                             const FrameInfo &frameInfo);
+    void recordCommandBuffer(const CommandBuffer &commandBuffer, const VulkanAppContext &context,
+                             const FrameInfo &frameInfo) const;
 
     template<typename T, typename... Args>
     void enqueueCommand(Args&&... args) {

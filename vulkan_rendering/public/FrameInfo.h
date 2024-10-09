@@ -4,7 +4,6 @@
 
 #ifndef FRAMEINFO_H
 #define FRAMEINFO_H
-#include <vulkan/vulkan_core.h>
 
 struct FrameInfo {
     uint32_t imageIndex = 0;

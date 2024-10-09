@@ -5,6 +5,9 @@
 #include <algorithm>
 #include <stdexcept>
 #include "SwapChain.h"
+
+#include <limits>
+
 #include "QueueFamilyIndices.h"
 #include "GLFW/glfw3.h"
 

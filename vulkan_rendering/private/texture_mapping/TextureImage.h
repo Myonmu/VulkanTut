@@ -7,6 +7,9 @@
 #include <Buffer.h>
 #include <Texture2D.h>
 
+/*
+ * Texture2D but on the GPU side
+ */
 class TextureImage: VulkanResource<VkImage> {
 public:
     TextureImage(VulkanAppContext& ctx, Texture2D& t2d);

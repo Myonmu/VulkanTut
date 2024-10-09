@@ -6,6 +6,9 @@
 
 #include <VulkanAppContext.h>
 
+#include "CopyBuffer.h"
+#include "FrameInfo.h"
+
 
 Buffer::Buffer(VulkanAppContext &context, VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags props) :
 VulkanResource<VkBuffer_T*>(context){
@@ -62,35 +65,11 @@ void Buffer::mapBufferMemory(void*& source) const {
 }
 
 void Buffer::copyBuffer(Buffer &srcBuffer, Buffer &dstBuffer, VulkanAppContext& ctx, VkDeviceSize size) {
-    VkCommandBufferAllocateInfo allocInfo{};
-    allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
-    allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
-    allocInfo.commandPool = ctx.commandPool;
-    allocInfo.commandBufferCount = 1;
+    CommandBuffer cmd{ctx};
+    CommandBufferRecorder recorder{};
 
-    VkCommandBuffer commandBuffer;
-    vkAllocateCommandBuffers(ctx.logicalDevice, &allocInfo, &commandBuffer);
+    recorder.enqueueCommand<CopyBuffer>(srcBuffer, dstBuffer, 0, 0, size);
+    recorder.recordCommandBuffer(cmd, ctx, FrameInfo{});
 
-    VkCommandBufferBeginInfo beginInfo{};
-    beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
-    beginInfo.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
-
-    vkBeginCommandBuffer(commandBuffer, &beginInfo);
-
-    VkBufferCopy copyRegion{};
-    copyRegion.srcOffset = 0;
-    copyRegion.size = size;
-    vkCmdCopyBuffer(commandBuffer, srcBuffer, dstBuffer, 1, &copyRegion);
-
-    vkEndCommandBuffer(commandBuffer);
-
-    VkSubmitInfo submitInfo{};
-    submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
-    submitInfo.commandBufferCount = 1;
-    submitInfo.pCommandBuffers = &commandBuffer;
-
-    vkQueueSubmit(ctx.logicalDevice.graphicsQueue, 1, &submitInfo, VK_NULL_HANDLE);
-    vkQueueWaitIdle(ctx.logicalDevice.graphicsQueue);
-    vkFreeCommandBuffers(ctx.logicalDevice, ctx.commandPool, 1, &commandBuffer);
-
+    cmd.executeImmediate();
 }

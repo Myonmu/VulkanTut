@@ -31,5 +31,15 @@ CommandBuffer::CommandBuffer(VulkanAppContext &context): VulkanResource<VkComman
     }
 }
 
-CommandBuffer::~CommandBuffer() = default;
+CommandBuffer::~CommandBuffer() {
+    vkFreeCommandBuffers(ctx.logicalDevice, ctx.commandPool, 1, *this);
+};
 
+void CommandBuffer::executeImmediate() {
+    VkSubmitInfo submitInfo{};
+    submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+    submitInfo.commandBufferCount = 1;
+    submitInfo.pCommandBuffers = *this;
+    vkQueueSubmit(ctx.logicalDevice.graphicsQueue, 1, &submitInfo, VK_NULL_HANDLE);
+    vkQueueWaitIdle(ctx.logicalDevice.graphicsQueue);
+}

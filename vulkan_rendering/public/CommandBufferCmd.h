@@ -4,10 +4,9 @@
 
 #ifndef COMMANDBUFFERCOMMAND_H
 #define COMMANDBUFFERCOMMAND_H
-
-struct FrameInfo;
+class CommandBuffer;
 struct VulkanAppContext;
-
+struct FrameInfo;
 class CommandBufferCmd {
 public:
     virtual ~CommandBufferCmd() = default;

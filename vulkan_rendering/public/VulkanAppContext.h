@@ -64,7 +64,7 @@ struct VulkanAppContext {
     IndexBuffer indexBuffer{*this};
     VulkanRenderer renderer{*this};
 
-    CommandBufferRecorder commandBufferRecorder{};
+    CommandBufferRecorder commandBufferRecorder{0};
 
     VulkanAppContext(int w, int h, const char *appName);
 
