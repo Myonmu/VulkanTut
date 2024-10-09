@@ -69,7 +69,7 @@ void Buffer::copyBuffer(Buffer &srcBuffer, Buffer &dstBuffer, VulkanAppContext& 
     CommandBufferRecorder recorder{};
 
     recorder.enqueueCommand<CopyBuffer>(srcBuffer, dstBuffer, 0, 0, size);
-    recorder.recordCommandBuffer(cmd, ctx, FrameInfo{});
+    recorder.recordCommandBuffer(cmd, ctx, FrameInfo::DONT_CARE);
 
     cmd.executeImmediate();
 }

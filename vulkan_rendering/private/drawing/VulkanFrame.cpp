@@ -55,10 +55,9 @@ void VulkanFrame::drawFrame(uint32_t currentFrameIndex) {
     vkResetFences(device, 1, &inFlightFence);
     // record command buffer
     vkResetCommandBuffer(commandBuffer, 0);
-    FrameInfo frameInfo{};
     frameInfo.imageIndex = imageIndex;
     frameInfo.currentFrameIndex = currentFrameIndex;
-    context.commandBufferRecorder.recordCommandBuffer(commandBuffer, context,  frameInfo);
+    context.frameDrawer.recordCommandBuffer(commandBuffer, context,  frameInfo);
     // Submit command buffer
     VkSubmitInfo submitInfo{};
     submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;

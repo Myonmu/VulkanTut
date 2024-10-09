@@ -6,12 +6,10 @@
 #include <VulkanAppContext.h>
 
 #include "CommandBuffer.h"
-#include "FrameInfo.h"
 
 CommandBufferRecorder::CommandBufferRecorder() = default;
 
-CommandBufferRecorder::CommandBufferRecorder(const VkCommandBufferUsageFlags flags) :flags(flags){
-
+CommandBufferRecorder::CommandBufferRecorder(const VkCommandBufferUsageFlags flags) : flags(flags) {
 }
 
 
@@ -35,10 +33,13 @@ void CommandBufferRecorder::recordCommandBuffer(const CommandBuffer &commandBuff
                                                 const FrameInfo &frameInfo) const {
     beginRecordCommandBuffer(commandBuffer);
 
-    for (const auto &cmd: commands) {
-        cmd->execute(commandBuffer, context, frameInfo);
+    if (recordFunc != nullptr) {
+        recordFunc(commandBuffer, context, frameInfo);
+    } else {
+        for (const auto &cmd: commands) {
+            cmd->execute(commandBuffer, context, frameInfo);
+        }
     }
-
     endRecordCommandBuffer(commandBuffer);
 }
 
@@ -46,4 +47,8 @@ CommandBufferRecorder::~CommandBufferRecorder() {
     for (const auto &cmd: commands) {
         delete cmd;
     }
+}
+
+void CommandBufferRecorder::setRecordFunc(const RecordFunc &f) {
+    recordFunc = f;
 }

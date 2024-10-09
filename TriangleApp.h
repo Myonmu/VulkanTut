@@ -7,6 +7,8 @@
 
 #include <vector>
 #include <optional>
+#include <Texture2D.h>
+#include <TextureImage.h>
 
 #include "BindDescriptorSet.h"
 #include "BindIndexBuffer.h"
@@ -32,10 +34,24 @@ public :
         mainLoop();
     }
 
+    ~TriangleApp() {
+        delete textureImage;
+        delete mainPass;
+        delete context;
+    }
+
 private:
     VulkanAppContext *context = nullptr;
     RenderPassRecorder *mainPass = nullptr;
+    TextureImage *textureImage = nullptr;
+
     void setup() {
+        Texture2D t2d{"../textures/texture.jpg"};
+        textureImage = new TextureImage(*context, t2d);
+        textureImage->transitionLayout(VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
+        textureImage->stage();
+        textureImage->transitionLayout(VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+
         mainPass = new RenderPassRecorder(context->renderPass);
         mainPass->enqueueCommand<BindPipeline>(VK_PIPELINE_BIND_POINT_GRAPHICS);
         mainPass->enqueueCommand<SetViewport>();
@@ -45,8 +61,8 @@ private:
         mainPass->enqueueCommand<BindDescriptorSet>();
         mainPass->enqueueCommand<DrawIndexed>(static_cast<uint32_t>(Vertex::testIndices.size()));
         //TODO: stub
-        auto& recorder = context->commandBufferRecorder;
-        recorder.enqueueCommand<EnqueueRenderPass>(*mainPass);
+        auto &mainRecorder = context->frameDrawer;
+        mainRecorder.enqueueCommand<EnqueueRenderPass>(*mainPass);
     }
 
     void mainLoop() {

@@ -4,9 +4,7 @@
 
 #ifndef TEXTURE2D_H
 #define TEXTURE2D_H
-#define STB_IMAGE_IMPLEMENTATION
-#include "stb_image.h"
-
+#include <vulkan/vulkan_core.h>
 
 class Texture2D {
 public:
@@ -17,8 +15,10 @@ public:
     [[nodiscard]] int getWidth() const;
     [[nodiscard]] int getHeight() const;
     [[nodiscard]] int getChannelCount() const;
+    [[nodiscard]] VkFormat getFormat() const;
+
 private:
-    stbi_uc* pixels;
+    void* pixels = nullptr;
     int width = 0, height = 0, channels = 0;
 };
 

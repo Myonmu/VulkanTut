@@ -4,9 +4,11 @@
 
 #ifndef FRAMEINFO_H
 #define FRAMEINFO_H
+#include <cstdint>
 
 struct FrameInfo {
     uint32_t imageIndex = 0;
     uint32_t currentFrameIndex = 0;
+    static const FrameInfo DONT_CARE;
 };
 #endif //FRAMEINFO_H

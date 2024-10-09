@@ -65,6 +65,9 @@ set(SOURCES
         private/drawing/RenderPassRecorder.h
         public/command_buffer_cmds/EnqueueRenderPass.h
         public/command_buffer_cmds/CopyBuffer.h
+        private/FrameInfo.cpp
+        public/command_buffer_cmds/TransitionImageLayout.h
+        public/command_buffer_cmds/CopyBufferToImage.h
 )
 
 # Create static library

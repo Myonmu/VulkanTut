@@ -6,15 +6,21 @@
 
 #include <VulkanAppContext.h>
 
+#include "CopyBufferToImage.h"
+#include "FrameInfo.h"
+
 TextureImage::TextureImage(VulkanAppContext &ctx,
                            const int &width, const int &height, const int &channels,
                            VkFormat textureFormat,
                            VkImageTiling tiling,
                            VkImageUsageFlags usage,
                            VkMemoryPropertyFlags memoryProperties
-): VulkanResource<VkImage_T *>(ctx),
+): VulkanResource(ctx),
+   width(width),
+   height(height), channels(channels), format(textureFormat),
+   imageSize(width * height * channels),
    stagingBuffer(ctx,
-                 width * height * channels,
+                 imageSize,
                  VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
                  VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT
    ) {
@@ -53,6 +59,13 @@ TextureImage::TextureImage(VulkanAppContext &ctx,
     vkBindImageMemory(ctx.logicalDevice, resource, textureImageMemory, 0);
 }
 
+TextureImage::TextureImage(VulkanAppContext &ctx, Texture2D &t2d) : TextureImage(
+    ctx, t2d.getWidth(), t2d.getHeight(), 4, t2d.getFormat(),
+    VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT,
+    VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT) {
+}
+
+
 uint32_t TextureImage::findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties) const {
     VkPhysicalDeviceMemoryProperties memProperties;
     vkGetPhysicalDeviceMemoryProperties(ctx.physicalDevice, &memProperties);
@@ -63,4 +76,35 @@ uint32_t TextureImage::findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags
     }
 
     throw std::runtime_error("failed to find suitable memory type");
+}
+
+void TextureImage::stage() {
+    CommandBuffer cmd{ctx};
+    CommandBufferRecorder recorder{};
+
+    recorder.enqueueCommand<CopyBufferToImage>(stagingBuffer, *this,
+                                               static_cast<uint32_t>(width),
+                                               static_cast<uint32_t>(height)
+    );
+
+    recorder.recordCommandBuffer(cmd, ctx, FrameInfo::DONT_CARE);
+
+    cmd.executeImmediate();
+}
+
+void TextureImage::transitionLayout(VkImageLayout newLayout) {
+    CommandBuffer cmd{ctx};
+    CommandBufferRecorder recorder{};
+    recorder.enqueueCommand<TransitionImageLayout>(*this,
+                                                   format,
+                                                   currentLayout,
+                                                   newLayout);
+    recorder.recordCommandBuffer(cmd, ctx, FrameInfo::DONT_CARE);
+    cmd.executeImmediate();
+    currentLayout = newLayout;
+}
+
+TextureImage::~TextureImage() {
+    vkDestroyImage(ctx.logicalDevice, resource, nullptr);
+    vkFreeMemory(ctx.logicalDevice, textureImageMemory, nullptr);
 }

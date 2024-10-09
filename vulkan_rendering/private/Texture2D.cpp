@@ -3,10 +3,10 @@
 //
 
 #include "Texture2D.h"
+#define STB_IMAGE_IMPLEMENTATION
+#include <stb_image.h>
 
-Texture2D::Texture2D() {
-
-}
+Texture2D::Texture2D() = default;
 
 Texture2D::Texture2D(const char *path) {
     pixels = stbi_load(path, &width, &height, &channels, STBI_rgb_alpha);
@@ -28,4 +28,7 @@ int Texture2D::getChannelCount() const {
     return channels;
 }
 
+VkFormat Texture2D::getFormat() const {
+    return VK_FORMAT_B8G8R8A8_SRGB;
+}
 

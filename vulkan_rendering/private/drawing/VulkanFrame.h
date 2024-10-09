@@ -7,6 +7,8 @@
 #include <CommandBufferRecorder.h>
 #include <vulkan/vulkan_core.h>
 
+#include "FrameInfo.h"
+
 
 class CommandBuffer;
 struct VulkanAppContext;
@@ -25,6 +27,7 @@ public:
 private:
     VulkanAppContext& context;
     CommandBuffer commandBuffer;
+    FrameInfo frameInfo{};
 
     VkSemaphore imageAvailableSemaphore{};
     VkSemaphore renderFinishedSemaphore{};

@@ -10,7 +10,7 @@
 /*
  * Texture2D but on the GPU side
  */
-class TextureImage: VulkanResource<VkImage> {
+class TextureImage: public VulkanResource<VkImage> {
 public:
     TextureImage(VulkanAppContext& ctx, Texture2D& t2d);
 
@@ -21,10 +21,16 @@ public:
     [[nodiscard]] uint32_t findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties) const;
 
     ~TextureImage() override;
+
+    void stage();
+    void transitionLayout(VkImageLayout newLayout);
 private:
+    VkImageLayout currentLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+    int width, height, channels;
+    VkFormat format;
     VkDeviceSize imageSize;
     Buffer stagingBuffer;
-    VkDeviceMemory textureImageMemory;
+    VkDeviceMemory textureImageMemory{};
 };
 
 
