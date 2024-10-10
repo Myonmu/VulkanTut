@@ -68,6 +68,14 @@ set(SOURCES
         private/FrameInfo.cpp
         public/command_buffer_cmds/TransitionImageLayout.h
         public/command_buffer_cmds/CopyBufferToImage.h
+        private/texture_mapping/ImageView.cpp
+        private/texture_mapping/ImageView.h
+        private/texture_mapping/TextureSampler.cpp
+        private/texture_mapping/TextureSampler.h
+        private/texture_mapping/TextureAddressMode.cpp
+        private/texture_mapping/TextureAddressMode.h
+        private/texture_mapping/TextureFilterMode.cpp
+        private/texture_mapping/TextureFilterMode.h
 )
 
 # Create static library

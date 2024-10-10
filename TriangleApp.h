@@ -44,6 +44,7 @@ private:
     VulkanAppContext *context = nullptr;
     RenderPassRecorder *mainPass = nullptr;
     TextureImage *textureImage = nullptr;
+    ImageView *textureImageView = nullptr;
 
     void setup() {
         Texture2D t2d{"../textures/texture.jpg"};
@@ -51,6 +52,7 @@ private:
         textureImage->transitionLayout(VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
         textureImage->stage();
         textureImage->transitionLayout(VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+        textureImageView = new ImageView(*context, textureImage->getRaw(), t2d.getFormat());
 
         mainPass = new RenderPassRecorder(context->renderPass);
         mainPass->enqueueCommand<BindPipeline>(VK_PIPELINE_BIND_POINT_GRAPHICS);

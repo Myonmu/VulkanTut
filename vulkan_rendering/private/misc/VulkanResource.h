@@ -25,10 +25,12 @@ public:
     operator T() const { return resource; }
     operator const T *() const { return &resource; }
 
+    // Gets the raw Vulkan object (type T)
     virtual T getRaw() const {
         return resource;
     }
 
+    // Gets the pointer to the raw Vulkan object
     virtual T *getRawPtr() {
         return &resource;
     }

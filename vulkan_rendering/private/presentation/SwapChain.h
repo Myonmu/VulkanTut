@@ -8,6 +8,8 @@
 
 #include <vulkan/vulkan_core.h>
 #include <vector>
+
+#include "ImageView.h"
 #include "VulkanResource.h"
 
 struct VulkanAppContext;
@@ -26,7 +28,7 @@ public:
     [[nodiscard]] size_t getSize() const;
     VkExtent2D swapChainExtent{};
     VkFormat swapChainImageFormat {};
-    std::vector<VkImageView> swapChainImageViews;
+    std::vector<ImageView *> swapChainImageViews;
     void recreate();
 private:
     std::vector<VkImage> swapChainImages;
@@ -35,7 +37,7 @@ private:
     static VkSurfaceFormatKHR chooseSwapSurfaceFormat(const std::vector<VkSurfaceFormatKHR>& availableFormats);
     static VkPresentModeKHR chooseSwapPresentMode(const std::vector<VkPresentModeKHR>& availablePresentModes);
     static VkExtent2D chooseSwapExtend(const VkSurfaceCapabilitiesKHR& capabilities, VulkanAppContext& context);
-    void createImageViews(VkDevice logicalDevice);
+    void createImageViews();
 };
 
 

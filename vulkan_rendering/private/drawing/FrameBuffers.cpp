@@ -11,7 +11,7 @@ void FrameBuffers::createFrameBuffers() {
     resource.resize(ctx.swapChain.getSize());
     for (size_t i = 0; i < ctx.swapChain.getSize(); i++) {
         VkImageView attachments[] = {
-            ctx.swapChain.swapChainImageViews[i]
+            ctx.swapChain.swapChainImageViews[i]->getRaw()
         };
 
         VkFramebufferCreateInfo framebufferInfo{};
