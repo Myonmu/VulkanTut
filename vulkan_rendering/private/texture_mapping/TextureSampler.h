@@ -8,14 +8,23 @@
 #include <vulkan/vulkan_core.h>
 
 
-class TextureFilterMode;
-class TextureAddressMode;
+struct TextureMipmapInfo;
+struct TextureCompareInfo;
+struct TextureAnisotropyInfo;
+struct TextureFilterMode;
+struct TextureAddressMode;
 
 class TextureSampler : public VulkanResource<VkSampler> {
 public:
-    TextureSampler(VulkanAppContext &ctx,
-                   TextureAddressMode &addressMode,
-                   TextureFilterMode &filterMode);
+    explicit TextureSampler(VulkanAppContext &ctx,
+                   TextureAddressMode addressMode,
+                   TextureFilterMode filterMode,
+                   TextureAnisotropyInfo anisotropyInfo,
+                   TextureCompareInfo compareInfo,
+                   TextureMipmapInfo mipmapInfo,
+                   VkBorderColor borderColor,
+                   bool unnormalizedCoords
+    );
 
     ~TextureSampler() override;
 };

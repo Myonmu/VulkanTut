@@ -7,8 +7,8 @@
 #include "TextureSampler.h"
 
 
-class TextureAddressMode {
-public:
+struct TextureAddressMode {
+
   VkSamplerAddressMode u{};
   VkSamplerAddressMode v{};
   VkSamplerAddressMode w{};

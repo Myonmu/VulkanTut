@@ -7,15 +7,13 @@
 #include <vulkan/vulkan_core.h>
 
 
-class TextureFilterMode {
-public:
+struct TextureFilterMode {
     VkFilter min;
     VkFilter mag;
 
     const static TextureFilterMode LINEAR;
     const static TextureFilterMode NEAREST;
 };
-
 
 
 #endif //TEXTUREFILTERMODE_H

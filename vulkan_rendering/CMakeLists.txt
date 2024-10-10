@@ -76,6 +76,12 @@ set(SOURCES
         private/texture_mapping/TextureAddressMode.h
         private/texture_mapping/TextureFilterMode.cpp
         private/texture_mapping/TextureFilterMode.h
+        private/texture_mapping/TextureMipmapInfo.cpp
+        private/texture_mapping/TextureMipmapInfo.h
+        private/texture_mapping/TextureCompareInfo.cpp
+        private/texture_mapping/TextureCompareInfo.h
+        private/texture_mapping/TextureAnisotropyInfo.cpp
+        private/texture_mapping/TextureAnisotropyInfo.h
 )
 
 # Create static library

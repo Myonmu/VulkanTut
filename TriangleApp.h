@@ -19,6 +19,12 @@
 #include "RenderPassRecorder.h"
 #include "SetScissors.h"
 #include "SetViewport.h"
+#include "TextureAddressMode.h"
+#include "TextureAnisotropyInfo.h"
+#include "TextureCompareInfo.h"
+#include "TextureFilterMode.h"
+#include "TextureMipmapInfo.h"
+#include "TextureSampler.h"
 #include "GLFW/glfw3.h"
 #include "VulkanAppContext.h"
 
@@ -35,6 +41,8 @@ public :
     }
 
     ~TriangleApp() {
+        delete sampler;
+        delete textureImageView;
         delete textureImage;
         delete mainPass;
         delete context;
@@ -45,6 +53,7 @@ private:
     RenderPassRecorder *mainPass = nullptr;
     TextureImage *textureImage = nullptr;
     ImageView *textureImageView = nullptr;
+    TextureSampler *sampler = nullptr;
 
     void setup() {
         Texture2D t2d{"../textures/texture.jpg"};
@@ -53,6 +62,15 @@ private:
         textureImage->stage();
         textureImage->transitionLayout(VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
         textureImageView = new ImageView(*context, textureImage->getRaw(), t2d.getFormat());
+
+        sampler = new TextureSampler(*context,
+                                     TextureAddressMode::REPEAT,
+                                     TextureFilterMode::LINEAR,
+                                     TextureAnisotropyInfo::getAutoAnisotropyInfo(),
+                                     TextureCompareInfo(),
+                                     TextureMipmapInfo::DEFAULT,
+                                     VK_BORDER_COLOR_INT_OPAQUE_BLACK,
+                                     VK_FALSE);
 
         mainPass = new RenderPassRecorder(context->renderPass);
         mainPass->enqueueCommand<BindPipeline>(VK_PIPELINE_BIND_POINT_GRAPHICS);
