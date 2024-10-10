@@ -6,7 +6,7 @@ The *classic* tutorial, named Vulkan Tutorial is a semi-great place to start cod
 
 Hence, the repo tries to mitigate this:
 
-- Vulkan objects will be encapsulated in a custom wrapper, and usually they have implicit conversion towards the raw Vulkan object. The wrappers follow 
+- Vulkan objects will be encapsulated in a custom wrapper, and usually they have implicit conversion towards the raw Vulkan object. The wrappers follow RAII.
 - Long methods are chopped into smaller chunks
 
 ## Notes
