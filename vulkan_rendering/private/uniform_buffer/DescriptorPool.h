@@ -4,6 +4,7 @@
 
 #ifndef DESCRIPTORPOOL_H
 #define DESCRIPTORPOOL_H
+#include <vector>
 #include <VulkanResource.h>
 #include <vulkan/vulkan_core.h>
 

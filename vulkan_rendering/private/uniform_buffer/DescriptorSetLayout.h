@@ -4,13 +4,17 @@
 
 #ifndef DESCRIPTORSETLAYOUT_H
 #define DESCRIPTORSETLAYOUT_H
+#include <vector>
 #include <VulkanResource.h>
 #include <vulkan/vulkan_core.h>
+
+#include "DescriptorSetLayoutBinding.h"
 
 
 class DescriptorSetLayout:public VulkanResource<VkDescriptorSetLayout> {
 public:
-    explicit DescriptorSetLayout(VulkanAppContext& ctx);
+    std::vector<VkDescriptorSetLayoutBinding> layoutBindings{};
+    explicit DescriptorSetLayout(VulkanAppContext& ctx, const std::vector<DescriptorSetLayoutBinding> &bindings);
     ~DescriptorSetLayout() override;
 };
 

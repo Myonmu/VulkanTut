@@ -72,6 +72,11 @@ private:
                                      VK_BORDER_COLOR_INT_OPAQUE_BLACK,
                                      VK_FALSE);
 
+        context->descriptorSets.AddTextureImageView(textureImageView);
+        context->descriptorSets.AddTextureSampler(sampler);
+
+        context->descriptorSets.configureDescriptorSets();
+
         mainPass = new RenderPassRecorder(context->renderPass);
         mainPass->enqueueCommand<BindPipeline>(VK_PIPELINE_BIND_POINT_GRAPHICS);
         mainPass->enqueueCommand<SetViewport>();

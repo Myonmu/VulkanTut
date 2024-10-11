@@ -16,11 +16,17 @@ protected:
     VulkanAppContext& ctx;
 public:
     explicit VulkanResource(VulkanAppContext& context) : ctx(context){
-        std::cout << "Initializing " << typeid(this).name() << std::endl;
+#ifdef NDEBUG
+#else
+        std::cout << "Initializing " << typeid(T).name() << std::endl;
+#endif
     }
 
     virtual ~VulkanResource() {
-        std::cout << "Cleaning up " << typeid(this).name() << std::endl;
+#ifdef NDEBUG
+#else
+        std::cout << "Cleaning up " << typeid(T).name() << std::endl;
+#endif
     }
     operator T() const { return resource; }
     operator const T *() const { return &resource; }

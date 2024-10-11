@@ -41,7 +41,7 @@ struct VulkanAppContext {
     const char *name;
     int width;
     int height;
-    GlfwWindow window {*this, width, height, name, frameBufferResizeCallback};
+    GlfwWindow window{*this, width, height, name, frameBufferResizeCallback};
 
     VulkanInstance vulkanInstance{*this};
     ValidationLayers validationLayers{*this};
@@ -50,10 +50,16 @@ struct VulkanAppContext {
     LogicalDevice logicalDevice{*this};
 
     // ------------ Logical device created -------------------
-    DescriptorSetLayout descriptorSetLayout{*this};
-    DescriptorPool descriptorPool {*this};
+    DescriptorSetLayout descriptorSetLayout{
+        *this,
+        {
+            {VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_VERTEX_BIT},
+            {VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT}
+        }
+    };
+    DescriptorPool descriptorPool{*this};
     UniformBufferGroup uniformBufferGroup{*this};
-    DescriptorSets descriptorSets {*this};
+    DescriptorSets descriptorSets{*this};
     SwapChain swapChain{*this};
     GraphicsPipeline graphicsPipeline{*this};
     RenderPass renderPass{*this};

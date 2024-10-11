@@ -82,6 +82,7 @@ set(SOURCES
         private/texture_mapping/TextureCompareInfo.h
         private/texture_mapping/TextureAnisotropyInfo.cpp
         private/texture_mapping/TextureAnisotropyInfo.h
+        private/uniform_buffer/DescriptorSetLayoutBinding.h
 )
 
 # Create static library
