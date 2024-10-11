@@ -53,6 +53,7 @@ uint32_t Buffer::findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags prope
 }
 
 
+// Uploads source data to the buffer (there will be memcpy)
 void Buffer::bindBufferMemory(const void* sourceData) const {
     void *data;
     vkMapMemory(ctx.logicalDevice, bufferMemory, 0, size, 0, &data);
@@ -60,6 +61,7 @@ void Buffer::bindBufferMemory(const void* sourceData) const {
     vkUnmapMemory(ctx.logicalDevice, bufferMemory);
 }
 
+// Projects buffer memory (the source param will be filled with buffer memory position)
 void Buffer::mapBufferMemory(void*& source) const {
     vkMapMemory(ctx.logicalDevice, bufferMemory, 0, size, 0, &source);
 }

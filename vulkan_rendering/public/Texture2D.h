@@ -8,6 +8,7 @@
 
 class Texture2D {
 public:
+    void* pixels = nullptr;
     Texture2D();
     explicit Texture2D(const char* path);
     ~Texture2D();
@@ -18,7 +19,6 @@ public:
     [[nodiscard]] VkFormat getFormat() const;
 
 private:
-    void* pixels = nullptr;
     int width = 0, height = 0, channels = 0;
 };
 
