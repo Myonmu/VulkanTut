@@ -2,10 +2,10 @@
 // Created by miska on 2024/02/11.
 //
 
-#include "GraphicsPipeline.h"
+#include "PipelineLayout.h"
 #include "VulkanAppContext.h"
 
-GraphicsPipeline::GraphicsPipeline(VulkanAppContext &context): VulkanResource(context) {
+PipelineLayout::PipelineLayout(VulkanAppContext &context): VulkanResource(context) {
     VkPipelineLayoutCreateInfo pipelineLayoutInfo{};
     pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
     pipelineLayoutInfo.setLayoutCount = 1; // Optional
@@ -20,6 +20,6 @@ GraphicsPipeline::GraphicsPipeline(VulkanAppContext &context): VulkanResource(co
     }
 }
 
-GraphicsPipeline::~GraphicsPipeline() {
+PipelineLayout::~PipelineLayout() {
     vkDestroyPipelineLayout(ctx.logicalDevice, resource, nullptr);
 }

@@ -19,7 +19,7 @@ set(INCLUDE_DIRS
 # Source files
 set(SOURCES
         private/setup/GlfwWindow.cpp
-        private/graphics_pipeline/GraphicsPipeline.cpp
+        private/graphics_pipeline/PipelineLayout.cpp
         private/graphics_pipeline/RenderPass.cpp
         private/graphics_pipeline/ShaderModule.cpp
         private/graphics_pipeline/VulkanPipeline.cpp

@@ -11,6 +11,7 @@
 #include <FrameBuffers.h>
 #include <GlfwWindow.h>
 #include <IndexBuffer.h>
+#include <PipelineLayout.h>
 #include <vector>
 #include <VertexBuffer.h>
 #include <VulkanRenderer.h>
@@ -21,7 +22,6 @@
 #include "VulkanInstance.h"
 #include "VulkanSurface.h"
 #include "LogicalDevice.h"
-#include "GraphicsPipeline.h"
 #include "RenderPass.h"
 #include "UniformBufferGroup.h"
 #include "VulkanPipeline.h"
@@ -56,21 +56,21 @@ struct VulkanAppContext {
             {VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_VERTEX_BIT},
             {VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT}
         }
-    };
-    DescriptorPool descriptorPool{*this};
-    UniformBufferGroup uniformBufferGroup{*this};
-    DescriptorSets descriptorSets{*this};
-    SwapChain swapChain{*this};
-    GraphicsPipeline graphicsPipeline{*this};
-    RenderPass renderPass{*this};
-    VulkanPipeline vulkanPipeline{*this};
-    FrameBuffers frameBuffers{*this};
+    }; // TODO: allow instance
+    DescriptorPool descriptorPool{*this}; // TODO: allow instance
+    UniformBufferGroup uniformBufferGroup{*this}; //TODO: per-object
+    DescriptorSets descriptorSets{*this}; //TODO: per-object
+    SwapChain swapChain{*this}; //TODO: per-window
+    PipelineLayout graphicsPipeline{*this}; //TODO: allow instance
+    RenderPass renderPass{*this}; // TODO: allow instance
+    VulkanPipeline vulkanPipeline{*this}; //TODO: allow instance
+    FrameBuffers frameBuffers{*this}; //TODO: allow instance
     CommandPool commandPool{*this};
-    VertexBuffer vertexBuffer{*this};
-    IndexBuffer indexBuffer{*this};
-    VulkanRenderer renderer{*this};
+    VertexBuffer vertexBuffer{*this}; //TODO: per-object
+    IndexBuffer indexBuffer{*this}; //TODO: per-object
+    VulkanRenderer renderer{*this}; //TODO: allow instance
 
-    CommandBufferRecorder frameDrawer{0};
+    CommandBufferRecorder frameDrawer{0}; //TODO: allow instance
 
     VulkanAppContext(int w, int h, const char *appName);
 
