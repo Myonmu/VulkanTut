@@ -8,15 +8,15 @@
 #include <vulkan/vulkan_core.h>
 #include "VulkanResource.h"
 
-struct VulkanAppContext;
+struct DeviceContext;
 
-class PhysicalDevice: public VulkanResource<VkPhysicalDevice, VulkanAppContext>{
+class PhysicalDevice: public VulkanResource<VkPhysicalDevice, DeviceContext>{
 public:
-    explicit PhysicalDevice(VulkanAppContext& context);
+    explicit PhysicalDevice(DeviceContext& context);
 private:
-    void pickPhysicalDevice(VulkanAppContext& context);
-    static bool checkDeviceExtensionSupport(VkPhysicalDevice device, VulkanAppContext& context);
-    static int rateDeviceSuitability(VkPhysicalDevice device, VulkanAppContext& context);
+    void pickPhysicalDevice(DeviceContext& context);
+    static bool checkDeviceExtensionSupport(VkPhysicalDevice device, DeviceContext& context);
+    static int rateDeviceSuitability(VkPhysicalDevice device, DeviceContext& context);
 };
 
 

@@ -7,25 +7,28 @@
 #include <iostream>
 #include <set>
 #include "PhysicalDevice.h"
+
+#include "DeviceContext.h"
 #include "QueueFamilyIndices.h"
 #include "SwapChain.h"
 #include "TextureAnisotropyInfo.h"
 
-bool PhysicalDevice::checkDeviceExtensionSupport(VkPhysicalDevice device, VulkanAppContext &context) {
+bool PhysicalDevice::checkDeviceExtensionSupport(VkPhysicalDevice device, DeviceContext &context) {
     uint32_t extensionsCount;
     vkEnumerateDeviceExtensionProperties(device, nullptr,
                                          &extensionsCount, nullptr);
     std::vector<VkExtensionProperties> availableExtensions(extensionsCount);
     vkEnumerateDeviceExtensionProperties(device, nullptr,
                                          &extensionsCount, availableExtensions.data());
-    std::set<std::string> requiredExtensions(context.deviceExtensions.begin(), context.deviceExtensions.end());
+    std::set<std::string> requiredExtensions(context.deviceExtensions.begin(),
+                                             context.deviceExtensions.end());
     for (const auto &extension: availableExtensions) {
         requiredExtensions.erase(extension.extensionName);
     }
     return requiredExtensions.empty();
 }
 
-int PhysicalDevice::rateDeviceSuitability(VkPhysicalDevice device, VulkanAppContext &context) {
+int PhysicalDevice::rateDeviceSuitability(VkPhysicalDevice device, DeviceContext &context) {
     VkPhysicalDeviceProperties deviceProperties;
     vkGetPhysicalDeviceProperties(device, &deviceProperties);
     VkPhysicalDeviceFeatures deviceFeatures;
@@ -66,11 +69,11 @@ int PhysicalDevice::rateDeviceSuitability(VkPhysicalDevice device, VulkanAppCont
     return score;
 }
 
-void PhysicalDevice::pickPhysicalDevice(VulkanAppContext &context) {
+void PhysicalDevice::pickPhysicalDevice(DeviceContext &context) {
     uint32_t deviceCount = 0;
-    vkEnumeratePhysicalDevices(context.vulkanInstance, &deviceCount, nullptr);
+    vkEnumeratePhysicalDevices(context.context.vulkanInstance, &deviceCount, nullptr);
     std::vector<VkPhysicalDevice> devices(deviceCount);
-    vkEnumeratePhysicalDevices(context.vulkanInstance, &deviceCount, devices.data());
+    vkEnumeratePhysicalDevices(context.context.vulkanInstance, &deviceCount, devices.data());
 
     // Use an ordered map to automatically sort candidates by increasing score
     std::multimap<int, VkPhysicalDevice> candidates;
@@ -92,7 +95,7 @@ void PhysicalDevice::pickPhysicalDevice(VulkanAppContext &context) {
     std::cout << "Selected Physical Device : " << properties.deviceName << std::endl;
 }
 
-PhysicalDevice::PhysicalDevice(VulkanAppContext &context): VulkanResource(context) {
+PhysicalDevice::PhysicalDevice(DeviceContext &context): VulkanResource(context) {
     pickPhysicalDevice(context);
     TextureAnisotropyInfo::queryAnisotropyInfo(context);
 }

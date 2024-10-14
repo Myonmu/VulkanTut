@@ -10,16 +10,17 @@
 #include <VulkanResource.h>
 #include <vulkan/vulkan_core.h>
 
-struct VulkanAppContext;
+struct DeviceContext;
 
-class LogicalDevice final : public VulkanResource<VkDevice, VulkanAppContext> {
+class LogicalDevice final : public VulkanResource<VkDevice, DeviceContext> {
 public:
-    explicit LogicalDevice(VulkanAppContext& context);
+    explicit LogicalDevice(DeviceContext& context);
     ~LogicalDevice() override;
+    //TODO: dynamic instead of hard coded fields
     VkQueue graphicsQueue{};
     VkQueue presentQueue{};
 private:
-    void createLogicalDevice(VulkanAppContext& context);
+    void createLogicalDevice(DeviceContext& context);
 };
 
 

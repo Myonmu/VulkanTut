@@ -6,17 +6,14 @@
 #include <set>
 #include <stdexcept>
 #include "LogicalDevice.h"
+
+#include "DeviceContext.h"
 #include "QueueFamilyIndices.h"
 
-void LogicalDevice::createLogicalDevice(VulkanAppContext& context){
-    QueueFamilyIndices indices = QueueFamilyIndices::FindQueueFamilies(context.physicalDevice,
-                                                                       context);
-
+void LogicalDevice::createLogicalDevice(DeviceContext& context){
+    QueueFamilyIndices indices = QueueFamilyIndices{context.physicalDevice, context, };
     std::vector<VkDeviceQueueCreateInfo> queueCreateInfos;
-    std::set<uint32_t> uniqueQueueFamilies = {
-            indices.graphicsFamily.value(),
-            indices.presentFamily.value()
-    };
+    std::set uniqueQueueFamilies = indices.getUniqueQueueFamilyIndices();
     float queuePriority = 1.0f;
     for(uint32_t queueFamily : uniqueQueueFamilies){
         VkDeviceQueueCreateInfo queueCreateInfo{};
@@ -39,8 +36,8 @@ void LogicalDevice::createLogicalDevice(VulkanAppContext& context){
     createInfo.enabledExtensionCount = static_cast<uint32_t>(context.deviceExtensions.size());
     createInfo.ppEnabledExtensionNames = context.deviceExtensions.data();
 
-    if(context.enableValidationLayers){
-        context.validationLayers.AttachToDeviceCreation(createInfo);
+    if(context.context.enableValidationLayers){
+        context.context.validationLayers.AttachToDeviceCreation(createInfo);
     }else{
         createInfo.enabledLayerCount = 0;
     }
@@ -49,11 +46,11 @@ void LogicalDevice::createLogicalDevice(VulkanAppContext& context){
         throw std::runtime_error("failed to create logical device.");
     }
 
-    vkGetDeviceQueue(resource, indices.graphicsFamily.value(), 0, &graphicsQueue);
-    vkGetDeviceQueue(resource, indices.presentFamily.value(), 0, &presentQueue);
+    vkGetDeviceQueue(resource, indices[QueueFamily::QUEUE_FAMILY_GRAPHICS].value(), 0, &graphicsQueue);
+    vkGetDeviceQueue(resource, indices[QueueFamily::QUEUE_FAMILY_PRESENT].value(), 0, &presentQueue);
 }
 
-LogicalDevice::LogicalDevice(VulkanAppContext& context) : VulkanResource(context){
+LogicalDevice::LogicalDevice(DeviceContext& context) : VulkanResource(context){
     createLogicalDevice(context);
 }
 

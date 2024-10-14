@@ -7,10 +7,12 @@
 #include <VulkanAppContext.h>
 #include <optional>
 
+#include "DeviceContext.h"
+
 std::optional<bool> TextureAnisotropyInfo::supportsAnisotropy{};
 std::optional<float> TextureAnisotropyInfo::supportedMaxAnisotropy{};
 
-void TextureAnisotropyInfo::queryAnisotropyInfo(const VulkanAppContext& ctx) {
+void TextureAnisotropyInfo::queryAnisotropyInfo(const DeviceContext& ctx) {
     if(supportsAnisotropy.has_value())return;
 
     VkPhysicalDeviceFeatures supportedFeatures;
