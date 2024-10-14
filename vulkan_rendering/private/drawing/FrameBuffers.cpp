@@ -7,6 +7,8 @@
 #include <VulkanAppContext.h>
 #include <SwapChain.h>
 
+#include "WindowContext.h"
+
 void FrameBuffers::createFrameBuffers() {
     resource.resize(ctx.swapChain.getSize());
     for (size_t i = 0; i < ctx.swapChain.getSize(); i++) {
@@ -23,7 +25,7 @@ void FrameBuffers::createFrameBuffers() {
         framebufferInfo.height = ctx.swapChain.swapChainExtent.height;
         framebufferInfo.layers = 1;
 
-        if (vkCreateFramebuffer(ctx.logicalDevice, &framebufferInfo,
+        if (vkCreateFramebuffer(ctx.context.logicalDevice, &framebufferInfo,
             nullptr, &resource[i]) != VK_SUCCESS) {
             throw std::runtime_error("failed to create framebuffer!");
         }
@@ -32,13 +34,13 @@ void FrameBuffers::createFrameBuffers() {
 
 void FrameBuffers::destroyFrameBuffers() {
     for (auto framebuffer : resource) {
-        vkDestroyFramebuffer(ctx.logicalDevice, framebuffer, nullptr);
+        vkDestroyFramebuffer(ctx.getLogicalDevice(), framebuffer, nullptr);
     }
 
 }
 
 
-FrameBuffers::FrameBuffers(VulkanAppContext &context): VulkanResource<std::vector<VkFramebuffer_T*>>(context) {
+FrameBuffers::FrameBuffers(WindowContext &context): VulkanResource(context) {
     createFrameBuffers();
 }
 

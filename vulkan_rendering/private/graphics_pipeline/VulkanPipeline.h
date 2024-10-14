@@ -9,9 +9,11 @@
 #include "VulkanResource.h"
 #include "ShaderModule.h"
 #include <vulkan/vulkan_core.h>
-class VulkanPipeline : public VulkanResource<VkPipeline>{
+class PipelineContext;
+
+class VulkanPipeline : public VulkanResource<VkPipeline, PipelineContext>{
 public:
-    explicit VulkanPipeline(VulkanAppContext &context);
+    explicit VulkanPipeline(PipelineContext &context);
     ~VulkanPipeline() override;
 private:
     std::vector<VkDynamicState> dynamicStates = {

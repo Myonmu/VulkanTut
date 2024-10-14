@@ -19,7 +19,7 @@ struct QueueFamilyIndices{
         return graphicsFamily.has_value() && presentFamily.has_value();
     }
 
-    static QueueFamilyIndices FindQueueFamilies(VkPhysicalDevice device, VulkanAppContext& context){
+    static QueueFamilyIndices FindQueueFamilies(VkPhysicalDevice device, const VulkanSurface& surface){
         QueueFamilyIndices indices;
 
         uint32_t queueFamilyCount = 0;
@@ -31,7 +31,7 @@ struct QueueFamilyIndices{
         for (const auto & queueFamily : queueFamilies){
             VkBool32 presentSupport = false;
             vkGetPhysicalDeviceSurfaceSupportKHR
-            (device, i, context.vulkanSurface, &presentSupport);
+            (device, i, surface, &presentSupport);
             if(presentSupport){
                 indices.presentFamily = i;
             }

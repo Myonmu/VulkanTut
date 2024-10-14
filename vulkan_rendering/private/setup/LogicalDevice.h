@@ -7,12 +7,12 @@
 #define VULKANTUT_LOGICALDEVICE_H
 
 
+#include <VulkanResource.h>
 #include <vulkan/vulkan_core.h>
-#include "VulkanResource.h"
 
 struct VulkanAppContext;
 
-class LogicalDevice: public VulkanResource<VkDevice> {
+class LogicalDevice final : public VulkanResource<VkDevice, VulkanAppContext> {
 public:
     explicit LogicalDevice(VulkanAppContext& context);
     ~LogicalDevice() override;

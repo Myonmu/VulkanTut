@@ -10,7 +10,7 @@
 
 struct VulkanAppContext;
 
-class PhysicalDevice: public VulkanResource<VkPhysicalDevice>{
+class PhysicalDevice: public VulkanResource<VkPhysicalDevice, VulkanAppContext>{
 public:
     explicit PhysicalDevice(VulkanAppContext& context);
 private:

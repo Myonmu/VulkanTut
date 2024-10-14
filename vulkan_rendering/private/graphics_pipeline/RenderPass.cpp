@@ -5,10 +5,10 @@
 #include "RenderPass.h"
 #include "VulkanAppContext.h"
 RenderPass::~RenderPass() {
-    vkDestroyRenderPass(ctx.logicalDevice, resource, nullptr);
+    vkDestroyRenderPass(ctx.getLogicalDevice(), resource, nullptr);
 }
 
-RenderPass::RenderPass(VulkanAppContext &context): VulkanResource<VkRenderPass_T*>(context){
+RenderPass::RenderPass(VulkanAppContext &context): VulkanResource(context){
     VkAttachmentDescription colorAttachment{};
     colorAttachment.format = context.swapChain.swapChainImageFormat;
     colorAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
@@ -43,7 +43,7 @@ RenderPass::RenderPass(VulkanAppContext &context): VulkanResource<VkRenderPass_T
     renderPassInfo.subpassCount = 1;
     renderPassInfo.pSubpasses = &subpass;
 
-    if (vkCreateRenderPass(context.logicalDevice,
+    if (vkCreateRenderPass(ctx.getLogicalDevice(),
                            &renderPassInfo, nullptr,
                            &resource) != VK_SUCCESS) {
         throw std::runtime_error("failed to create render pass!");

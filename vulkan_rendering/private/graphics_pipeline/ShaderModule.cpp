@@ -6,17 +6,18 @@
 
 #include <FileUtility.h>
 
+#include "PipelineContext.h"
 #include "VulkanAppContext.h"
 
 
-ShaderModule::ShaderModule(const std::vector<char>& code , VulkanAppContext& context):
-VulkanResource<VkShaderModule_T*>(context){
+ShaderModule::ShaderModule(const std::vector<char>& code , PipelineContext& context):
+VulkanResource(context){
     VkShaderModuleCreateInfo createInfo{};
     createInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
     createInfo.codeSize = code.size();
     createInfo.pCode = reinterpret_cast<const uint32_t*>(code.data());
 
-    if (vkCreateShaderModule(context.logicalDevice,
+    if (vkCreateShaderModule(context.getLogicalDevice(),
                              &createInfo,
                              nullptr,
                              &resource) != VK_SUCCESS) {
@@ -24,14 +25,14 @@ VulkanResource<VkShaderModule_T*>(context){
     }
 }
 
-ShaderModule::ShaderModule(std::string shaderPath, VulkanAppContext& context) : VulkanResource<VkShaderModule_T*>(context){
+ShaderModule::ShaderModule(std::string shaderPath, PipelineContext& context) : VulkanResource(context){
     auto code = FileUtility::ReadFile(shaderPath);
     VkShaderModuleCreateInfo createInfo{};
     createInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
     createInfo.codeSize = code.size();
     createInfo.pCode = reinterpret_cast<const uint32_t*>(code.data());
 
-    if (vkCreateShaderModule(context.logicalDevice,
+    if (vkCreateShaderModule(context.getLogicalDevice(),
                              &createInfo,
                              nullptr,
                              &resource) != VK_SUCCESS) {
@@ -40,5 +41,5 @@ ShaderModule::ShaderModule(std::string shaderPath, VulkanAppContext& context) : 
 }
 
 ShaderModule::~ShaderModule() {
-    vkDestroyShaderModule(ctx.logicalDevice, resource, nullptr);
+    vkDestroyShaderModule(ctx.getLogicalDevice(), resource, nullptr);
 }

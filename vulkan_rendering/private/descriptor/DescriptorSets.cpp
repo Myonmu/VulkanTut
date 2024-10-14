@@ -7,15 +7,19 @@
 #include <UniformBufferObject.h>
 #include <VulkanAppContext.h>
 
-DescriptorSets::DescriptorSets(VulkanAppContext &ctx): VulkanResource(ctx) {
-    std::vector<VkDescriptorSetLayout> layouts(ctx.MAX_FRAMES_IN_FLIGHT, ctx.descriptorSetLayout);
-    resource.resize(ctx.MAX_FRAMES_IN_FLIGHT);
+#include "DescriptorContext.h"
+#include "RenderObject.h"
+
+DescriptorSets::DescriptorSets(DescriptorContext &ctx): VulkanResource(ctx) {
+    auto maxFrameInFlight = ctx.context.MAX_FRAMES_IN_FLIGHT;
+    std::vector<VkDescriptorSetLayout> layouts(maxFrameInFlight, ctx.descriptorSetLayout);
+    resource.resize(ctx.context.MAX_FRAMES_IN_FLIGHT);
     VkDescriptorSetAllocateInfo allocInfo = {};
     allocInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
     allocInfo.descriptorPool = ctx.descriptorPool;
-    allocInfo.descriptorSetCount = static_cast<uint32_t>(ctx.MAX_FRAMES_IN_FLIGHT);
+    allocInfo.descriptorSetCount = static_cast<uint32_t>(maxFrameInFlight);
     allocInfo.pSetLayouts = layouts.data();
-    if (vkAllocateDescriptorSets(ctx.logicalDevice, &allocInfo, resource.data()) != VK_SUCCESS) {
+    if (vkAllocateDescriptorSets(ctx.getLogicalDevice(), &allocInfo, resource.data()) != VK_SUCCESS) {
         throw std::runtime_error("failed to allocate descriptor sets!");
     }
     //configureDescriptorSets();
@@ -23,7 +27,7 @@ DescriptorSets::DescriptorSets(VulkanAppContext &ctx): VulkanResource(ctx) {
 
 DescriptorSets::~DescriptorSets() = default;
 
-void DescriptorSets::configureDescriptorSets() {
+void DescriptorSets::configureDescriptorSets(const RenderObject& obj) {
     for (size_t i = 0; i < resource.size(); i++) {
         textureResIndex = 0;
         std::vector<VkWriteDescriptorSet> descriptorWrites{ctx.descriptorSetLayout.layoutBindings.size()};
@@ -36,7 +40,7 @@ void DescriptorSets::configureDescriptorSets() {
             descriptorWrites[j].descriptorCount = 1;
             if (binding.descriptorType == VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER) {
                 VkDescriptorBufferInfo bufferInfo = {};
-                bufferInfo.buffer = ctx.uniformBufferGroup[i];
+                bufferInfo.buffer = obj.uniformBufferGroup[i];
                 bufferInfo.offset = 0;
                 bufferInfo.range = sizeof(UniformBufferObject);
 
@@ -55,7 +59,7 @@ void DescriptorSets::configureDescriptorSets() {
             }
         }
 
-        vkUpdateDescriptorSets(ctx.logicalDevice, descriptorWrites.size(),
+        vkUpdateDescriptorSets(ctx.getLogicalDevice(), descriptorWrites.size(),
                                descriptorWrites.data(),
                                0, nullptr);
     }

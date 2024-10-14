@@ -4,7 +4,6 @@
 
 #ifndef DESCRIPTORSETS_H
 #define DESCRIPTORSETS_H
-#include <TextureImage.h>
 #include <vector>
 #include <VulkanResource.h>
 #include <vulkan/vulkan_core.h>
@@ -13,17 +12,19 @@
 #include "TextureSampler.h"
 
 
-class DescriptorSets : public VulkanResource<std::vector<VkDescriptorSet>> {
+class RenderObject;
+struct DescriptorContext;
 
+class DescriptorSets : public VulkanResource<std::vector<VkDescriptorSet>, DescriptorContext> {
     std::vector<ImageView*> images{};
     std::vector<TextureSampler*> samplers{};
     uint32_t textureResIndex = 0;
 public:
-    explicit DescriptorSets(VulkanAppContext& ctx);
+    explicit DescriptorSets(DescriptorContext& ctx);
     ~DescriptorSets() override;
     VkDescriptorSet& operator[](size_t index);
 
-    void configureDescriptorSets();
+    void configureDescriptorSets(const RenderObject& obj);
 
     void AddTextureImageView(ImageView* textureImage);
     void AddTextureSampler(TextureSampler* textureSampler);

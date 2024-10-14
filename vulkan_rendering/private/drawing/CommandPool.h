@@ -9,7 +9,9 @@
 #include <vulkan/vulkan_core.h>
 
 
-class CommandPool: public VulkanResource<VkCommandPool> {
+struct VulkanAppContext;
+
+class CommandPool: public VulkanResource<VkCommandPool, VulkanAppContext> {
 public:
     explicit CommandPool(VulkanAppContext& context);
     ~CommandPool() override;

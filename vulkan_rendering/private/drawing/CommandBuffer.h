@@ -9,7 +9,9 @@
 #include <vulkan/vulkan_core.h>
 
 
-class CommandBuffer : public VulkanResource<VkCommandBuffer>{
+struct VulkanAppContext;
+
+class CommandBuffer : public VulkanResource<VkCommandBuffer, VulkanAppContext>{
 public:
     explicit CommandBuffer(VulkanAppContext& context);
     ~CommandBuffer() override;

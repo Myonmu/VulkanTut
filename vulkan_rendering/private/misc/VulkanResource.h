@@ -7,15 +7,13 @@
 
 #include <iostream>
 
-struct VulkanAppContext;
-
-template<typename T>
+template<typename T, typename CTX>
 class VulkanResource {
 protected:
     T resource;
-    VulkanAppContext& ctx;
+    CTX& ctx;
 public:
-    explicit VulkanResource(VulkanAppContext& context) : ctx(context){
+    explicit VulkanResource(CTX& context) : ctx(context){
 #ifdef NDEBUG
 #else
         std::cout << "Initializing " << typeid(T).name() << std::endl;
@@ -37,7 +35,7 @@ public:
     }
 
     // Gets the pointer to the raw Vulkan object
-    virtual T *getRawPtr() {
+    virtual T *getRawPtr() const{
         return &resource;
     }
 };

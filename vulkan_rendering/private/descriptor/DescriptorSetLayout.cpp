@@ -3,11 +3,10 @@
 //
 
 #include "DescriptorSetLayout.h"
-
-#include <array>
 #include <VulkanAppContext.h>
+#include "DescriptorContext.h"
 
-DescriptorSetLayout::DescriptorSetLayout(VulkanAppContext &ctx, const std::vector<DescriptorSetLayoutBinding> &bindings)
+DescriptorSetLayout::DescriptorSetLayout(DescriptorContext &ctx, const std::vector<DescriptorSetLayoutBinding> &bindings)
     : VulkanResource(ctx) {
     layoutBindings.resize(bindings.size());
     for (int i = 0; i < layoutBindings.size(); ++i) {
@@ -25,11 +24,11 @@ DescriptorSetLayout::DescriptorSetLayout(VulkanAppContext &ctx, const std::vecto
     layoutInfo.bindingCount = static_cast<uint32_t>(bindings.size());
     layoutInfo.pBindings = layoutBindings.data();
 
-    if (vkCreateDescriptorSetLayout(ctx.logicalDevice, &layoutInfo, nullptr, &resource) != VK_SUCCESS) {
+    if (vkCreateDescriptorSetLayout(ctx.getLogicalDevice(), &layoutInfo, nullptr, &resource) != VK_SUCCESS) {
         throw std::runtime_error("failed to create descriptor set layout!");
     }
 }
 
 DescriptorSetLayout::~DescriptorSetLayout() {
-    vkDestroyDescriptorSetLayout(ctx.logicalDevice, resource, nullptr);
+    vkDestroyDescriptorSetLayout(ctx.context.logicalDevice, resource, nullptr);
 }

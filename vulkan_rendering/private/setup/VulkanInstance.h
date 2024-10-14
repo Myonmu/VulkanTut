@@ -11,7 +11,7 @@
 
 struct VulkanAppContext;
 
-class VulkanInstance : public VulkanResource<VkInstance> {
+class VulkanInstance : public VulkanResource<VkInstance, VulkanAppContext> {
 public:
     explicit VulkanInstance(VulkanAppContext& context);
     ~VulkanInstance() override;

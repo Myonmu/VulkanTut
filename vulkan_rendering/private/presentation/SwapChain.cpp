@@ -5,10 +5,10 @@
 #include <algorithm>
 #include <stdexcept>
 #include "SwapChain.h"
-
 #include <limits>
 
 #include "QueueFamilyIndices.h"
+#include "WindowContext.h"
 #include "GLFW/glfw3.h"
 
 SwapChain::SwapChainSupportDetails SwapChain::querySwapChainSupport(VkPhysicalDevice device, VkSurfaceKHR surface){
@@ -45,7 +45,7 @@ VkPresentModeKHR SwapChain::chooseSwapPresentMode(const std::vector<VkPresentMod
     return VK_PRESENT_MODE_FIFO_KHR;
 }
 
-VkExtent2D SwapChain::chooseSwapExtend(const VkSurfaceCapabilitiesKHR& capabilities, VulkanAppContext& context){
+VkExtent2D SwapChain::chooseSwapExtend(const VkSurfaceCapabilitiesKHR& capabilities, WindowContext& context){
     if (capabilities.currentExtent.width != std::numeric_limits<uint32_t>::max()) {
         return capabilities.currentExtent;
     } else {
@@ -64,10 +64,9 @@ VkExtent2D SwapChain::chooseSwapExtend(const VkSurfaceCapabilitiesKHR& capabilit
 }
 
 
-void SwapChain::createSwapChain(VulkanAppContext& context){
-    auto& physicalDevice = context.physicalDevice;
-    auto& surface = context.vulkanSurface;
-    auto& logicalDevice = context.logicalDevice;
+void SwapChain::createSwapChain(WindowContext& context){
+    auto& physicalDevice = context.context.physicalDevice;
+    auto& surface = context.surface;
     SwapChainSupportDetails swapChainSupport = querySwapChainSupport(physicalDevice, surface);
 
     VkSurfaceFormatKHR surfaceFormat = chooseSwapSurfaceFormat(swapChainSupport.formats);
@@ -90,7 +89,7 @@ void SwapChain::createSwapChain(VulkanAppContext& context){
     createInfo.imageArrayLayers = 1;
     createInfo.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
 
-    QueueFamilyIndices indices = QueueFamilyIndices::FindQueueFamilies(physicalDevice, context);
+    QueueFamilyIndices indices = QueueFamilyIndices::FindQueueFamilies(physicalDevice, context.surface);
     uint32_t queueFamilyIndices[] = {indices.graphicsFamily.value(), indices.presentFamily.value()};
 
     if (indices.graphicsFamily != indices.presentFamily) {
@@ -110,13 +109,13 @@ void SwapChain::createSwapChain(VulkanAppContext& context){
 
     createInfo.oldSwapchain = VK_NULL_HANDLE;
 
-    if(vkCreateSwapchainKHR(logicalDevice, &createInfo, nullptr, &resource) != VK_SUCCESS){
+    if(vkCreateSwapchainKHR(ctx.getLogicalDevice(), &createInfo, nullptr, &resource) != VK_SUCCESS){
         throw std::runtime_error("failed to create swap chain");
     }
 
-    vkGetSwapchainImagesKHR(logicalDevice, resource, &imageCount, nullptr);
+    vkGetSwapchainImagesKHR(ctx.getLogicalDevice(), resource, &imageCount, nullptr);
     swapChainImages.resize(imageCount);
-    vkGetSwapchainImagesKHR(logicalDevice, resource, &imageCount, swapChainImages.data());
+    vkGetSwapchainImagesKHR(ctx.getLogicalDevice(), resource, &imageCount, swapChainImages.data());
 
     swapChainImageFormat = surfaceFormat.format;
     swapChainExtent = extent;
@@ -125,7 +124,7 @@ void SwapChain::createSwapChain(VulkanAppContext& context){
 void SwapChain::createImageViews(){
     swapChainImageViews.resize(swapChainImages.size());
     for (size_t i = 0; i < swapChainImages.size(); i++) {
-        swapChainImageViews[i] = new ImageView(ctx, swapChainImages[i], swapChainImageFormat);
+        swapChainImageViews[i] = new ImageView(ctx.context, swapChainImages[i], swapChainImageFormat);
     }
 }
 
@@ -133,10 +132,10 @@ SwapChain::~SwapChain() {
     for (const auto imageView : swapChainImageViews) {
         delete imageView;
     }
-    vkDestroySwapchainKHR(ctx.logicalDevice, resource, nullptr);
+    vkDestroySwapchainKHR(ctx.getLogicalDevice(), resource, nullptr);
 }
 
-SwapChain::SwapChain(VulkanAppContext &context): VulkanResource(context) {
+SwapChain::SwapChain(WindowContext &context): VulkanResource(context) {
     createSwapChain(context);
     createImageViews();
 }
@@ -145,7 +144,7 @@ void SwapChain::recreate() {
     for (const auto imageView : swapChainImageViews) {
         delete imageView;
     }
-    vkDestroySwapchainKHR(ctx.logicalDevice, resource, nullptr);
+    vkDestroySwapchainKHR(ctx.getLogicalDevice(), resource, nullptr);
     createSwapChain(ctx);
     createImageViews();
 }

@@ -8,7 +8,7 @@
 #include <vulkan/vulkan_core.h>
 
 
-class ImageView : public VulkanResource<VkImageView>{
+class ImageView : public VulkanResource<VkImageView, VulkanAppContext>{
 public:
     ImageView(VulkanAppContext& ctx, const VkImage &image, VkFormat format);
     ~ImageView() override;

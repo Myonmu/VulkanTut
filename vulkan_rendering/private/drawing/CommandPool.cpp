@@ -7,7 +7,7 @@
 #include <QueueFamilyIndices.h>
 #include <VulkanAppContext.h>
 
-CommandPool::CommandPool(VulkanAppContext &context) : VulkanResource<VkCommandPool_T*>(context){
+CommandPool::CommandPool(VulkanAppContext &context) : VulkanResource(context){
     auto queueFamilyIndices =QueueFamilyIndices::FindQueueFamilies(context.physicalDevice, context);
     VkCommandPoolCreateInfo poolInfo{};
 

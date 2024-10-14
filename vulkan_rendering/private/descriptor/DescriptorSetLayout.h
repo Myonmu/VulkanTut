@@ -11,10 +11,12 @@
 #include "DescriptorSetLayoutBinding.h"
 
 
-class DescriptorSetLayout:public VulkanResource<VkDescriptorSetLayout> {
+struct DescriptorContext;
+
+class DescriptorSetLayout:public VulkanResource<VkDescriptorSetLayout, DescriptorContext> {
 public:
     std::vector<VkDescriptorSetLayoutBinding> layoutBindings{};
-    explicit DescriptorSetLayout(VulkanAppContext& ctx, const std::vector<DescriptorSetLayoutBinding> &bindings);
+    explicit DescriptorSetLayout(DescriptorContext& ctx, const std::vector<DescriptorSetLayoutBinding> &bindings);
     ~DescriptorSetLayout() override;
 };
 

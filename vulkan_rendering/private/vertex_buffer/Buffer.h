@@ -8,9 +8,10 @@
 #include <VulkanResource.h>
 #include <vulkan/vulkan_core.h>
 
+struct VulkanAppContext;
 class CommandPool;
 
-class Buffer: public VulkanResource<VkBuffer> {
+class Buffer: public VulkanResource<VkBuffer, VulkanAppContext> {
 public:
     explicit Buffer(VulkanAppContext& context, VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags props);
     ~Buffer() override;

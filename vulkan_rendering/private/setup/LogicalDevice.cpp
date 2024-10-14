@@ -49,7 +49,6 @@ void LogicalDevice::createLogicalDevice(VulkanAppContext& context){
         throw std::runtime_error("failed to create logical device.");
     }
 
-
     vkGetDeviceQueue(resource, indices.graphicsFamily.value(), 0, &graphicsQueue);
     vkGetDeviceQueue(resource, indices.presentFamily.value(), 0, &presentQueue);
 }

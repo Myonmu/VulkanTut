@@ -10,7 +10,7 @@
 #include <vulkan/vulkan_core.h>
 
 struct VulkanAppContext;
-class RenderPass : public VulkanResource<VkRenderPass>{
+class RenderPass : public VulkanResource<VkRenderPass, VulkanAppContext>{
 public:
     explicit RenderPass(VulkanAppContext& context);
     ~RenderPass() override;

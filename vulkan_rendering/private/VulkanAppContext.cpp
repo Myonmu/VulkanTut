@@ -33,3 +33,7 @@ void VulkanAppContext::frameBufferResizeCallback(GLFWwindow *window, int width, 
     const auto app = static_cast<VulkanAppContext *>(glfwGetWindowUserPointer(window));
     app->renderer.signalResize();
 }
+
+const LogicalDevice& VulkanAppContext::getLogicalDevice() const {
+    return logicalDevice;
+}

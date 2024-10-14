@@ -13,7 +13,7 @@ PipelineLayout::PipelineLayout(VulkanAppContext &context): VulkanResource(contex
     pipelineLayoutInfo.pushConstantRangeCount = 0; // Optional
     pipelineLayoutInfo.pPushConstantRanges = nullptr; // Optional
 
-    if (vkCreatePipelineLayout(context.logicalDevice,
+    if (vkCreatePipelineLayout(ctx.logicalDevice,
                                &pipelineLayoutInfo,
                                nullptr, &resource) != VK_SUCCESS) {
         throw std::runtime_error("failed to create pipeline layout!");
@@ -21,5 +21,5 @@ PipelineLayout::PipelineLayout(VulkanAppContext &context): VulkanResource(contex
 }
 
 PipelineLayout::~PipelineLayout() {
-    vkDestroyPipelineLayout(ctx.logicalDevice, resource, nullptr);
+    vkDestroyPipelineLayout(ctx.getLogicalDevice(), resource, nullptr);
 }

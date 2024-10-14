@@ -13,7 +13,7 @@ void VulkanSurface::createSurface(VulkanAppContext& context){
     }
 }
 
-VulkanSurface::VulkanSurface(VulkanAppContext &context): VulkanResource<VkSurfaceKHR_T*>(context) {
+VulkanSurface::VulkanSurface(VulkanAppContext &context): VulkanResource(context) {
     createSurface(context);
 }
 

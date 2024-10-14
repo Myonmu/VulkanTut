@@ -10,7 +10,7 @@
 
 struct VulkanAppContext;
 
-class VulkanSurface : public VulkanResource<VkSurfaceKHR>{
+class VulkanSurface : public VulkanResource<VkSurfaceKHR, VulkanAppContext>{
 public:
     explicit VulkanSurface(VulkanAppContext &context);
     ~VulkanSurface() override;

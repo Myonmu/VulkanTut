@@ -10,7 +10,7 @@
 
 struct VulkanAppContext;
 
-class ValidationLayers : public VulkanResource<VkDebugUtilsMessengerEXT>{
+class ValidationLayers : public VulkanResource<VkDebugUtilsMessengerEXT, VulkanAppContext>{
 public:
     explicit ValidationLayers(VulkanAppContext& context);
     ~ValidationLayers() override;

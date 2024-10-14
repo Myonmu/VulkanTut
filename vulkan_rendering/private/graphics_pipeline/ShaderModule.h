@@ -9,10 +9,12 @@
 #include "VulkanResource.h"
 #include <vulkan/vulkan_core.h>
 #include <vector>
-class ShaderModule : public VulkanResource<VkShaderModule>{
+class PipelineContext;
+
+class ShaderModule : public VulkanResource<VkShaderModule, PipelineContext>{
 public:
-    ShaderModule(std::string shaderPath, VulkanAppContext& context);
-    ShaderModule(const std::vector<char>& code ,VulkanAppContext& context);
+    ShaderModule(std::string shaderPath, PipelineContext& context);
+    ShaderModule(const std::vector<char>& code ,PipelineContext& context);
     ~ShaderModule() override;
 };
 

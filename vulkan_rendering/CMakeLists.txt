@@ -12,6 +12,7 @@ set(INCLUDE_DIRS
         ${CMAKE_CURRENT_SOURCE_DIR}/private/vertex_buffer
         ${CMAKE_CURRENT_SOURCE_DIR}/private/uniform_buffer
         ${CMAKE_CURRENT_SOURCE_DIR}/private/texture_mapping
+        ${CMAKE_CURRENT_SOURCE_DIR}/private/descriptor
         ${CMAKE_CURRENT_SOURCE_DIR}/public
         ${CMAKE_CURRENT_SOURCE_DIR}/public/command_buffer_cmds
 )
@@ -46,11 +47,11 @@ set(SOURCES
         private/vertex_buffer/IndexBuffer.cpp
         private/misc/VmaInstance.cpp
         private/uniform_buffer/UniformBufferObject.cpp
-        private/uniform_buffer/DescriptorSetLayout.cpp
+        private/descriptor/DescriptorSetLayout.cpp
         private/uniform_buffer/UniformBufferGroup.h
         private/uniform_buffer/UniformBufferGroup.cpp
-        private/uniform_buffer/DescriptorPool.cpp
-        private/uniform_buffer/DescriptorSets.cpp
+        private/descriptor/DescriptorPool.cpp
+        private/descriptor/DescriptorSets.cpp
         private/Texture2D.cpp
         private/texture_mapping/TextureImage.cpp
         public/command_buffer_cmds/BindDescriptorSet.h
@@ -82,7 +83,18 @@ set(SOURCES
         private/texture_mapping/TextureCompareInfo.h
         private/texture_mapping/TextureAnisotropyInfo.cpp
         private/texture_mapping/TextureAnisotropyInfo.h
-        private/uniform_buffer/DescriptorSetLayoutBinding.h
+        private/descriptor/DescriptorSetLayoutBinding.h
+        private/VulkanRenderScene.cpp
+        public/VulkanRenderScene.h
+        private/descriptor/DescriptorContext.h
+        private/descriptor/DescriptorContext.cpp
+        private/RenderObject.cpp
+        public/RenderObject.h
+        private/presentation/WindowContext.cpp
+        private/presentation/WindowContext.h
+        private/misc/SubContext.h
+        private/graphics_pipeline/PipelineContext.cpp
+        private/graphics_pipeline/PipelineContext.h
 )
 
 # Create static library

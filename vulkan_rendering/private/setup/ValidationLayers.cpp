@@ -105,7 +105,7 @@ void ValidationLayers::AttachToDeviceCreation(VkDeviceCreateInfo &createInfo) {
     createInfo.ppEnabledLayerNames = Names();
 }
 
-ValidationLayers::ValidationLayers(VulkanAppContext &context):VulkanResource<VkDebugUtilsMessengerEXT_T*>(context){
+ValidationLayers::ValidationLayers(VulkanAppContext &context):VulkanResource(context){
     setupDebugMessenger(context);
 }
 

@@ -12,9 +12,10 @@
 #include "ImageView.h"
 #include "VulkanResource.h"
 
+struct WindowContext;
 struct VulkanAppContext;
 
-class SwapChain : public VulkanResource<VkSwapchainKHR> {
+class SwapChain : public VulkanResource<VkSwapchainKHR, WindowContext> {
 public:
     struct SwapChainSupportDetails{
         VkSurfaceCapabilitiesKHR capabilities;
@@ -22,7 +23,7 @@ public:
         std::vector<VkPresentModeKHR> presentModes;
     };
 
-    explicit SwapChain(VulkanAppContext& context);
+    explicit SwapChain(WindowContext& context);
     ~SwapChain() override;
     static SwapChainSupportDetails querySwapChainSupport(VkPhysicalDevice device, VkSurfaceKHR surface);
     [[nodiscard]] size_t getSize() const;
@@ -33,10 +34,10 @@ public:
 private:
     std::vector<VkImage> swapChainImages;
 
-    void createSwapChain(VulkanAppContext& context);
+    void createSwapChain(WindowContext& context);
     static VkSurfaceFormatKHR chooseSwapSurfaceFormat(const std::vector<VkSurfaceFormatKHR>& availableFormats);
     static VkPresentModeKHR chooseSwapPresentMode(const std::vector<VkPresentModeKHR>& availablePresentModes);
-    static VkExtent2D chooseSwapExtend(const VkSurfaceCapabilitiesKHR& capabilities, VulkanAppContext& context);
+    static VkExtent2D chooseSwapExtend(const VkSurfaceCapabilitiesKHR& capabilities, WindowContext& context);
     void createImageViews();
 };
 

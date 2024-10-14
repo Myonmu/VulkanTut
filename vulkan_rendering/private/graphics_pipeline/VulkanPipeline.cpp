@@ -4,13 +4,14 @@
 
 #include "VulkanPipeline.h"
 #include "FileUtility.h"
+#include "PipelineContext.h"
 #include "Vertex.h"
 #include "VulkanAppContext.h"
 
 //TODO: Hardcoded shader path
 //TODO: Refactor pipeline stage construction into smaller methods
-VulkanPipeline::VulkanPipeline(VulkanAppContext &context)
-    : VulkanResource<VkPipeline_T *>(context),
+VulkanPipeline::VulkanPipeline(PipelineContext &context)
+    : VulkanResource(context),
       frag("../shaders/frag.spv", ctx),
       vert("../shaders/vert.spv", ctx) {
 
@@ -147,7 +148,7 @@ VulkanPipeline::VulkanPipeline(VulkanAppContext &context)
     pipelineInfo.basePipelineHandle = VK_NULL_HANDLE; // Optional
     pipelineInfo.basePipelineIndex = -1; // Optional
 
-    if (vkCreateGraphicsPipelines(context.logicalDevice
+    if (vkCreateGraphicsPipelines(context.getLogicalDevice()
                                   , VK_NULL_HANDLE, 1,
                                   &pipelineInfo, nullptr,
                                   &resource) != VK_SUCCESS) {
@@ -156,6 +157,6 @@ VulkanPipeline::VulkanPipeline(VulkanAppContext &context)
 }
 
 VulkanPipeline::~VulkanPipeline() {
-    vkDestroyPipeline(ctx.logicalDevice,
+    vkDestroyPipeline(ctx.getLogicalDevice(),
                       resource, nullptr);
 }

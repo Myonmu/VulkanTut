@@ -83,6 +83,8 @@ struct VulkanAppContext {
     void resize();
 
     void drawFrame();
+
+    [[nodiscard]] const LogicalDevice &getLogicalDevice() const;
 };
 
 

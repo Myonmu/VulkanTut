@@ -30,7 +30,7 @@ int PhysicalDevice::rateDeviceSuitability(VkPhysicalDevice device, VulkanAppCont
     vkGetPhysicalDeviceProperties(device, &deviceProperties);
     VkPhysicalDeviceFeatures deviceFeatures;
     vkGetPhysicalDeviceFeatures(device, &deviceFeatures);
-    QueueFamilyIndices indices = QueueFamilyIndices::FindQueueFamilies(device, context);
+    QueueFamilyIndices indices = QueueFamilyIndices::FindQueueFamilies(device, context.vulkanSurface);
     int score = 0;
     // Discrete GPUs have a significant performance advantage
     if (deviceProperties.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU) {

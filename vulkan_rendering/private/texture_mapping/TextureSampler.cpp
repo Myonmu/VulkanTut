@@ -44,12 +44,12 @@ TextureSampler::TextureSampler(VulkanAppContext &ctx,
     samplerInfo.minFilter = filterMode.min;
     samplerInfo.magFilter = filterMode.mag;
 
-    if (vkCreateSampler(ctx.logicalDevice, &samplerInfo, nullptr, &resource) != VK_SUCCESS) {
+    if (vkCreateSampler(device, &samplerInfo, nullptr, &resource) != VK_SUCCESS) {
         throw std::runtime_error("failed to create texture sampler!");
     }
 
 }
 
 TextureSampler::~TextureSampler() {
-    vkDestroySampler(ctx.logicalDevice, resource, nullptr);
+    vkDestroySampler(device, resource, nullptr);
 }

@@ -14,7 +14,7 @@ struct TextureAnisotropyInfo;
 struct TextureFilterMode;
 struct TextureAddressMode;
 
-class TextureSampler : public VulkanResource<VkSampler> {
+class TextureSampler : public VulkanResource<VkSampler, VulkanAppContext> {
 public:
     explicit TextureSampler(VulkanAppContext &ctx,
                    TextureAddressMode addressMode,

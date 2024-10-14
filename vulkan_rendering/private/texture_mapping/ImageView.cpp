@@ -18,11 +18,11 @@ ImageView::ImageView(VulkanAppContext &ctx, const VkImage &image, const VkFormat
     viewInfo.subresourceRange.baseArrayLayer = 0;
     viewInfo.subresourceRange.layerCount = 1;
 
-    if (vkCreateImageView(ctx.logicalDevice, &viewInfo, nullptr, &resource) != VK_SUCCESS) {
+    if (vkCreateImageView(device, &viewInfo, nullptr, &resource) != VK_SUCCESS) {
         throw std::runtime_error("failed to create texture image view!");
     }
 }
 
 ImageView::~ImageView() {
-    vkDestroyImageView(ctx.logicalDevice, resource, nullptr);
+    vkDestroyImageView(device, resource, nullptr);
 }

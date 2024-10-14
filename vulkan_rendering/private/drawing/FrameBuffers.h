@@ -10,9 +10,11 @@
 #include <vulkan/vulkan_core.h>
 
 
-class FrameBuffers: public VulkanResource<std::vector<VkFramebuffer>>{
+struct WindowContext;
+
+class FrameBuffers: public VulkanResource<std::vector<VkFramebuffer>, WindowContext>{
 public:
-    explicit FrameBuffers(VulkanAppContext& context);
+    explicit FrameBuffers(WindowContext& context);
     ~FrameBuffers() override;
     void recreate();
 private:
