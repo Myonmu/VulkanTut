@@ -15,7 +15,7 @@ public:
     GlfwWindow(VulkanAppContext &context, int w, int h, const char *appName, GLFWframebuffersizefun resizeFun);
 
     ~GlfwWindow();
-    operator GLFWwindow*() const {return window;} // NOLINT(*-explicit-constructor)
+    operator GLFWwindow*() const {return window;}
 private:
     VulkanAppContext& ctx;
     GLFWwindow* window;

@@ -4,19 +4,22 @@
 
 #include <stdexcept>
 #include "VulkanSurface.h"
-#include "VulkanAppContext.h"
 
-void VulkanSurface::createSurface(VulkanAppContext& context){
-    if(glfwCreateWindowSurface(context.vulkanInstance,
-                               context.window, nullptr, &resource) != VK_SUCCESS){
+#include "DeviceContext.h"
+#include "VulkanAppContext.h"
+#include "WindowContext.h"
+
+void VulkanSurface::createSurface(WindowContext& context){
+    if(glfwCreateWindowSurface(context.context.context.get_vulkanInstance(),
+                               context.get_surface(), nullptr, &resource) != VK_SUCCESS){
         throw std::runtime_error("failed to create window surface");
     }
 }
 
-VulkanSurface::VulkanSurface(VulkanAppContext &context): VulkanResource(context) {
+VulkanSurface::VulkanSurface(WindowContext &context): VulkanResource(context) {
     createSurface(context);
 }
 
 VulkanSurface::~VulkanSurface() {
-    vkDestroySurfaceKHR(ctx.vulkanInstance, resource, nullptr);
+    vkDestroySurfaceKHR(ctx.context.context.get_vulkanInstance(), resource, nullptr);
 }

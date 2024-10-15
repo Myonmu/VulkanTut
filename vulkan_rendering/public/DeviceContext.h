@@ -8,8 +8,9 @@
 #include <PhysicalDevice.h>
 #include <vector>
 
+#include "ContextMacros.h"
 #include "SubContext.h"
-
+#include "WindowContext.h"
 
 struct VulkanAppContext;
 
@@ -17,11 +18,23 @@ struct DeviceContext : SubContext<VulkanAppContext> {
     const std::vector<const char *> deviceExtensions = {
         VK_KHR_SWAPCHAIN_EXTENSION_NAME
     };
-     PhysicalDevice physicalDevice{*this};
-     LogicalDevice logicalDevice{*this};
-    explicit DeviceContext(const VulkanAppContext& ctx);
+    std::vector<WindowContext> windowContexts;
+
+    CTX_PROPERTY(QueueFamilyIndices, queueFamilyIndices)
+    CTX_PROPERTY(PhysicalDevice, physicalDevice)
+    CTX_PROPERTY(LogicalDevice, logicalDevice)
+
+    CTX_FORWARD_GET_DECL(VulkanInstance, vulkanInstance)
+
+    explicit DeviceContext(const VulkanAppContext &ctx);
+
     ~DeviceContext() override;
-    const LogicalDevice &getLogicalDevice() const override;
+
+    [[nodiscard]] const LogicalDevice &getLogicalDevice() const override;
+
+    [[nodiscard]] QueueFamily getCombinedQueueFamilyRequirements() const;
+
+    void init();
 };
 
 

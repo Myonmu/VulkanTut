@@ -7,6 +7,7 @@
 #include "SwapChain.h"
 #include <limits>
 
+#include "DeviceContext.h"
 #include "QueueFamilyIndices.h"
 #include "WindowContext.h"
 #include "GLFW/glfw3.h"
@@ -50,7 +51,7 @@ VkExtent2D SwapChain::chooseSwapExtend(const VkSurfaceCapabilitiesKHR& capabilit
         return capabilities.currentExtent;
     } else {
         int width, height;
-        glfwGetFramebufferSize(context.window, &width, &height);
+        glfwGetFramebufferSize(context.get_window(), &width, &height);
 
         VkExtent2D actualExtent = {
                 static_cast<uint32_t>(width),
@@ -65,8 +66,8 @@ VkExtent2D SwapChain::chooseSwapExtend(const VkSurfaceCapabilitiesKHR& capabilit
 
 
 void SwapChain::createSwapChain(WindowContext& context){
-    auto& physicalDevice = context.context.physicalDevice;
-    auto& surface = context.surface;
+    auto& physicalDevice = context.get_physicalDevice();
+    auto& surface = context.get_surface();
     SwapChainSupportDetails swapChainSupport = querySwapChainSupport(physicalDevice, surface);
 
     VkSurfaceFormatKHR surfaceFormat = chooseSwapSurfaceFormat(swapChainSupport.formats);
@@ -89,7 +90,7 @@ void SwapChain::createSwapChain(WindowContext& context){
     createInfo.imageArrayLayers = 1;
     createInfo.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
 
-    QueueFamilyIndices indices = QueueFamilyIndices(physicalDevice, context.surface);
+    QueueFamilyIndices indices = QueueFamilyIndices(physicalDevice, context.get_surface(), context.requiredQueueFamilies);
     uint32_t queueFamilyIndices[indices.getQueueFamilyIndicesCount()];
     indices.fillQueueFamilyIndicesArray(queueFamilyIndices);
 

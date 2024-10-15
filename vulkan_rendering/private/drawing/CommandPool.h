@@ -9,11 +9,11 @@
 #include <vulkan/vulkan_core.h>
 
 
-struct VulkanAppContext;
+struct DeviceContext;
 
-class CommandPool: public VulkanResource<VkCommandPool, VulkanAppContext> {
+class CommandPool: public VulkanResource<VkCommandPool, DeviceContext> {
 public:
-    explicit CommandPool(VulkanAppContext& context);
+    explicit CommandPool(DeviceContext& context);
     ~CommandPool() override;
 };
 

@@ -9,11 +9,11 @@
 #include <vulkan/vulkan_core.h>
 
 
-struct VulkanAppContext;
+struct DeviceContext;
 
-class CommandBuffer : public VulkanResource<VkCommandBuffer, VulkanAppContext>{
+class CommandBuffer : public VulkanResource<VkCommandBuffer, DeviceContext>{
 public:
-    explicit CommandBuffer(VulkanAppContext& context);
+    explicit CommandBuffer(DeviceContext& context);
     ~CommandBuffer() override;
     void executeImmediate();
 };

@@ -97,6 +97,7 @@ set(SOURCES
         private/graphics_pipeline/PipelineContext.h
         public/DeviceContext.h
         private/DeviceContext.cpp
+        private/misc/ContextMacros.h
 )
 
 # Create static library

@@ -8,14 +8,14 @@
 #include <vulkan/vulkan_core.h>
 #include "VulkanResource.h"
 
-struct VulkanAppContext;
+struct WindowContext;
 
-class VulkanSurface : public VulkanResource<VkSurfaceKHR, VulkanAppContext>{
+class VulkanSurface : public VulkanResource<VkSurfaceKHR, WindowContext>{
 public:
-    explicit VulkanSurface(VulkanAppContext &context);
+    explicit VulkanSurface(WindowContext &context);
     ~VulkanSurface() override;
 private:
-    void createSurface(VulkanAppContext& context);
+    void createSurface(WindowContext& context);
 };
 
 #endif //VULKANTUT_VULKANSURFACE_H

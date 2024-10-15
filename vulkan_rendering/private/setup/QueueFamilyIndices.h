@@ -34,8 +34,6 @@ inline QueueFamily operator&(QueueFamily a, QueueFamily b) {
 struct QueueFamilyIndices {
     QueueFamily requiredBits;
     std::unordered_map<QueueFamily, uint32_t> indices;
-    std::optional<uint32_t> graphicsFamily;
-    std::optional<uint32_t> presentFamily;
 
     [[nodiscard]] bool isComplete() const {
         // For each required bit in `requiredBits`, check if the corresponding index is valid
@@ -63,30 +61,7 @@ struct QueueFamilyIndices {
 
     QueueFamilyIndices(const PhysicalDevice &device, const VulkanSurface &surface,
                        QueueFamily queueFamilyFlags): requiredBits(queueFamilyFlags) {
-        uint32_t queueFamilyCount = 0;
-        vkGetPhysicalDeviceQueueFamilyProperties(device, &queueFamilyCount, nullptr);
-        std::vector<VkQueueFamilyProperties> queueFamilies(queueFamilyCount);
-        vkGetPhysicalDeviceQueueFamilyProperties(device, &queueFamilyCount, queueFamilies.data());
-
-        int i = 0;
-        for (const auto &queueFamily: queueFamilies) {
-            checkFlags(queueFamily, QueueFamily::QUEUE_FAMILY_GRAPHICS, VK_QUEUE_GRAPHICS_BIT, i);
-            checkFlags(queueFamily, QueueFamily::QUEUE_FAMILY_COMPUTE, VK_QUEUE_COMPUTE_BIT, i);
-            checkFlags(queueFamily, QueueFamily::QUEUE_FAMILY_TRANSFER, VK_QUEUE_TRANSFER_BIT, i);
-
-            // Check if present queue is required (requires surface support)
-            if (static_cast<bool>(queueFamilyFlags & QueueFamily::QUEUE_FAMILY_PRESENT)) {
-                VkBool32 presentSupport = false;
-                vkGetPhysicalDeviceSurfaceSupportKHR(device, i, surface, &presentSupport);
-                if (presentSupport) {
-                    indices[QueueFamily::QUEUE_FAMILY_PRESENT] = i;
-                }
-            }
-            if (isComplete()) {
-                break;
-            }
-            i++;
-        }
+        queryQueueFamilies(device, surface);
     }
 
     [[nodiscard]] std::set<uint32_t> getUniqueQueueFamilyIndices() const {
@@ -105,10 +80,39 @@ struct QueueFamilyIndices {
         int i = 0;
         for (const auto &entry: indices) {
             arr[i] = entry.second;
+            i++;
         }
     }
 
 private:
+
+    void queryQueueFamilies(VkPhysicalDevice device, VkSurfaceKHR surface) {
+        uint32_t queueFamilyCount = 0;
+        vkGetPhysicalDeviceQueueFamilyProperties(device, &queueFamilyCount, nullptr);
+        std::vector<VkQueueFamilyProperties> queueFamilies(queueFamilyCount);
+        vkGetPhysicalDeviceQueueFamilyProperties(device, &queueFamilyCount, queueFamilies.data());
+
+        int i = 0;
+        for (const auto &queueFamily: queueFamilies) {
+            checkFlags(queueFamily, QueueFamily::QUEUE_FAMILY_GRAPHICS, VK_QUEUE_GRAPHICS_BIT, i);
+            checkFlags(queueFamily, QueueFamily::QUEUE_FAMILY_COMPUTE, VK_QUEUE_COMPUTE_BIT, i);
+            checkFlags(queueFamily, QueueFamily::QUEUE_FAMILY_TRANSFER, VK_QUEUE_TRANSFER_BIT, i);
+
+            // Check if present queue is required (requires surface support)
+            if (static_cast<bool>(requiredBits & QueueFamily::QUEUE_FAMILY_PRESENT)) {
+                VkBool32 presentSupport = false;
+                vkGetPhysicalDeviceSurfaceSupportKHR(device, i, surface, &presentSupport);
+                if (presentSupport) {
+                    indices[QueueFamily::QUEUE_FAMILY_PRESENT] = i;
+                }
+            }
+            if (isComplete()) {
+                break;
+            }
+            i++;
+        }
+    }
+
     void checkFlags(const VkQueueFamilyProperties &prop, const QueueFamily &compareFlag, const VkQueueFlagBits vkFlag,
                     const uint32_t i) {
         if (static_cast<bool>(requiredBits & compareFlag) && prop.queueFlags & vkFlag) {

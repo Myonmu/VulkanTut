@@ -7,8 +7,10 @@
 #include <QueueFamilyIndices.h>
 #include <VulkanAppContext.h>
 
-CommandPool::CommandPool(VulkanAppContext &context) : VulkanResource(context){
-    auto queueFamilyIndices =QueueFamilyIndices::FindQueueFamilies(context.physicalDevice, context);
+#include "DeviceContext.h"
+
+CommandPool::CommandPool(DeviceContext &context) : VulkanResource(context){
+    auto queueFamilyIndices = ctx.get_queueFamilyIndices();
     VkCommandPoolCreateInfo poolInfo{};
 
     poolInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
@@ -24,7 +26,7 @@ CommandPool::CommandPool(VulkanAppContext &context) : VulkanResource(context){
     Thus, we need to set the VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT flag bit for our command pool.
      */
     poolInfo.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
-    poolInfo.queueFamilyIndex = queueFamilyIndices.graphicsFamily.value();
+    poolInfo.queueFamilyIndex = queueFamilyIndices[QueueFamily::QUEUE_FAMILY_GRAPHICS].value();
 
     /*
     Command buffers are executed by submitting them on one of the device queues,
@@ -32,11 +34,11 @@ CommandPool::CommandPool(VulkanAppContext &context) : VulkanResource(context){
     Each command pool can only allocate command buffers that are submitted on a single type of queue.
     We're going to record commands for drawing, which is why we've chosen the graphics queue family.
      */
-    if (vkCreateCommandPool(context.logicalDevice, &poolInfo, nullptr, &resource) != VK_SUCCESS) {
+    if (vkCreateCommandPool(context.getLogicalDevice(), &poolInfo, nullptr, &resource) != VK_SUCCESS) {
         throw std::runtime_error("failed to create command pool!");
     }
 }
 
 CommandPool::~CommandPool() {
-    vkDestroyCommandPool(ctx.logicalDevice, resource, nullptr);
+    vkDestroyCommandPool(ctx.getLogicalDevice(), resource, nullptr);
 }

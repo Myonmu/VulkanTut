@@ -7,14 +7,15 @@
 #include <Buffer.h>
 #include <Texture2D.h>
 
+struct DeviceContext;
 /*
  * Texture2D but on the GPU side
  */
-class TextureImage: public VulkanResource<VkImage> {
+class TextureImage: public VulkanResource<VkImage, DeviceContext> {
 public:
-    TextureImage(VulkanAppContext& ctx, Texture2D& t2d);
+    TextureImage(DeviceContext& ctx, Texture2D& t2d);
 
-    TextureImage(VulkanAppContext &ctx, const int &width, const int &height, const int &channels,
+    TextureImage(DeviceContext &ctx, const int &width, const int &height, const int &channels,
                  VkFormat textureFormat,
                  VkImageTiling tiling, VkImageUsageFlags usage, VkMemoryPropertyFlags memoryProperties);
 

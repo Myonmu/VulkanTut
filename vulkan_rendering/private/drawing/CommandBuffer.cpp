@@ -6,7 +6,7 @@
 
 #include <VulkanAppContext.h>
 
-CommandBuffer::CommandBuffer(VulkanAppContext &context): VulkanResource(context){
+CommandBuffer::CommandBuffer(DeviceContext &context): VulkanResource(context){
     VkCommandBufferAllocateInfo info{};
     info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
     info.commandPool = context.commandPool;

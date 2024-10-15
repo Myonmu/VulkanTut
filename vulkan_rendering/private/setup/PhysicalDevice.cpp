@@ -33,7 +33,11 @@ int PhysicalDevice::rateDeviceSuitability(VkPhysicalDevice device, DeviceContext
     vkGetPhysicalDeviceProperties(device, &deviceProperties);
     VkPhysicalDeviceFeatures deviceFeatures;
     vkGetPhysicalDeviceFeatures(device, &deviceFeatures);
-    QueueFamilyIndices indices = QueueFamilyIndices::FindQueueFamilies(device, context.vulkanSurface);
+    QueueFamilyIndices indices = QueueFamilyIndices(
+        context.get_physicalDevice(),
+        context.vulkanSurface,
+        context.getCombinedQueueFamilyRequirements()
+    );
     int score = 0;
     // Discrete GPUs have a significant performance advantage
     if (deviceProperties.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU) {
@@ -50,8 +54,7 @@ int PhysicalDevice::rateDeviceSuitability(VkPhysicalDevice device, DeviceContext
     if (!checkDeviceExtensionSupport(device, context)) {
         return 0;
     } else {
-        SwapChain::SwapChainSupportDetails swapChainSupport =
-                SwapChain::querySwapChainSupport(device, context.vulkanSurface);
+        SwapChain::SwapChainSupportDetails swapChainSupport = SwapChain::querySwapChainSupport(device, context.);
         if (swapChainSupport.formats.empty() || swapChainSupport.presentModes.empty()) {
             return 0;
         }
@@ -71,9 +74,9 @@ int PhysicalDevice::rateDeviceSuitability(VkPhysicalDevice device, DeviceContext
 
 void PhysicalDevice::pickPhysicalDevice(DeviceContext &context) {
     uint32_t deviceCount = 0;
-    vkEnumeratePhysicalDevices(context.context.vulkanInstance, &deviceCount, nullptr);
+    vkEnumeratePhysicalDevices(context.get_vulkanInstance(), &deviceCount, nullptr);
     std::vector<VkPhysicalDevice> devices(deviceCount);
-    vkEnumeratePhysicalDevices(context.context.vulkanInstance, &deviceCount, devices.data());
+    vkEnumeratePhysicalDevices(context.get_vulkanInstance(), &deviceCount, devices.data());
 
     // Use an ordered map to automatically sort candidates by increasing score
     std::multimap<int, VkPhysicalDevice> candidates;

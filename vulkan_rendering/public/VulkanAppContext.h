@@ -16,6 +16,7 @@
 #include <VertexBuffer.h>
 #include <VulkanRenderer.h>
 
+#include "ContextMacros.h"
 #include "PhysicalDevice.h"
 #include "SwapChain.h"
 #include "ValidationLayers.h"
@@ -35,16 +36,9 @@ struct VulkanAppContext {
 #else
     const bool enableValidationLayers = true;
 #endif
-    const char *name;
-    int width;
-    int height;
-    GlfwWindow window{*this, width, height, name, frameBufferResizeCallback};
 
-    VulkanInstance vulkanInstance{*this};
-    ValidationLayers validationLayers{*this};
-    VulkanSurface vulkanSurface{*this};
-    PhysicalDevice physicalDevice{*this};
-    LogicalDevice logicalDevice{*this};
+    CTX_PROPERTY(VulkanInstance, vulkanInstance)
+    std::vector<std::unique_ptr<DeviceContext>> deviceContexts;
 
     // ------------ Logical device created -------------------
     DescriptorSetLayout descriptorSetLayout{

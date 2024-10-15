@@ -7,9 +7,10 @@
 #include <VulkanAppContext.h>
 
 #include "CopyBufferToImage.h"
+#include "DeviceContext.h"
 #include "FrameInfo.h"
 
-TextureImage::TextureImage(VulkanAppContext &ctx,
+TextureImage::TextureImage(DeviceContext &ctx,
                            const int &width, const int &height, const int &channels,
                            VkFormat textureFormat,
                            VkImageTiling tiling,
@@ -40,26 +41,26 @@ TextureImage::TextureImage(VulkanAppContext &ctx,
     imageInfo.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
     imageInfo.flags = 0;
 
-    if (vkCreateImage(ctx.logicalDevice, &imageInfo, nullptr, &resource) != VK_SUCCESS) {
+    if (vkCreateImage(ctx.getLogicalDevice(), &imageInfo, nullptr, &resource) != VK_SUCCESS) {
         throw std::runtime_error("failed to create image!");
     }
 
     VkMemoryRequirements memRequirements;
-    vkGetImageMemoryRequirements(ctx.logicalDevice, resource, &memRequirements);
+    vkGetImageMemoryRequirements(ctx.getLogicalDevice(), resource, &memRequirements);
 
     VkMemoryAllocateInfo allocInfo = {};
     allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
     allocInfo.allocationSize = memRequirements.size;
     allocInfo.memoryTypeIndex = findMemoryType(memRequirements.memoryTypeBits, memoryProperties);
 
-    if (vkAllocateMemory(ctx.logicalDevice, &allocInfo, nullptr, &textureImageMemory) != VK_SUCCESS) {
+    if (vkAllocateMemory(ctx.getLogicalDevice(), &allocInfo, nullptr, &textureImageMemory) != VK_SUCCESS) {
         throw std::runtime_error("failed to allocate memory!");
     }
 
-    vkBindImageMemory(ctx.logicalDevice, resource, textureImageMemory, 0);
+    vkBindImageMemory(ctx.getLogicalDevice(), resource, textureImageMemory, 0);
 }
 
-TextureImage::TextureImage(VulkanAppContext &ctx, Texture2D &t2d) : TextureImage(
+TextureImage::TextureImage(DeviceContext &ctx, Texture2D &t2d) : TextureImage(
     ctx, t2d.getWidth(), t2d.getHeight(), 4, t2d.getFormat(),
     VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT,
     VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT) {
@@ -69,7 +70,7 @@ TextureImage::TextureImage(VulkanAppContext &ctx, Texture2D &t2d) : TextureImage
 
 uint32_t TextureImage::findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties) const {
     VkPhysicalDeviceMemoryProperties memProperties;
-    vkGetPhysicalDeviceMemoryProperties(ctx.physicalDevice, &memProperties);
+    vkGetPhysicalDeviceMemoryProperties(ctx.get_physicalDevice(), &memProperties);
     for (auto i = 0; i < memProperties.memoryTypeCount; i++) {
         if ((typeFilter & 1 << i) && (memProperties.memoryTypes[i].propertyFlags & properties) == properties) {
             return i;
@@ -88,7 +89,7 @@ void TextureImage::stage() {
                                                static_cast<uint32_t>(height)
     );
 
-    recorder.recordCommandBuffer(cmd, ctx, FrameInfo::DONT_CARE);
+    recorder.recordCommandBuffer(cmd, ctx.context, FrameInfo::DONT_CARE);
 
     cmd.executeImmediate();
 }
@@ -100,12 +101,12 @@ void TextureImage::transitionLayout(VkImageLayout newLayout) {
                                                    format,
                                                    currentLayout,
                                                    newLayout);
-    recorder.recordCommandBuffer(cmd, ctx, FrameInfo::DONT_CARE);
+    recorder.recordCommandBuffer(cmd, ctx.context, FrameInfo::DONT_CARE);
     cmd.executeImmediate();
     currentLayout = newLayout;
 }
 
 TextureImage::~TextureImage() {
-    vkDestroyImage(ctx.logicalDevice, resource, nullptr);
-    vkFreeMemory(ctx.logicalDevice, textureImageMemory, nullptr);
+    vkDestroyImage(ctx.getLogicalDevice(), resource, nullptr);
+    vkFreeMemory(ctx.getLogicalDevice(), textureImageMemory, nullptr);
 }

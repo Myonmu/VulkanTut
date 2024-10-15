@@ -8,15 +8,16 @@
 #include <VulkanResource.h>
 #include <vulkan/vulkan_core.h>
 
+struct DeviceContext;
 struct VulkanAppContext;
 class CommandPool;
 
-class Buffer: public VulkanResource<VkBuffer, VulkanAppContext> {
+class Buffer: public VulkanResource<VkBuffer, DeviceContext> {
 public:
-    explicit Buffer(VulkanAppContext& context, VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags props);
+    explicit Buffer(DeviceContext& context, VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags props);
     ~Buffer() override;
     void bindBufferMemory(const void* sourceData) const;
-    static void copyBuffer(Buffer& srcBuffer, Buffer& dstBuffer, VulkanAppContext& ctx, VkDeviceSize size);
+    static void copyBuffer(Buffer& srcBuffer, Buffer& dstBuffer, DeviceContext& ctx, VkDeviceSize size);
     // this is a reference to a pointer, because mapping buffer memory would set the pointer as well.
     void mapBufferMemory(void*& source) const;
 protected:
