@@ -7,11 +7,13 @@
 #include <stdexcept>
 #include "LogicalDevice.h"
 
+#include <VulkanAppContext.h>
+
 #include "DeviceContext.h"
 #include "QueueFamilyIndices.h"
 
 void LogicalDevice::createLogicalDevice(DeviceContext& context){
-    QueueFamilyIndices indices = QueueFamilyIndices{context.physicalDevice, context, };
+    QueueFamilyIndices indices{context.getCombinedQueueFamilyRequirements()};
     std::vector<VkDeviceQueueCreateInfo> queueCreateInfos;
     std::set uniqueQueueFamilies = indices.getUniqueQueueFamilyIndices();
     float queuePriority = 1.0f;
@@ -37,12 +39,12 @@ void LogicalDevice::createLogicalDevice(DeviceContext& context){
     createInfo.ppEnabledExtensionNames = context.deviceExtensions.data();
 
     if(context.context.enableValidationLayers){
-        context.context.validationLayers.AttachToDeviceCreation(createInfo);
+        ValidationLayers::AttachToDeviceCreation(createInfo);
     }else{
         createInfo.enabledLayerCount = 0;
     }
 
-    if (vkCreateDevice(context.physicalDevice, &createInfo, nullptr, &resource)!=VK_SUCCESS){
+    if (vkCreateDevice(context.get_physicalDevice(), &createInfo, nullptr, &resource)!=VK_SUCCESS){
         throw std::runtime_error("failed to create logical device.");
     }
 

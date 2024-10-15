@@ -6,7 +6,7 @@
 
 #include "Vertex.h"
 
-IndexBuffer::IndexBuffer(VulkanAppContext &ctx)
+IndexBuffer::IndexBuffer(DeviceContext &ctx)
     : size(sizeof(Vertex::testIndices[0]) * Vertex::testIndices.size()),
       ctx(ctx),
       buffer(

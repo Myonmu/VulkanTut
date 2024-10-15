@@ -10,10 +10,10 @@
 
 DescriptorPool::DescriptorPool(DescriptorContext &ctx): VulkanResource(ctx) {
     auto maxFramesInFlight = ctx.context.MAX_FRAMES_IN_FLIGHT;
-    std::vector<VkDescriptorPoolSize> poolSizes{ctx.descriptorSetLayout.layoutBindings.size()};
+    std::vector<VkDescriptorPoolSize> poolSizes{ctx.get_descriptorSetLayout().layoutBindings.size()};
 
     for (int i = 0; i < poolSizes.size(); i++) {
-        poolSizes[i].type = ctx.descriptorSetLayout.layoutBindings[i].descriptorType;
+        poolSizes[i].type = ctx.get_descriptorSetLayout().layoutBindings[i].descriptorType;
         poolSizes[i].descriptorCount = static_cast<uint32_t>(maxFramesInFlight);
     }
 

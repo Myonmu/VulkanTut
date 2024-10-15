@@ -10,10 +10,10 @@
 class VertexBuffer {
 private:
     VkDeviceSize size;
-    VulkanAppContext &ctx;
+    DeviceContext &ctx;
 
 public:
-    explicit VertexBuffer(VulkanAppContext &context);
+    explicit VertexBuffer(DeviceContext &context);
 
     ~VertexBuffer();
 

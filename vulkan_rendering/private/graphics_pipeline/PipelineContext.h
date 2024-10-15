@@ -8,15 +8,16 @@
 #include <RenderPass.h>
 #include <VulkanPipeline.h>
 
+#include "ContextMacros.h"
 #include "SubContext.h"
 
 
 struct VulkanAppContext;
 
-struct PipelineContext : public SubContext<VulkanAppContext>{
-    PipelineLayout graphicsPipeline{*this}; //TODO: allow instance
-    RenderPass renderPass{*this}; // TODO: allow instance
-    VulkanPipeline vulkanPipeline{*this}; //TODO: allow instance
+struct PipelineContext : public SubContext<VulkanAppContext> {
+    CTX_PROPERTY(PipelineLayout, graphicsPipeline)
+    CTX_PROPERTY(RenderPass, renderPass)
+    CTX_PROPERTY(VulkanPipeline, vulkanPipeline)
 };
 
 

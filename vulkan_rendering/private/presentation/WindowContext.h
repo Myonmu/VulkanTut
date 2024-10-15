@@ -7,6 +7,7 @@
 #include <GlfwWindow.h>
 #include <QueueFamilyIndices.h>
 #include <SwapChain.h>
+#include <VulkanInstance.h>
 #include <VulkanSurface.h>
 
 #include "ContextMacros.h"
@@ -30,7 +31,7 @@ struct WindowContext : SubContext<DeviceContext>{
     static void frameBufferResizeCallback(GLFWwindow *window, int width, int height);
     ~WindowContext() override;
 
-    WindowContext(const DeviceContext &ctx, const char *name, int width, int height);
+    WindowContext(const DeviceContext &ctx, const char *name, int width, int height, QueueFamily requiredQueueFamilies);
 };
 
 

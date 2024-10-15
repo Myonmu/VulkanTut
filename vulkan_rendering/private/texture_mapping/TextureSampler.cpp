@@ -4,15 +4,14 @@
 
 #include "TextureSampler.h"
 
-#include <VulkanAppContext.h>
-
+#include "DeviceContext.h"
 #include "TextureAddressMode.h"
 #include "TextureAnisotropyInfo.h"
 #include "TextureCompareInfo.h"
 #include "TextureFilterMode.h"
 #include "TextureMipmapInfo.h"
 
-TextureSampler::TextureSampler(VulkanAppContext &ctx,
+TextureSampler::TextureSampler(DeviceContext &ctx,
                                const TextureAddressMode addressMode,
                                const TextureFilterMode filterMode,
                                const TextureAnisotropyInfo anisotropyInfo,
@@ -44,12 +43,12 @@ TextureSampler::TextureSampler(VulkanAppContext &ctx,
     samplerInfo.minFilter = filterMode.min;
     samplerInfo.magFilter = filterMode.mag;
 
-    if (vkCreateSampler(device, &samplerInfo, nullptr, &resource) != VK_SUCCESS) {
+    if (vkCreateSampler(ctx.getLogicalDevice(), &samplerInfo, nullptr, &resource) != VK_SUCCESS) {
         throw std::runtime_error("failed to create texture sampler!");
     }
 
 }
 
 TextureSampler::~TextureSampler() {
-    vkDestroySampler(device, resource, nullptr);
+    vkDestroySampler(ctx.getLogicalDevice(), resource, nullptr);
 }

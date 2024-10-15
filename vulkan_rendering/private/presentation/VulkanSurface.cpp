@@ -11,7 +11,7 @@
 
 void VulkanSurface::createSurface(WindowContext& context){
     if(glfwCreateWindowSurface(context.context.context.get_vulkanInstance(),
-                               context.get_surface(), nullptr, &resource) != VK_SUCCESS){
+                               context.get_window(), nullptr, &resource) != VK_SUCCESS){
         throw std::runtime_error("failed to create window surface");
     }
 }

@@ -7,12 +7,15 @@
 #include <UniformBufferObject.h>
 #include <VulkanAppContext.h>
 
-UniformBufferGroup::UniformBufferGroup(VulkanAppContext &ctx) :ctx(ctx) {
-    VkDeviceSize bufferSize = sizeof(UniformBufferObject);
-    uniformBuffers.resize(ctx.MAX_FRAMES_IN_FLIGHT);
-    uniformBuffersData.resize(ctx.MAX_FRAMES_IN_FLIGHT);
+#include "DeviceContext.h"
 
-    for (auto i = 0; i < ctx.MAX_FRAMES_IN_FLIGHT; i++) {
+UniformBufferGroup::UniformBufferGroup(DeviceContext &ctx) :ctx(ctx) {
+    VkDeviceSize bufferSize = sizeof(UniformBufferObject);
+    auto maxFramesInFlight = ctx.context.MAX_FRAMES_IN_FLIGHT;
+    uniformBuffers.resize(maxFramesInFlight);
+    uniformBuffersData.resize(maxFramesInFlight);
+
+    for (auto i = 0; i < maxFramesInFlight; i++) {
         uniformBuffers[i] = new Buffer(ctx, bufferSize, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT ,
             VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
         uniformBuffers[i]->mapBufferMemory(uniformBuffersData[i]);

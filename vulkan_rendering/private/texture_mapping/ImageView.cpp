@@ -6,7 +6,9 @@
 
 #include <VulkanAppContext.h>
 
-ImageView::ImageView(VulkanAppContext &ctx, const VkImage &image, const VkFormat format): VulkanResource(ctx) {
+#include "DeviceContext.h"
+
+ImageView::ImageView(DeviceContext &ctx, const VkImage &image, const VkFormat format): VulkanResource(ctx) {
     VkImageViewCreateInfo viewInfo{};
     viewInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
     viewInfo.image = image;
@@ -18,11 +20,11 @@ ImageView::ImageView(VulkanAppContext &ctx, const VkImage &image, const VkFormat
     viewInfo.subresourceRange.baseArrayLayer = 0;
     viewInfo.subresourceRange.layerCount = 1;
 
-    if (vkCreateImageView(device, &viewInfo, nullptr, &resource) != VK_SUCCESS) {
+    if (vkCreateImageView(ctx.getLogicalDevice(), &viewInfo, nullptr, &resource) != VK_SUCCESS) {
         throw std::runtime_error("failed to create texture image view!");
     }
 }
 
 ImageView::~ImageView() {
-    vkDestroyImageView(device, resource, nullptr);
+    vkDestroyImageView(ctx.getLogicalDevice(), resource, nullptr);
 }

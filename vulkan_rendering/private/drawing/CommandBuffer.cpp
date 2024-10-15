@@ -6,10 +6,12 @@
 
 #include <VulkanAppContext.h>
 
+#include "DeviceContext.h"
+
 CommandBuffer::CommandBuffer(DeviceContext &context): VulkanResource(context){
     VkCommandBufferAllocateInfo info{};
     info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
-    info.commandPool = context.commandPool;
+    info.commandPool = context.get_commandPool();
     /*
     The level parameter specifies if the allocated command buffers are primary or secondary command buffers.
 
@@ -26,13 +28,13 @@ CommandBuffer::CommandBuffer(DeviceContext &context): VulkanResource(context){
     info.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
     info.commandBufferCount = 1;
 
-    if (vkAllocateCommandBuffers(context.logicalDevice, &info, &resource) != VK_SUCCESS) {
+    if (vkAllocateCommandBuffers(context.getLogicalDevice(), &info, &resource) != VK_SUCCESS) {
         throw std::runtime_error("failed to allocate command buffers!");
     }
 }
 
 CommandBuffer::~CommandBuffer() {
-    vkFreeCommandBuffers(ctx.logicalDevice, ctx.commandPool, 1, *this);
+    vkFreeCommandBuffers(ctx.getLogicalDevice(), ctx.get_commandPool(), 1, *this);
 };
 
 void CommandBuffer::executeImmediate() {
@@ -40,6 +42,6 @@ void CommandBuffer::executeImmediate() {
     submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
     submitInfo.commandBufferCount = 1;
     submitInfo.pCommandBuffers = *this;
-    vkQueueSubmit(ctx.logicalDevice.graphicsQueue, 1, &submitInfo, VK_NULL_HANDLE);
-    vkQueueWaitIdle(ctx.logicalDevice.graphicsQueue);
+    vkQueueSubmit(ctx.getLogicalDevice().graphicsQueue, 1, &submitInfo, VK_NULL_HANDLE);
+    vkQueueWaitIdle(ctx.getLogicalDevice().graphicsQueue);
 }

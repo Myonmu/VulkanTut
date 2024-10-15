@@ -8,15 +8,16 @@
 #include <vulkan/vulkan_core.h>
 
 
+struct DeviceContext;
 struct TextureMipmapInfo;
 struct TextureCompareInfo;
 struct TextureAnisotropyInfo;
 struct TextureFilterMode;
 struct TextureAddressMode;
 
-class TextureSampler : public VulkanResource<VkSampler, VulkanAppContext> {
+class TextureSampler : public VulkanResource<VkSampler, DeviceContext> {
 public:
-    explicit TextureSampler(VulkanAppContext &ctx,
+    explicit TextureSampler(DeviceContext &ctx,
                    TextureAddressMode addressMode,
                    TextureFilterMode filterMode,
                    TextureAnisotropyInfo anisotropyInfo,

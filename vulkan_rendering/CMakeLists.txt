@@ -98,6 +98,7 @@ set(SOURCES
         public/DeviceContext.h
         private/DeviceContext.cpp
         private/misc/ContextMacros.h
+        private/setup/QueueFamilyIndices.cpp
 )
 
 # Create static library

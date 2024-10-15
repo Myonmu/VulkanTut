@@ -140,9 +140,9 @@ VulkanPipeline::VulkanPipeline(PipelineContext &context)
     pipelineInfo.pColorBlendState = &colorBlending;
     pipelineInfo.pDynamicState = &dynamicState;
 
-    pipelineInfo.layout = context.graphicsPipeline;
+    pipelineInfo.layout = context.get_graphicsPipeline();
 
-    pipelineInfo.renderPass = context.renderPass;
+    pipelineInfo.renderPass = context.get_renderPass();
     pipelineInfo.subpass = 0;
 
     pipelineInfo.basePipelineHandle = VK_NULL_HANDLE; // Optional

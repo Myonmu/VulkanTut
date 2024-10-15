@@ -30,5 +30,5 @@ DescriptorSetLayout::DescriptorSetLayout(DescriptorContext &ctx, const std::vect
 }
 
 DescriptorSetLayout::~DescriptorSetLayout() {
-    vkDestroyDescriptorSetLayout(ctx.context.logicalDevice, resource, nullptr);
+    vkDestroyDescriptorSetLayout(ctx.getLogicalDevice(), resource, nullptr);
 }

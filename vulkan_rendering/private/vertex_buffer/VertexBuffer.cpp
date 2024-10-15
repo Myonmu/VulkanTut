@@ -8,7 +8,7 @@
 
 #include "Vertex.h"
 
-VertexBuffer::VertexBuffer(VulkanAppContext &context)
+VertexBuffer::VertexBuffer(DeviceContext &context)
     : size(sizeof(Vertex::testVerts[0]) * Vertex::testVerts.size()),
       ctx(context),
       buffer(

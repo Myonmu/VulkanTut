@@ -33,11 +33,6 @@ int PhysicalDevice::rateDeviceSuitability(VkPhysicalDevice device, DeviceContext
     vkGetPhysicalDeviceProperties(device, &deviceProperties);
     VkPhysicalDeviceFeatures deviceFeatures;
     vkGetPhysicalDeviceFeatures(device, &deviceFeatures);
-    QueueFamilyIndices indices = QueueFamilyIndices(
-        context.get_physicalDevice(),
-        context.vulkanSurface,
-        context.getCombinedQueueFamilyRequirements()
-    );
     int score = 0;
     // Discrete GPUs have a significant performance advantage
     if (deviceProperties.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU) {
@@ -47,14 +42,17 @@ int PhysicalDevice::rateDeviceSuitability(VkPhysicalDevice device, DeviceContext
     // Maximum possible size of textures affects graphics quality
     score += deviceProperties.limits.maxImageDimension2D;
 
-    if (!indices.isComplete()) {
+    if (!context.get_queueFamilyIndices().isComplete()) {
         return 0;
     }
 
     if (!checkDeviceExtensionSupport(device, context)) {
         return 0;
-    } else {
-        SwapChain::SwapChainSupportDetails swapChainSupport = SwapChain::querySwapChainSupport(device, context.);
+    }
+
+    for (auto element: context.windowContexts) {
+        SwapChain::SwapChainSupportDetails swapChainSupport = SwapChain::querySwapChainSupport(
+            device, element.get_surface());
         if (swapChainSupport.formats.empty() || swapChainSupport.presentModes.empty()) {
             return 0;
         }

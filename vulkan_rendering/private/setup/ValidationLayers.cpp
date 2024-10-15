@@ -77,7 +77,7 @@ void ValidationLayers::setupDebugMessenger(const VulkanAppContext &context) {
     VkDebugUtilsMessengerCreateInfoEXT createInfo{};
     PopulateDebugMessengerCreateInfo(createInfo);
 
-    if (CreateDebugUtilsMessengerEXT(context.vulkanInstance, &createInfo, nullptr,
+    if (CreateDebugUtilsMessengerEXT(context.get_vulkanInstance(), &createInfo, nullptr,
                                      &resource) != VK_SUCCESS) {
         throw std::runtime_error("failed to set up debug messenger!");
     }
@@ -110,7 +110,7 @@ ValidationLayers::ValidationLayers(VulkanAppContext &context):VulkanResource(con
 }
 
 ValidationLayers::~ValidationLayers() {
-    DestroyDebugUtilsMessengerEXT(ctx.vulkanInstance, resource, nullptr);
+    DestroyDebugUtilsMessengerEXT(ctx.get_vulkanInstance(), resource, nullptr);
 }
 
 VkBool32 ValidationLayers::debugCallback(VkDebugUtilsMessageSeverityFlagBitsEXT severity,

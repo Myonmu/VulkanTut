@@ -7,15 +7,15 @@
 
 #define CTX_PROPERTY(type, name)\
     std::unique_ptr<type> name;\
-    inline const type& get_##name() const {return *name;}
+    inline const type& get_##name() const {return *(name);}
 
 #define CTX_PROPERTY_RAW_PTR(type, name)\
     type* name;\
-    inline const type& get_##name() const {return *name;}
+    inline const type& get_##name() const {return *(name);}
 
 #define CTX_PROPERTY_LIST(type, name)\
     std::vector<type> name;\
-    inline
+    inline const type& get_##name##_at(int i) const {return *(name)[i];}
 
 #define CTX_FORWARD_GET_DECL(type, name)\
     inline const type& get_##name() const;

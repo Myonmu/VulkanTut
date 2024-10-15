@@ -13,9 +13,9 @@ struct VulkanAppContext;
 class UniformBufferGroup {
     std::vector<Buffer*> uniformBuffers;
     std::vector<void*> uniformBuffersData;
-    VulkanAppContext& ctx;
+    DeviceContext& ctx;
 public:
-    explicit UniformBufferGroup(VulkanAppContext& ctx);
+    explicit UniformBufferGroup(DeviceContext& ctx);
     Buffer& operator[](size_t index) const;
     ~UniformBufferGroup();
     void CopyMemoryToBuffer(const uint32_t& slot,const void* data, const size_t& size) const;

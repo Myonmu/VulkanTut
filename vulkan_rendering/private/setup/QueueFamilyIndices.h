@@ -6,11 +6,12 @@
 #define VULKANTUT_QUEUEFAMILYINDICES_H
 
 #include <optional>
+#include <PhysicalDevice.h>
 #include <set>
 #include <unordered_map>
 #include <vector>
+#include <VulkanSurface.h>
 #include <vulkan/vulkan_core.h>
-#include "VulkanAppContext.h"
 
 enum class QueueFamily : uint32_t {
     QUEUE_FAMILY_PRESENT = 1 << 0,
@@ -60,9 +61,13 @@ struct QueueFamilyIndices {
     }
 
     QueueFamilyIndices(const PhysicalDevice &device, const VulkanSurface &surface,
-                       QueueFamily queueFamilyFlags): requiredBits(queueFamilyFlags) {
+                       const QueueFamily queueFamilyFlags): requiredBits(queueFamilyFlags) {
         queryQueueFamilies(device, surface);
     }
+
+    explicit QueueFamilyIndices(const QueueFamily queueFamilyFlags):requiredBits(queueFamilyFlags) {
+
+    };
 
     [[nodiscard]] std::set<uint32_t> getUniqueQueueFamilyIndices() const {
         std::set<uint32_t> uniqueIndices;
@@ -84,9 +89,7 @@ struct QueueFamilyIndices {
         }
     }
 
-private:
-
-    void queryQueueFamilies(VkPhysicalDevice device, VkSurfaceKHR surface) {
+    void queryQueueFamilies(const VkPhysicalDevice device, const VkSurfaceKHR surface) {
         uint32_t queueFamilyCount = 0;
         vkGetPhysicalDeviceQueueFamilyProperties(device, &queueFamilyCount, nullptr);
         std::vector<VkQueueFamilyProperties> queueFamilies(queueFamilyCount);
@@ -112,6 +115,9 @@ private:
             i++;
         }
     }
+private:
+
+
 
     void checkFlags(const VkQueueFamilyProperties &prop, const QueueFamily &compareFlag, const VkQueueFlagBits vkFlag,
                     const uint32_t i) {

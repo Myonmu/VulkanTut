@@ -9,19 +9,16 @@
 #include <DescriptorSetLayout.h>
 #include <DescriptorSets.h>
 #include <FrameBuffers.h>
-#include <GlfwWindow.h>
 #include <IndexBuffer.h>
 #include <PipelineLayout.h>
+#include <ValidationLayers.h>
 #include <vector>
 #include <VertexBuffer.h>
 #include <VulkanRenderer.h>
 
 #include "ContextMacros.h"
-#include "PhysicalDevice.h"
 #include "SwapChain.h"
-#include "ValidationLayers.h"
 #include "VulkanInstance.h"
-#include "VulkanSurface.h"
 #include "LogicalDevice.h"
 #include "RenderPass.h"
 #include "UniformBufferGroup.h"
@@ -37,7 +34,9 @@ struct VulkanAppContext {
     const bool enableValidationLayers = true;
 #endif
 
+    const char* name;
     CTX_PROPERTY(VulkanInstance, vulkanInstance)
+    CTX_PROPERTY(ValidationLayers, validationLayers)
     std::vector<std::unique_ptr<DeviceContext>> deviceContexts;
 
     // ------------ Logical device created -------------------

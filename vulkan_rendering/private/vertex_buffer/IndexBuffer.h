@@ -12,9 +12,9 @@ struct VulkanAppContext;
 class IndexBuffer {
 private:
     VkDeviceSize size;
-    VulkanAppContext &ctx;
+    DeviceContext &ctx;
 public:
-    explicit IndexBuffer(VulkanAppContext& ctx);
+    explicit IndexBuffer(DeviceContext& ctx);
     ~IndexBuffer();
     Buffer buffer;
     operator VkBuffer() const {return buffer;}

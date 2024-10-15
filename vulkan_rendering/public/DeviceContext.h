@@ -4,9 +4,11 @@
 
 #ifndef DEVICECONTEXT_H
 #define DEVICECONTEXT_H
+#include <CommandPool.h>
 #include <LogicalDevice.h>
 #include <PhysicalDevice.h>
 #include <vector>
+#include <VulkanInstance.h>
 
 #include "ContextMacros.h"
 #include "SubContext.h"
@@ -23,6 +25,8 @@ struct DeviceContext : SubContext<VulkanAppContext> {
     CTX_PROPERTY(QueueFamilyIndices, queueFamilyIndices)
     CTX_PROPERTY(PhysicalDevice, physicalDevice)
     CTX_PROPERTY(LogicalDevice, logicalDevice)
+
+    CTX_PROPERTY(CommandPool, commandPool)
 
     CTX_FORWARD_GET_DECL(VulkanInstance, vulkanInstance)
 

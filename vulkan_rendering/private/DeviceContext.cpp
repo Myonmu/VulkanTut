@@ -3,11 +3,17 @@
 //
 
 #include "DeviceContext.h"
+
+#include <VulkanAppContext.h>
+
 #include "QueueFamilyIndices.h"
 
 DeviceContext::DeviceContext(const VulkanAppContext &ctx) : SubContext(ctx){
 }
 
+void DeviceContext::init() {
+
+}
 
 DeviceContext::~DeviceContext() = default;
 
