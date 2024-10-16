@@ -38,7 +38,14 @@ struct DeviceContext : SubContext<VulkanAppContext> {
 
     [[nodiscard]] QueueFamily getCombinedQueueFamilyRequirements() const;
 
+    void createWindow(const char *name, int width, int height, QueueFamily requiredQueueFamilies);
+
+    // manually called after all surfaces are created
     void init();
+
+    [[nodiscard]] bool isLogicalDeviceCreated() const {return isDeviceCreated;}
+private:
+    bool isDeviceCreated = false;
 };
 
 

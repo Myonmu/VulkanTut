@@ -4,6 +4,7 @@
 
 #ifndef WINDOWCONTEXT_H
 #define WINDOWCONTEXT_H
+#include <FrameBuffers.h>
 #include <GlfwWindow.h>
 #include <QueueFamilyIndices.h>
 #include <SwapChain.h>
@@ -24,6 +25,7 @@ struct WindowContext : SubContext<DeviceContext>{
     CTX_PROPERTY(GlfwWindow, window)
     CTX_PROPERTY(VulkanSurface, surface)
     CTX_PROPERTY(SwapChain, swapChain)
+    CTX_PROPERTY(FrameBuffers, frameBuffers)
 
     CTX_FORWARD_GET_DECL(VulkanInstance, vulkanInstance)
     CTX_FORWARD_GET_DECL(PhysicalDevice, physicalDevice)
@@ -32,6 +34,9 @@ struct WindowContext : SubContext<DeviceContext>{
     ~WindowContext() override;
 
     WindowContext(const DeviceContext &ctx, const char *name, int width, int height, QueueFamily requiredQueueFamilies);
+
+    // should be called after device creation
+    void init();
 };
 
 

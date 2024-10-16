@@ -10,10 +10,12 @@
 #include "WindowContext.h"
 
 void FrameBuffers::createFrameBuffers() {
-    resource.resize(ctx.swapChain.getSize());
-    for (size_t i = 0; i < ctx.swapChain.getSize(); i++) {
+    auto& swapChain = ctx.get_swapChain();
+    const auto swapChainSize = swapChain.getSize();
+    resource.resize(swapChainSize);
+    for (size_t i = 0; i < swapChainSize; i++) {
         VkImageView attachments[] = {
-            ctx.swapChain.swapChainImageViews[i]->getRaw()
+            swapChain.swapChainImageViews[i]->getRaw()
         };
 
         VkFramebufferCreateInfo framebufferInfo{};
@@ -21,11 +23,11 @@ void FrameBuffers::createFrameBuffers() {
         framebufferInfo.renderPass = ctx.renderPass;
         framebufferInfo.attachmentCount = 1;
         framebufferInfo.pAttachments = attachments;
-        framebufferInfo.width = ctx.swapChain.swapChainExtent.width;
-        framebufferInfo.height = ctx.swapChain.swapChainExtent.height;
+        framebufferInfo.width = swapChain.swapChainExtent.width;
+        framebufferInfo.height = swapChain.swapChainExtent.height;
         framebufferInfo.layers = 1;
 
-        if (vkCreateFramebuffer(ctx.context.logicalDevice, &framebufferInfo,
+        if (vkCreateFramebuffer(ctx.getLogicalDevice(), &framebufferInfo,
             nullptr, &resource[i]) != VK_SUCCESS) {
             throw std::runtime_error("failed to create framebuffer!");
         }
