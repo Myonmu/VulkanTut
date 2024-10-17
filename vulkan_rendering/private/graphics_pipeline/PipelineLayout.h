@@ -8,9 +8,9 @@
 #include "ShaderModule.h"
 
 struct VulkanAppContext;
-class PipelineLayout : public VulkanResource<VkPipelineLayout, VulkanAppContext>{
+class PipelineLayout : public VulkanResource<VkPipelineLayout, PipelineContext>{
 public:
-    explicit PipelineLayout(VulkanAppContext& context);
+    explicit PipelineLayout(PipelineContext& context);
     ~PipelineLayout() override;
 };
 

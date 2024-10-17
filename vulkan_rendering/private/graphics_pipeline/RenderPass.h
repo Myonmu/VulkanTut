@@ -9,10 +9,10 @@
 #include "VulkanResource.h"
 #include <vulkan/vulkan_core.h>
 
-struct VulkanAppContext;
-class RenderPass : public VulkanResource<VkRenderPass, VulkanAppContext>{
+struct PipelineContext;
+class RenderPass : public VulkanResource<VkRenderPass, PipelineContext>{
 public:
-    explicit RenderPass(VulkanAppContext& context);
+    explicit RenderPass(PipelineContext& context);
     ~RenderPass() override;
 };
 

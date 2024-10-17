@@ -9,14 +9,14 @@
 #include "DescriptorSetLayout.h"
 #include "SubContext.h"
 
+struct DeviceContext;
 class LogicalDevice;
-struct VulkanAppContext;
 
-struct DescriptorContext: public SubContext<VulkanAppContext>{
+struct DescriptorContext: public SubContext<DeviceContext>{
     CTX_PROPERTY(DescriptorSetLayout,descriptorSetLayout)
     CTX_PROPERTY(DescriptorPool, descriptorPool)
 
-    DescriptorContext(VulkanAppContext &ctx, const std::vector<DescriptorSetLayoutBinding> &bindings);
+    DescriptorContext(DeviceContext &ctx, const std::vector<DescriptorSetLayoutBinding> &bindings);
 };
 
 

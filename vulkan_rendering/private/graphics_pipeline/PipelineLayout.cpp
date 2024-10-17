@@ -3,9 +3,11 @@
 //
 
 #include "PipelineLayout.h"
+
+#include "PipelineContext.h"
 #include "VulkanAppContext.h"
 
-PipelineLayout::PipelineLayout(VulkanAppContext &context): VulkanResource(context) {
+PipelineLayout::PipelineLayout(PipelineContext &context): VulkanResource(context) {
     VkPipelineLayoutCreateInfo pipelineLayoutInfo{};
     pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
     pipelineLayoutInfo.setLayoutCount = 1; // Optional
@@ -13,7 +15,7 @@ PipelineLayout::PipelineLayout(VulkanAppContext &context): VulkanResource(contex
     pipelineLayoutInfo.pushConstantRangeCount = 0; // Optional
     pipelineLayoutInfo.pPushConstantRanges = nullptr; // Optional
 
-    if (vkCreatePipelineLayout(ctx.logicalDevice,
+    if (vkCreatePipelineLayout(ctx.getLogicalDevice(),
                                &pipelineLayoutInfo,
                                nullptr, &resource) != VK_SUCCESS) {
         throw std::runtime_error("failed to create pipeline layout!");

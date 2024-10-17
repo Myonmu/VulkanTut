@@ -12,9 +12,9 @@
 #include "SubContext.h"
 
 
-struct VulkanAppContext;
+struct DeviceContext;
 
-struct PipelineContext : public SubContext<VulkanAppContext> {
+struct PipelineContext : public SubContext<DeviceContext> {
     CTX_PROPERTY(PipelineLayout, graphicsPipeline)
     CTX_PROPERTY(RenderPass, renderPass)
     CTX_PROPERTY(VulkanPipeline, vulkanPipeline)

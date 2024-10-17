@@ -10,12 +10,12 @@
 #include "FrameInfo.h"
 
 
+struct WindowContext;
 class CommandBuffer;
-struct VulkanAppContext;
 
 class VulkanFrame {
 public:
-    explicit VulkanFrame(VulkanAppContext& context);
+    explicit VulkanFrame(WindowContext& context);
     ~VulkanFrame();
 
     void drawFrame(uint32_t currentFrameIndex);
@@ -25,7 +25,7 @@ public:
 
     void signalResize();
 private:
-    VulkanAppContext& context;
+    WindowContext& context;
     CommandBuffer commandBuffer;
     FrameInfo frameInfo{};
 

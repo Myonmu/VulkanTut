@@ -3,13 +3,17 @@
 //
 
 #include "RenderPass.h"
+
+#include "PipelineContext.h"
 #include "VulkanAppContext.h"
 RenderPass::~RenderPass() {
     vkDestroyRenderPass(ctx.getLogicalDevice(), resource, nullptr);
 }
 
-RenderPass::RenderPass(VulkanAppContext &context): VulkanResource(context){
+RenderPass::RenderPass(PipelineContext &context): VulkanResource(context){
     VkAttachmentDescription colorAttachment{};
+    // we *may* use swap chain image format but not necessarily.
+    // VkRenderPass can be shared between swap chains
     colorAttachment.format = context.swapChain.swapChainImageFormat;
     colorAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
     colorAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
