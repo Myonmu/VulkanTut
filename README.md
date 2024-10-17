@@ -56,11 +56,11 @@ This is perhaps another understated relationship in the tutorial.
 
 `VkSwapchainKHR` is effectively per-window, and in the tutorial, `VkRenderPass` is created with a swapchain's image format, and `VkFrameBuffer` requires both a swapchain's image attachments and be bound to **a single render pass**. And this would create a strong dependency chain on our first sight, though uppon closer inspection, not necessarily.
 
-`VkRenderPass` only requires an image format, but it doesn't state that the image format should come from a swapchain. (Well, actually yes, you *would* use the swapchain's image format, but you don't need to access the swapchain during render pass creation. ) Thus insteand of accessing swapchain's member field, using a constructor injection would decouple the strong relationship between swapchain and render pass. (Note: constructor injection is just a fancy way to say pass the image format as constructor argument)
+In the tutorial,`VkRenderPass` only requires an image format, but it doesn't state that the image format should come from a swapchain. (Well, actually yes, you *would* use the swapchain's image format, but you don't need to access the swapchain during render pass creation. ) Thus insteand of accessing swapchain's member field, using a constructor injection would decouple the strong relationship between swapchain and render pass. (Note: constructor injection is just a fancy way to say pass the image format as constructor argument)
 
-This means that multiple swapchains can effectively be using the same render pass, if their image format is compatible. 
+This means that multiple swapchains can effectively be using the same render pass, if their image format and other bits are compatible. 
 
-Well, not exactly. since swapchains do not use a render pass directly. This relationship comes with `VkFrameBuffer` as it uses both a swapchain and a render pass - we must ensure that the swapchain and the render pass are compatible when creating frame buffers, or else, we first need to create a compatible render pass.
+Well, not exactly. since swapchains do not *use* a render pass directly. This relationship comes with `VkFrameBuffer` as it uses both a swapchain and a render pass - we must ensure that the swapchain and the render pass are compatible when creating frame buffers, or else, we first need to create a compatible render pass. By "compatible", in general it isn't just the image format, but also store/load operations, etc.
 
 ```
 VkSwapchainKHR
@@ -69,4 +69,6 @@ VkSwapchainKHR
         \*         /*
         VkFrameBuffer 
 ```
+
+The compatibility requirements seem strict, but consider the following scenario: a scene is being rendered with multiple windows, using the same device and likely the same render pipeline. For consistency, there's no reason to fiddle with the render pass parameters, thus it is very likely that we can use the same render pass for all these windows. 
 
