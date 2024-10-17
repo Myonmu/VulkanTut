@@ -49,3 +49,24 @@ Given that a dynamically spawned window is almost certain to have the same queue
 As a generic engine, even if we do not need video encoding/decoding at the moment, we could allocate a surface pre-emptively to avoid the hassle when end-user suddenly wants to do so. 
 
 A final note, it is actually possible to not recreate everything, *if we are able to find another physical device that suits the needs*. We could simply run the window on another GPU... But that can cause significant headache afterwards as you might want to synchronize between different devices.
+
+### VkSwapchainKHR, VkRenderPass, and VkFrameBuffer
+
+This is perhaps another understated relationship in the tutorial. 
+
+`VkSwapchainKHR` is effectively per-window, and in the tutorial, `VkRenderPass` is created with a swapchain's image format, and `VkFrameBuffer` requires both a swapchain's image attachments and be bound to **a single render pass**. And this would create a strong dependency chain on our first sight, though uppon closer inspection, not necessarily.
+
+`VkRenderPass` only requires an image format, but it doesn't state that the image format should come from a swapchain. (Well, actually yes, you *would* use the swapchain's image format, but you don't need to access the swapchain during render pass creation. ) Thus insteand of accessing swapchain's member field, using a constructor injection would decouple the strong relationship between swapchain and render pass. (Note: constructor injection is just a fancy way to say pass the image format as constructor argument)
+
+This means that multiple swapchains can effectively be using the same render pass, if their image format is compatible. 
+
+Well, not exactly. since swapchains do not use a render pass directly. This relationship comes with `VkFrameBuffer` as it uses both a swapchain and a render pass - we must ensure that the swapchain and the render pass are compatible when creating frame buffers, or else, we first need to create a compatible render pass.
+
+```
+VkSwapchainKHR
+      \1            VkRenderPass
+       \            /1
+        \*         /*
+        VkFrameBuffer 
+```
+
