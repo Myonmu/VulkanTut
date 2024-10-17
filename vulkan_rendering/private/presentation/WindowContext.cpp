@@ -20,8 +20,12 @@ WindowContext::WindowContext(const DeviceContext &ctx, const char *name, int wid
 
 void WindowContext::init() {
     swapChain = std::make_unique<SwapChain>(*this);
-    frameBuffers = std::make_unique<FrameBuffers>(*this);
 }
+
+void WindowContext::createFrameBuffers(const RenderPass& renderPass) {
+
+}
+
 
 
 void WindowContext::frameBufferResizeCallback(GLFWwindow *window, int width, int height) {

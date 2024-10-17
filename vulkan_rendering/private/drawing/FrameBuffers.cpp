@@ -9,7 +9,7 @@
 
 #include "WindowContext.h"
 
-void FrameBuffers::createFrameBuffers() {
+void FrameBuffers::createFrameBuffers(const RenderPass& renderPass) {
     auto& swapChain = ctx.get_swapChain();
     const auto swapChainSize = swapChain.getSize();
     resource.resize(swapChainSize);
@@ -20,7 +20,7 @@ void FrameBuffers::createFrameBuffers() {
 
         VkFramebufferCreateInfo framebufferInfo{};
         framebufferInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
-        framebufferInfo.renderPass = ctx.renderPass;
+        framebufferInfo.renderPass = renderPass;
         framebufferInfo.attachmentCount = 1;
         framebufferInfo.pAttachments = attachments;
         framebufferInfo.width = swapChain.swapChainExtent.width;
@@ -42,8 +42,9 @@ void FrameBuffers::destroyFrameBuffers() {
 }
 
 
-FrameBuffers::FrameBuffers(WindowContext &context): VulkanResource(context) {
-    createFrameBuffers();
+FrameBuffers::FrameBuffers(WindowContext &context, const RenderPass& renderPass): VulkanResource(context)
+, renderPass(renderPass){
+    createFrameBuffers(renderPass);
 }
 
 FrameBuffers::~FrameBuffers() {
@@ -52,7 +53,7 @@ FrameBuffers::~FrameBuffers() {
 
 void FrameBuffers::recreate() {
     destroyFrameBuffers();
-    createFrameBuffers();
+    createFrameBuffers(renderPass);
 }
 
 

@@ -15,6 +15,7 @@
 #include "SubContext.h"
 
 
+class RenderPass;
 struct DeviceContext;
 
 struct WindowContext : SubContext<DeviceContext>{
@@ -25,6 +26,7 @@ struct WindowContext : SubContext<DeviceContext>{
     CTX_PROPERTY(GlfwWindow, window)
     CTX_PROPERTY(VulkanSurface, surface)
     CTX_PROPERTY(SwapChain, swapChain)
+    // requires render pass
     CTX_PROPERTY(FrameBuffers, frameBuffers)
 
     CTX_FORWARD_GET_DECL(VulkanInstance, vulkanInstance)
@@ -37,6 +39,8 @@ struct WindowContext : SubContext<DeviceContext>{
 
     // should be called after device creation
     void init();
+
+    void createFrameBuffers(const RenderPass& renderPass);
 };
 
 

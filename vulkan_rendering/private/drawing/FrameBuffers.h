@@ -5,20 +5,24 @@
 
 #ifndef FRAMEBUFFERS_H
 #define FRAMEBUFFERS_H
+#include <RenderPass.h>
 #include <vector>
 #include <VulkanResource.h>
 #include <vulkan/vulkan_core.h>
 
 
+class RenderPass;
 struct WindowContext;
 
 class FrameBuffers: public VulkanResource<std::vector<VkFramebuffer>, WindowContext>{
 public:
-    explicit FrameBuffers(WindowContext& context);
+    explicit FrameBuffers(WindowContext& context, const RenderPass& renderPass);
     ~FrameBuffers() override;
     void recreate();
 private:
-    void createFrameBuffers();
+    // saved reference to be used during recreation
+    const RenderPass& renderPass;
+    void createFrameBuffers(const RenderPass& renderPass);
     void destroyFrameBuffers();
 };
 

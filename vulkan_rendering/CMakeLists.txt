@@ -98,7 +98,8 @@ set(SOURCES
         public/DeviceContext.h
         private/DeviceContext.cpp
         private/misc/ContextMacros.h
-        private/setup/QueueFamilyIndices.cpp
+        public/VulkanSetupProcedure.h
+        public/VulkanSetupProcedure.h
 )
 
 # Create static library

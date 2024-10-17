@@ -11,6 +11,7 @@
 #include <vulkan/vulkan_core.h>
 class PipelineContext;
 
+// Per-object rendering pipeline
 class VulkanPipeline : public VulkanResource<VkPipeline, PipelineContext>{
 public:
     explicit VulkanPipeline(PipelineContext &context);

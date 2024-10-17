@@ -96,7 +96,7 @@ private:
             context->drawFrame();
         }
 
-        vkDeviceWaitIdle(context->logicalDevice);
+        vkDeviceWaitIdle(context->getLogicalDevice());
     }
 };
 

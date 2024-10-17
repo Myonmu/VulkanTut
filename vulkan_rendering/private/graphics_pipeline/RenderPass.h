@@ -12,7 +12,7 @@
 struct PipelineContext;
 class RenderPass : public VulkanResource<VkRenderPass, PipelineContext>{
 public:
-    explicit RenderPass(PipelineContext& context);
+    explicit RenderPass(PipelineContext& context, VkFormat format);
     ~RenderPass() override;
 };
 

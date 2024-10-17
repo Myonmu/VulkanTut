@@ -20,6 +20,7 @@ struct DeviceContext : SubContext<VulkanAppContext> {
     const std::vector<const char *> deviceExtensions = {
         VK_KHR_SWAPCHAIN_EXTENSION_NAME
     };
+
     std::vector<WindowContext> windowContexts;
 
     CTX_PROPERTY(QueueFamilyIndices, queueFamilyIndices)
