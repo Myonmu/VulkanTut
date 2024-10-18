@@ -100,6 +100,8 @@ set(SOURCES
         private/misc/ContextMacros.h
         public/VulkanSetupProcedure.h
         public/VulkanSetupProcedure.h
+        private/misc/LifetimeBarrier.cpp
+        private/misc/LifetimeBarrier.h
 )
 
 # Create static library

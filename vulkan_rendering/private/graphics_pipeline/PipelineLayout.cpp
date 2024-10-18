@@ -7,11 +7,11 @@
 #include "PipelineContext.h"
 #include "VulkanAppContext.h"
 
-PipelineLayout::PipelineLayout(PipelineContext &context): VulkanResource(context) {
+PipelineLayout::PipelineLayout(PipelineContext &context, std::vector<VkDescriptorSetLayout> layouts): VulkanResource(context) {
     VkPipelineLayoutCreateInfo pipelineLayoutInfo{};
     pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
-    pipelineLayoutInfo.setLayoutCount = 1; // Optional
-    pipelineLayoutInfo.pSetLayouts = context.descriptorSetLayout; // Optional
+    pipelineLayoutInfo.setLayoutCount = layouts.size(); // Optional
+    pipelineLayoutInfo.pSetLayouts = layouts.data(); // Optional
     pipelineLayoutInfo.pushConstantRangeCount = 0; // Optional
     pipelineLayoutInfo.pPushConstantRanges = nullptr; // Optional
 

@@ -7,9 +7,10 @@
 #include <VulkanAppContext.h>
 
 #include "DescriptorContext.h"
+#include "DeviceContext.h"
 
 DescriptorPool::DescriptorPool(DescriptorContext &ctx): VulkanResource(ctx) {
-    auto maxFramesInFlight = ctx.context.MAX_FRAMES_IN_FLIGHT;
+    auto maxFramesInFlight = ctx.context.context.MAX_FRAMES_IN_FLIGHT;
     std::vector<VkDescriptorPoolSize> poolSizes{ctx.get_descriptorSetLayout().layoutBindings.size()};
 
     for (int i = 0; i < poolSizes.size(); i++) {

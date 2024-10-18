@@ -25,6 +25,7 @@ struct WindowContext : SubContext<DeviceContext>{
     QueueFamily requiredQueueFamilies;
     CTX_PROPERTY(GlfwWindow, window)
     CTX_PROPERTY(VulkanSurface, surface)
+    // requires device
     CTX_PROPERTY(SwapChain, swapChain)
     // requires render pass
     CTX_PROPERTY(FrameBuffers, frameBuffers)

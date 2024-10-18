@@ -24,6 +24,7 @@ struct DeviceContext : SubContext<VulkanAppContext> {
     std::vector<WindowContext> windowContexts;
 
     CTX_PROPERTY(QueueFamilyIndices, queueFamilyIndices)
+    // requires surface
     CTX_PROPERTY(PhysicalDevice, physicalDevice)
     CTX_PROPERTY(LogicalDevice, logicalDevice)
 
@@ -45,6 +46,8 @@ struct DeviceContext : SubContext<VulkanAppContext> {
     void init();
 
     [[nodiscard]] bool isLogicalDeviceCreated() const {return isDeviceCreated;}
+
+
 private:
     bool isDeviceCreated = false;
 };
