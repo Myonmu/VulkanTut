@@ -13,7 +13,7 @@ protected:
     T resource;
     CTX& ctx;
 public:
-    explicit VulkanResource(CTX& context) : ctx(context){
+    explicit VulkanResource(CTX& context):ctx(context){
 #ifdef NDEBUG
 #else
         std::cout << "Initializing " << typeid(T).name() << std::endl;
@@ -35,7 +35,7 @@ public:
     }
 
     // Gets the pointer to the raw Vulkan object
-    virtual T *getRawPtr() const{
+    virtual const T *getRawPtr() const{
         return &resource;
     }
 };

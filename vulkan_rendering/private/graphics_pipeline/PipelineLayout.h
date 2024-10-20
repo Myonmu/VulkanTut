@@ -7,11 +7,12 @@
 
 #include "ShaderModule.h"
 
+struct DeviceContext;
 class DescriptorSetLayout;
-struct VulkanAppContext;
-class PipelineLayout : public VulkanResource<VkPipelineLayout, PipelineContext>{
+
+class PipelineLayout : public VulkanResource<VkPipelineLayout, DeviceContext>{
 public:
-    explicit PipelineLayout(PipelineContext& context, std::vector<VkDescriptorSetLayout> layouts layouts);
+    explicit PipelineLayout(DeviceContext& context, std::vector<VkDescriptorSetLayout> layouts);
     ~PipelineLayout() override;
 };
 

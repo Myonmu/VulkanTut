@@ -8,20 +8,19 @@
 
 #include "QueueFamilyIndices.h"
 
-DeviceContext::DeviceContext(const VulkanAppContext &ctx) : SubContext(ctx) {
+DeviceContext::DeviceContext(const VulkanAppContext &ctx, VulkanDeviceSetupProcedure &setupProcedure) : SubContext(ctx) {
+    setupProcedure.createWindows(*this);
 }
 
 void DeviceContext::createWindow(const char *name, int width, int height, QueueFamily requiredQueueFamilies) {
     // when the logical device is not yet created, adding a new window (surface) is safe
     if (!isDeviceCreated) {
-        windowContexts.emplace_back(*this, name, width, height, requiredQueueFamilies);
+        create_windowContext(*this, name, width, height, requiredQueueFamilies);
     } else {
         // or when required queue families are already satisfied
         if (auto combinedRequirements = getCombinedQueueFamilyRequirements();
             (combinedRequirements | requiredQueueFamilies) == combinedRequirements) {
-
-            windowContexts.emplace_back(*this, name, width, height, requiredQueueFamilies);
-
+            create_windowContext(std::make_unique<WindowContext>(*this, name, width, height, requiredQueueFamilies));
         } else {
             // or else, requiring a new queue family would cause a device recreation
             // we do not consider allocating a new physical device for now.
@@ -35,30 +34,53 @@ void DeviceContext::createWindow(const char *name, int width, int height, QueueF
 
 
 void DeviceContext::init() {
-
     physicalDevice = std::make_unique<PhysicalDevice>(*this);
+    // TODO: this query is not necessary, because the selected physical device has already done this
+    queueFamilyIndices = std::make_unique<QueueFamilyIndices>(get_physicalDevice(),
+                                                              getCombinedQueueFamilyRequirements());
+    //cannot use getter (const)
+    queryPresentQueues(get_physicalDevice(), *queueFamilyIndices);
     logicalDevice = std::make_unique<LogicalDevice>(*this);
-    commandPool = std::make_unique<CommandPool>(*this);
+    for (auto id: get_queueFamilyIndices().getUniqueQueueFamilyIndices()) {
+        create_queueContext(*this, id, 0);
+    }
 
     isDeviceCreated = true;
     // now we finalize window contexts
-    for (auto& window: windowContexts) {
-        window.init();
+    for (const auto &window: windowContext) {
+        window->init();
     }
 }
 
 DeviceContext::~DeviceContext() = default;
 
-const LogicalDevice &DeviceContext::getLogicalDevice() const {
-    return get_logicalDevice();
+LogicalDevice &DeviceContext::getLogicalDevice() const {
+    return *logicalDevice;
 }
 
 QueueFamily DeviceContext::getCombinedQueueFamilyRequirements() const {
     QueueFamily q{};
-    for (const auto &window: windowContexts) {
-        q = q | window.requiredQueueFamilies;
+    for (const auto &window: windowContext) {
+        q = q | window->requiredQueueFamilies;
     }
     return q;
 }
+
+void DeviceContext::queryPresentQueues(VkPhysicalDevice physicalDevice, QueueFamilyIndices &queueFamilies) const {
+    for (auto &window: windowContext) {
+        queueFamilies.queryPresentFamilyIndex(physicalDevice, window->get_surface());
+    }
+}
+
+QueueContext &DeviceContext::getPresentQueueContext(const VulkanSurface &surface) const {
+    const auto id = queueFamilyIndices->getPresentQueueFamilyIndex(surface).value();
+    return get_queueContext_at(id);
+}
+
+QueueContext &DeviceContext::getCommonQueueContext(const QueueFamily queueFamily) const {
+    const auto id = (*queueFamilyIndices)[queueFamily].value();
+    return get_queueContext_at(id);
+}
+
 
 CTX_FORWARD_GET_BODY(DeviceContext, VulkanInstance, vulkanInstance)

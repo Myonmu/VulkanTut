@@ -13,7 +13,8 @@ struct DeviceContext;
 
 class CommandPool: public VulkanResource<VkCommandPool, DeviceContext> {
 public:
-    explicit CommandPool(DeviceContext& context);
+    explicit CommandPool(DeviceContext& context, uint32_t queueFamilyIndex,
+        VkCommandPoolCreateFlagBits flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT);
     ~CommandPool() override;
 };
 

@@ -4,14 +4,14 @@
 
 #include "RenderPass.h"
 
-#include "PipelineContext.h"
+#include "DeviceContext.h"
 #include "VulkanAppContext.h"
 RenderPass::~RenderPass() {
     vkDestroyRenderPass(ctx.getLogicalDevice(), resource, nullptr);
 }
 
 // TODO: make render pass configurable
-RenderPass::RenderPass(PipelineContext &context, VkFormat format): VulkanResource(context){
+RenderPass::RenderPass(DeviceContext &context, VkFormat format): VulkanResource(context){
     VkAttachmentDescription colorAttachment{};
     // we *may* use swap chain image format but not necessarily.
     // VkRenderPass can be shared between swap chains

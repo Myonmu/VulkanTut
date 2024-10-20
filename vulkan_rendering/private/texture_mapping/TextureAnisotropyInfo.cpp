@@ -16,14 +16,14 @@ void TextureAnisotropyInfo::queryAnisotropyInfo(const DeviceContext& ctx) {
     if(supportsAnisotropy.has_value())return;
 
     VkPhysicalDeviceFeatures supportedFeatures;
-    vkGetPhysicalDeviceFeatures(ctx.physicalDevice, &supportedFeatures);
+    vkGetPhysicalDeviceFeatures(ctx.get_physicalDevice(), &supportedFeatures);
     supportsAnisotropy = supportedFeatures.samplerAnisotropy;
     if(!supportsAnisotropy) {
         supportedMaxAnisotropy = 1.0f;
         return;
     }
     VkPhysicalDeviceProperties properties{};
-    vkGetPhysicalDeviceProperties(ctx.physicalDevice, &properties);
+    vkGetPhysicalDeviceProperties(ctx.get_physicalDevice(), &properties);
     supportedMaxAnisotropy = properties.limits.maxSamplerAnisotropy;
 
 }

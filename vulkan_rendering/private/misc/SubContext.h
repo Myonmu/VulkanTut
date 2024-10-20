@@ -9,15 +9,14 @@
 class LogicalDevice;
 
 template <typename T>
-struct SubContext<T> {
+struct SubContext {
     virtual ~SubContext() = default;
-    explicit SubContext(const T& parent):context(parent) {
+    explicit SubContext(T& parent):context(parent) {
 
     }
-    T& context;
-    [[nodiscard]] virtual const LogicalDevice& getLogicalDevice() const {
-        return context.getLogicalDevice();
-    }
+
+    T &context;
+    [[nodiscard]] virtual LogicalDevice& getLogicalDevice() const;
 };
 
 

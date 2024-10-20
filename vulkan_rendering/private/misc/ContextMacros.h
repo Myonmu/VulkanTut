@@ -5,6 +5,8 @@
 #ifndef CONTEXTMACROS_H
 #define CONTEXTMACROS_H
 
+#include <memory.h>
+
 #define CTX_PROPERTY(type, name)\
     std::unique_ptr<type> name;\
     inline const type& get_##name() const {return *(name);}
@@ -14,8 +16,10 @@
     inline const type& get_##name() const {return *(name);}
 
 #define CTX_PROPERTY_LIST(type, name)\
-    std::vector<type> name;\
-    inline const type& get_##name##_at(int i) const {return *(name)[i];}
+    std::vector<std::unique_ptr<type>> (name);\
+    template<typename... Args>\
+    inline void create_##name##(Args&&... VAR_ARGS){(name).emplace_back(std::make_unique<type>(*this, std::forward<Args>(VAR_ARGS)...));};\
+    inline type & get_##name##_at(uint32_t i) const {return * name[i];}
 
 #define CTX_FORWARD_GET_DECL(type, name)\
     inline const type& get_##name() const;

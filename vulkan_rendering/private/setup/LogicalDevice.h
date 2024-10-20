@@ -6,7 +6,6 @@
 #ifndef VULKANTUT_LOGICALDEVICE_H
 #define VULKANTUT_LOGICALDEVICE_H
 
-
 #include <VulkanResource.h>
 #include <vulkan/vulkan_core.h>
 
@@ -16,9 +15,6 @@ class LogicalDevice final : public VulkanResource<VkDevice, DeviceContext> {
 public:
     explicit LogicalDevice(DeviceContext& context);
     ~LogicalDevice() override;
-    //TODO: dynamic instead of hard coded fields
-    VkQueue graphicsQueue{};
-    VkQueue presentQueue{};
 private:
     void createLogicalDevice(DeviceContext& context);
 };

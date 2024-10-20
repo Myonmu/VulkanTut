@@ -4,15 +4,17 @@
 
 #ifndef DEVICECONTEXT_H
 #define DEVICECONTEXT_H
-#include <CommandPool.h>
+
 #include <LogicalDevice.h>
 #include <PhysicalDevice.h>
 #include <vector>
 #include <VulkanInstance.h>
-
-#include "ContextMacros.h"
+#include "QueueContext.h"
 #include "SubContext.h"
+#include "VulkanSetupProcedure.h"
 #include "WindowContext.h"
+#include "DescriptorContext.h"
+#include "ContextMacros.h"
 
 struct VulkanAppContext;
 
@@ -21,23 +23,33 @@ struct DeviceContext : SubContext<VulkanAppContext> {
         VK_KHR_SWAPCHAIN_EXTENSION_NAME
     };
 
-    std::vector<WindowContext> windowContexts;
+    /*----------- PROPERTIES ----------*/
 
-    CTX_PROPERTY(QueueFamilyIndices, queueFamilyIndices)
-    // requires surface
+    CTX_PROPERTY_LIST(WindowContext, windowContext)
+    // VkPhysicalDevice, requires surfaces to select device
     CTX_PROPERTY(PhysicalDevice, physicalDevice)
+    // Queue family indices info of the selected physical device
+    CTX_PROPERTY(QueueFamilyIndices, queueFamilyIndices)
+    // VkDevice
     CTX_PROPERTY(LogicalDevice, logicalDevice)
 
-    CTX_PROPERTY(CommandPool, commandPool)
+    CTX_PROPERTY_LIST(RenderPass, renderPass)
+    CTX_PROPERTY_LIST(DescriptorContext, descriptorContext)
+    //Queues (should always be ordered)
+    CTX_PROPERTY_LIST(QueueContext, queueContext)
+
+    /*----------- FORWARD CALLS ----------*/
 
     CTX_FORWARD_GET_DECL(VulkanInstance, vulkanInstance)
 
-    explicit DeviceContext(const VulkanAppContext &ctx);
+    /*----------- MEMBER FUNCTIONS ----------*/
+    explicit DeviceContext(const VulkanAppContext &ctx, VulkanDeviceSetupProcedure &setupProcedure);
 
     ~DeviceContext() override;
 
-    [[nodiscard]] const LogicalDevice &getLogicalDevice() const override;
+    [[nodiscard]] LogicalDevice &getLogicalDevice() const override;
 
+    // get combined queue family requirement flags from all windows
     [[nodiscard]] QueueFamily getCombinedQueueFamilyRequirements() const;
 
     void createWindow(const char *name, int width, int height, QueueFamily requiredQueueFamilies);
@@ -47,8 +59,15 @@ struct DeviceContext : SubContext<VulkanAppContext> {
 
     [[nodiscard]] bool isLogicalDeviceCreated() const {return isDeviceCreated;}
 
+    [[nodiscard]] QueueContext& getCommonQueueContext(QueueFamily queueFamily) const;
+    [[nodiscard]] QueueContext& getPresentQueueContext(const VulkanSurface& surface) const;
+
+    friend class PhysicalDevice;
 
 private:
+
+    // fills a QueueFamilyIndices object with present queue info.
+    void queryPresentQueues(VkPhysicalDevice physicalDevice, QueueFamilyIndices& queueFamilies) const;
     bool isDeviceCreated = false;
 };
 

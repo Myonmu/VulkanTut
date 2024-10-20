@@ -8,7 +8,7 @@
 
 #include "DescriptorSetLayoutBinding.h"
 
-DescriptorContext::DescriptorContext(DeviceContext &ctx, const std::vector<DescriptorSetLayoutBinding> &bindings)
+DescriptorContext::DescriptorContext(const DeviceContext &ctx, const std::vector<DescriptorSetLayoutBinding> &bindings)
     : SubContext(ctx)
 {
     descriptorSetLayout = std::make_unique<DescriptorSetLayout>(*this, bindings);

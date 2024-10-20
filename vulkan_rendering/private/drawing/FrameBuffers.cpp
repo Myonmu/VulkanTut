@@ -8,6 +8,7 @@
 #include <SwapChain.h>
 
 #include "WindowContext.h"
+#include "LogicalDevice.h"
 
 void FrameBuffers::createFrameBuffers(const RenderPass& renderPass) {
     auto& swapChain = ctx.get_swapChain();

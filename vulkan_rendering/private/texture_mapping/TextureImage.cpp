@@ -95,7 +95,7 @@ void TextureImage::stage() {
 }
 
 void TextureImage::transitionLayout(VkImageLayout newLayout) {
-    CommandBuffer cmd{ctx};
+    CommandBuffer cmd{ctx, QueueFamily::QUEUE_FAMILY_GRAPHICS};
     CommandBufferRecorder recorder{};
     recorder.enqueueCommand<TransitionImageLayout>(*this,
                                                    format,

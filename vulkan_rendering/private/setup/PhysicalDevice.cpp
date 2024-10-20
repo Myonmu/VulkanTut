@@ -42,6 +42,8 @@ int PhysicalDevice::rateDeviceSuitability(VkPhysicalDevice device, DeviceContext
     // Maximum possible size of textures affects graphics quality
     score += deviceProperties.limits.maxImageDimension2D;
 
+    auto indicesInfo = QueueFamilyIndices(device, context.getCombinedQueueFamilyRequirements());
+    context.queryPresentQueues(device, indicesInfo);
     if (!context.get_queueFamilyIndices().isComplete()) {
         return 0;
     }
@@ -50,9 +52,9 @@ int PhysicalDevice::rateDeviceSuitability(VkPhysicalDevice device, DeviceContext
         return 0;
     }
 
-    for (auto element: context.windowContexts) {
+    for (const auto& element: context.windowContext) {
         SwapChain::SwapChainSupportDetails swapChainSupport = SwapChain::querySwapChainSupport(
-            device, element.get_surface());
+            device, element->get_surface());
         if (swapChainSupport.formats.empty() || swapChainSupport.presentModes.empty()) {
             return 0;
         }

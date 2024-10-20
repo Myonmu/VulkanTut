@@ -17,7 +17,7 @@ public:
     static bool CheckValidationLayerSupport();
     static void AttachToInstanceCreation(VkDebugUtilsMessengerCreateInfoEXT &pExt, VkInstanceCreateInfo &pInfo);
 
-   static static void AttachToDeviceCreation(VkDeviceCreateInfo& createInfo);
+    static void AttachToDeviceCreation(VkDeviceCreateInfo& createInfo);
 
 private:
     static const std::vector<const char *> validationLayers;

@@ -5,6 +5,7 @@
 #include "DescriptorSetLayout.h"
 #include <VulkanAppContext.h>
 #include "DescriptorContext.h"
+#include "LogicalDevice.h"
 
 DescriptorSetLayout::DescriptorSetLayout(DescriptorContext &ctx, const std::vector<DescriptorSetLayoutBinding> &bindings)
     : VulkanResource(ctx) {

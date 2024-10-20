@@ -6,7 +6,6 @@
 
 #include <chrono>
 #include <UniformBufferObject.h>
-#include <VulkanAppContext.h>
 
 #include "CommandBuffer.h"
 #define GLM_ENABLE_EXPERIMENTAL
@@ -15,7 +14,7 @@
 #include "glm/gtx/quaternion.hpp"
 
 VulkanFrame::VulkanFrame(WindowContext &context): context(context),
-                                                  commandBuffer(context.context) {
+                                                  commandBuffer(context.context, QueueFamily::QUEUE_FAMILY_GRAPHICS) {
     VkSemaphoreCreateInfo semaphoreInfo{};
     semaphoreInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
     VkFenceCreateInfo fenceInfo{};
@@ -39,8 +38,8 @@ void VulkanFrame::signalResize() {
 
 //TODO: Could this be modular?
 void VulkanFrame::drawFrame(uint32_t currentFrameIndex) {
-    const auto& device = context.getLogicalDevice();
-    const auto& swapChain = context.get_swapChain();
+    const auto &device = context.getLogicalDevice();
+    const auto &swapChain = context.get_swapChain();
     vkWaitForFences(device, 1, &inFlightFence, VK_TRUE, UINT64_MAX);
 
     // Acquire image from swap chain
@@ -58,7 +57,7 @@ void VulkanFrame::drawFrame(uint32_t currentFrameIndex) {
     vkResetCommandBuffer(commandBuffer, 0);
     frameInfo.imageIndex = imageIndex;
     frameInfo.currentFrameIndex = currentFrameIndex;
-    context.frameDrawer.recordCommandBuffer(commandBuffer, context,  frameInfo);
+    context.frameDrawer.recordCommandBuffer(commandBuffer, context, frameInfo);
     // Submit command buffer
     VkSubmitInfo submitInfo{};
     submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
@@ -74,7 +73,8 @@ void VulkanFrame::drawFrame(uint32_t currentFrameIndex) {
     submitInfo.signalSemaphoreCount = 1;
     submitInfo.pSignalSemaphores = signalSemaphores;
 
-    if (vkQueueSubmit(context.getLogicalDevice().graphicsQueue, 1, &submitInfo, inFlightFence) != VK_SUCCESS) {
+    if (const auto queue = context.context.getCommonQueueContext(QueueFamily::QUEUE_FAMILY_GRAPHICS).get_queue();
+        vkQueueSubmit(queue, 1, &submitInfo, inFlightFence) != VK_SUCCESS) {
         throw std::runtime_error("failed to submit draw command buffer");
     }
 
@@ -89,7 +89,8 @@ void VulkanFrame::drawFrame(uint32_t currentFrameIndex) {
     presentInfo.pImageIndices = &imageIndex;
     presentInfo.pResults = nullptr;
 
-    result = vkQueuePresentKHR(context.getLogicalDevice().presentQueue, &presentInfo);
+    auto presentQueue = context.context.getPresentQueueContext(context.get_surface()).get_queue();
+    result = vkQueuePresentKHR(presentQueue, &presentInfo);
     if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR || frameBufferResized) {
         frameBufferResized = false;
         context.resize();
@@ -101,12 +102,13 @@ void VulkanFrame::drawFrame(uint32_t currentFrameIndex) {
 void VulkanFrame::updateUniformBuffer(uint32_t currentFrame) {
     static auto startTime = std::chrono::high_resolution_clock::now();
     auto currentTime = std::chrono::high_resolution_clock::now();
-    auto time = std::chrono::duration<float, std::chrono::seconds::period> (currentTime - startTime).count();
+    auto time = std::chrono::duration<float, std::chrono::seconds::period>(currentTime - startTime).count();
     UniformBufferObject ubo{};
-    ubo.model = glm::rotate(glm::mat4(1.0f), time*glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
-    ubo.view = glm::lookAt(glm::vec3(2.0f,2,2), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+    ubo.model = glm::rotate(glm::mat4(1.0f), time * glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+    ubo.view = glm::lookAt(glm::vec3(2.0f, 2, 2), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
     ubo.projection = glm::perspective(glm::radians(45.0f),
-        context.get_swapChain().swapChainExtent.width/(float)context.get_swapChain().swapChainExtent.height, 0.1f, 10.0f);
+                                      context.get_swapChain().swapChainExtent.width / (float) context.get_swapChain().
+                                      swapChainExtent.height, 0.1f, 10.0f);
     /*
      *GLM was originally designed for OpenGL,
      *where the Y coordinate of the clip coordinates is inverted.
@@ -121,7 +123,7 @@ void VulkanFrame::updateUniformBuffer(uint32_t currentFrame) {
 
 
 VulkanFrame::~VulkanFrame() {
-    const auto& device = context.getLogicalDevice();
+    const auto &device = context.getLogicalDevice();
     vkDestroySemaphore(device, imageAvailableSemaphore, nullptr);
     vkDestroySemaphore(device, renderFinishedSemaphore, nullptr);
     vkDestroyFence(device, inFlightFence, nullptr);

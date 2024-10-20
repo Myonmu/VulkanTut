@@ -90,11 +90,13 @@ void SwapChain::createSwapChain(WindowContext& context){
     createInfo.imageArrayLayers = 1;
     createInfo.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
 
-    QueueFamilyIndices indices = QueueFamilyIndices(physicalDevice, context.get_surface(), context.requiredQueueFamilies);
-    uint32_t queueFamilyIndices[indices.getQueueFamilyIndicesCount()];
-    indices.fillQueueFamilyIndicesArray(queueFamilyIndices);
+    QueueFamilyIndices indices = ctx.context.get_queueFamilyIndices();
+    auto size = indices.getQueueFamilyIndicesCount(surface);
+    uint32_t queueFamilyIndices[size];
+    indices.fillQueueFamilyIndicesArray(queueFamilyIndices, surface);
 
-    if (indices[QueueFamily::QUEUE_FAMILY_GRAPHICS] != indices[QueueFamily::QUEUE_FAMILY_PRESENT]) {
+    if (indices.getCommonQueueFamilyIndex(QueueFamily::QUEUE_FAMILY_GRAPHICS).value() !=
+        indices.getPresentQueueFamilyIndex(surface).value()) {
         createInfo.imageSharingMode = VK_SHARING_MODE_CONCURRENT;
         createInfo.queueFamilyIndexCount = 2;
         createInfo.pQueueFamilyIndices = queueFamilyIndices;

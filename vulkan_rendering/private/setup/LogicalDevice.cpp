@@ -13,7 +13,7 @@
 #include "QueueFamilyIndices.h"
 
 void LogicalDevice::createLogicalDevice(DeviceContext& context){
-    QueueFamilyIndices indices{context.getCombinedQueueFamilyRequirements()};
+    auto indices = context.get_queueFamilyIndices();
     std::vector<VkDeviceQueueCreateInfo> queueCreateInfos;
     std::set uniqueQueueFamilies = indices.getUniqueQueueFamilyIndices();
     float queuePriority = 1.0f;
@@ -48,8 +48,8 @@ void LogicalDevice::createLogicalDevice(DeviceContext& context){
         throw std::runtime_error("failed to create logical device.");
     }
 
-    vkGetDeviceQueue(resource, indices[QueueFamily::QUEUE_FAMILY_GRAPHICS].value(), 0, &graphicsQueue);
-    vkGetDeviceQueue(resource, indices[QueueFamily::QUEUE_FAMILY_PRESENT].value(), 0, &presentQueue);
+    //vkGetDeviceQueue(resource, indices[QueueFamily::QUEUE_FAMILY_GRAPHICS].value(), 0, &graphicsQueue);
+    //vkGetDeviceQueue(resource, indices[QueueFamily::QUEUE_FAMILY_PRESENT].value(), 0, &presentQueue);
 }
 
 LogicalDevice::LogicalDevice(DeviceContext& context) : VulkanResource(context){

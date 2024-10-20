@@ -68,7 +68,7 @@ void Buffer::mapBufferMemory(void*& source) const {
 }
 
 void Buffer::copyBuffer(Buffer &srcBuffer, Buffer &dstBuffer, DeviceContext& ctx, VkDeviceSize size) {
-    CommandBuffer cmd{ctx};
+    CommandBuffer cmd{ctx, QueueFamily::QUEUE_FAMILY_GRAPHICS};
     CommandBufferRecorder recorder{};
 
     recorder.enqueueCommand<CopyBuffer>(srcBuffer, dstBuffer, 0, 0, size);

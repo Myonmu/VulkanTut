@@ -3,18 +3,21 @@
 //
 
 #include "VulkanPipeline.h"
+
+#include "DeviceContext.h"
 #include "FileUtility.h"
-#include "PipelineContext.h"
 #include "Vertex.h"
 #include "VulkanAppContext.h"
 
 //TODO: Hardcoded shader path
 //TODO: Refactor pipeline stage construction into smaller methods
-VulkanPipeline::VulkanPipeline(PipelineContext &context)
+VulkanPipeline::VulkanPipeline(DeviceContext &context,
+                               const PipelineLayout &layout,
+                               const RenderPass &renderPass,
+                               const SwapChain &swapChain)
     : VulkanResource(context),
       frag("../shaders/frag.spv", ctx),
       vert("../shaders/vert.spv", ctx) {
-
     VkPipelineShaderStageCreateInfo vertShaderStageInfo{};
     vertShaderStageInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
     vertShaderStageInfo.stage = VK_SHADER_STAGE_VERTEX_BIT;
@@ -56,14 +59,14 @@ VulkanPipeline::VulkanPipeline(PipelineContext &context)
     VkViewport viewport{};
     viewport.x = 0.0f;
     viewport.y = 0.0f;
-    viewport.width = static_cast<float>(context.swapChain.swapChainExtent.width);
-    viewport.height = static_cast<float>(context.swapChain.swapChainExtent.height);
+    viewport.width = static_cast<float>(swapChain.swapChainExtent.width);
+    viewport.height = static_cast<float>(swapChain.swapChainExtent.height);
     viewport.minDepth = 0.0f;
     viewport.maxDepth = 1.0f;
 
     VkRect2D scissor{};
     scissor.offset = {0, 0};
-    scissor.extent = context.swapChain.swapChainExtent;
+    scissor.extent = swapChain.swapChainExtent;
 
     /*
     VkPipelineViewportStateCreateInfo viewportState{};
@@ -140,9 +143,9 @@ VulkanPipeline::VulkanPipeline(PipelineContext &context)
     pipelineInfo.pColorBlendState = &colorBlending;
     pipelineInfo.pDynamicState = &dynamicState;
 
-    pipelineInfo.layout = context.get_graphicsPipeline();
+    pipelineInfo.layout = layout;
 
-    pipelineInfo.renderPass = context.get_renderPass();
+    pipelineInfo.renderPass = renderPass;
     pipelineInfo.subpass = 0;
 
     pipelineInfo.basePipelineHandle = VK_NULL_HANDLE; // Optional

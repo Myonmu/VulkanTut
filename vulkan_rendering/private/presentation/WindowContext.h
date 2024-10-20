@@ -18,7 +18,8 @@
 class RenderPass;
 struct DeviceContext;
 
-struct WindowContext : SubContext<DeviceContext>{
+struct WindowContext : public SubContext<DeviceContext>{
+    friend struct DeviceContext;
     const char *name;
     int width;
     int height;
@@ -38,10 +39,14 @@ struct WindowContext : SubContext<DeviceContext>{
 
     WindowContext(const DeviceContext &ctx, const char *name, int width, int height, QueueFamily requiredQueueFamilies);
 
+    void resize();
+private:
     // should be called after device creation
     void init();
 
     void createFrameBuffers(const RenderPass& renderPass);
+
+
 };
 
 

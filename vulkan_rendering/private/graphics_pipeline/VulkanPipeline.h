@@ -9,17 +9,27 @@
 #include "VulkanResource.h"
 #include "ShaderModule.h"
 #include <vulkan/vulkan_core.h>
+class SwapChain;
+class RenderPass;
+class PipelineLayout;
 class PipelineContext;
 
 // Per-object rendering pipeline
-class VulkanPipeline : public VulkanResource<VkPipeline, PipelineContext>{
+class VulkanPipeline : public VulkanResource<VkPipeline, DeviceContext> {
 public:
-    explicit VulkanPipeline(PipelineContext &context);
+    explicit VulkanPipeline(
+        DeviceContext &context,
+        const PipelineLayout &layout,
+        const RenderPass &renderPass,
+        const SwapChain& swapChain
+        );
+
     ~VulkanPipeline() override;
+
 private:
     std::vector<VkDynamicState> dynamicStates = {
-            VK_DYNAMIC_STATE_VIEWPORT,
-            VK_DYNAMIC_STATE_SCISSOR
+        VK_DYNAMIC_STATE_VIEWPORT,
+        VK_DYNAMIC_STATE_SCISSOR
     };
     ShaderModule frag;
     ShaderModule vert;

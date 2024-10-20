@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.27)
 project(Vk)
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 23)
 
 # Add subdirectories' include paths
 set(INCLUDE_DIRS
@@ -84,8 +84,6 @@ set(SOURCES
         private/texture_mapping/TextureAnisotropyInfo.cpp
         private/texture_mapping/TextureAnisotropyInfo.h
         private/descriptor/DescriptorSetLayoutBinding.h
-        private/VulkanRenderScene.cpp
-        public/VulkanRenderScene.h
         private/descriptor/DescriptorContext.h
         private/descriptor/DescriptorContext.cpp
         private/RenderObject.cpp
@@ -93,8 +91,6 @@ set(SOURCES
         private/presentation/WindowContext.cpp
         private/presentation/WindowContext.h
         private/misc/SubContext.h
-        private/graphics_pipeline/PipelineContext.cpp
-        private/graphics_pipeline/PipelineContext.h
         public/DeviceContext.h
         private/DeviceContext.cpp
         private/misc/ContextMacros.h
@@ -102,6 +98,12 @@ set(SOURCES
         public/VulkanSetupProcedure.h
         private/misc/LifetimeBarrier.cpp
         private/misc/LifetimeBarrier.h
+        private/misc/ObjectPool.h
+        private/setup/VulkanQueue.cpp
+        private/setup/VulkanQueue.h
+        private/drawing/QueueContext.cpp
+        private/drawing/QueueContext.h
+        private/misc/SubContext.cpp
 )
 
 # Create static library

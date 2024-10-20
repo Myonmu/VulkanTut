@@ -6,11 +6,11 @@
 
 #include <FileUtility.h>
 
-#include "PipelineContext.h"
+#include "DeviceContext.h"
 #include "VulkanAppContext.h"
 
 
-ShaderModule::ShaderModule(const std::vector<char>& code , PipelineContext& context):
+ShaderModule::ShaderModule(const std::vector<char>& code , DeviceContext& context):
 VulkanResource(context){
     VkShaderModuleCreateInfo createInfo{};
     createInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
@@ -25,7 +25,7 @@ VulkanResource(context){
     }
 }
 
-ShaderModule::ShaderModule(std::string shaderPath, PipelineContext& context) : VulkanResource(context){
+ShaderModule::ShaderModule(std::string shaderPath, DeviceContext& context) : VulkanResource(context){
     auto code = FileUtility::ReadFile(shaderPath);
     VkShaderModuleCreateInfo createInfo{};
     createInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;

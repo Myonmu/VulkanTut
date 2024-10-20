@@ -10,6 +10,7 @@
 #include <Texture2D.h>
 #include <TextureImage.h>
 
+#include "AppSetup.h"
 #include "BindDescriptorSet.h"
 #include "BindIndexBuffer.h"
 #include "BindPipeline.h"
@@ -35,7 +36,7 @@ const uint32_t HEIGHT = 600;
 class TriangleApp {
 public :
     void Run() {
-        context = new VulkanAppContext(WIDTH, HEIGHT, "Vulkan");
+        context = VulkanAppContext::createAppContext<AppSetup>("VulkanApp");
         setup();
         mainLoop();
     }

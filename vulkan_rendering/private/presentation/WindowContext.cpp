@@ -23,12 +23,23 @@ void WindowContext::init() {
 }
 
 void WindowContext::createFrameBuffers(const RenderPass& renderPass) {
-
+    frameBuffers = std::make_unique<FrameBuffers>(*this, renderPass);
 }
 
-
+void WindowContext::resize() {
+    glfwGetFramebufferSize(get_window(), &width, &height);
+    while (width == 0 || height == 0) {
+        glfwGetFramebufferSize(get_window(), &width, &height);
+        glfwWaitEvents();
+    }
+    vkDeviceWaitIdle(getLogicalDevice());
+    swapChain->recreate();
+    frameBuffers->recreate();
+}
 
 void WindowContext::frameBufferResizeCallback(GLFWwindow *window, int width, int height) {
+    const auto app = static_cast<VulkanAppContext *>(glfwGetWindowUserPointer(window));
+    app->renderer.signalResize();
 }
 
 CTX_FORWARD_GET_BODY(WindowContext, VulkanInstance, vulkanInstance)

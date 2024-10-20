@@ -8,10 +8,12 @@
 
 #include "DeviceContext.h"
 
-CommandBuffer::CommandBuffer(DeviceContext &context): VulkanResource(context){
+CommandBuffer::CommandBuffer(DeviceContext &context, QueueFamily queueFamily): VulkanResource(context),
+queueFamily(queueFamily)
+{
     VkCommandBufferAllocateInfo info{};
     info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
-    info.commandPool = context.get_commandPool();
+    info.commandPool = context.getCommonQueueContext(queueFamily).get_commandPool();
     /*
     The level parameter specifies if the allocated command buffers are primary or secondary command buffers.
 
@@ -34,7 +36,9 @@ CommandBuffer::CommandBuffer(DeviceContext &context): VulkanResource(context){
 }
 
 CommandBuffer::~CommandBuffer() {
-    vkFreeCommandBuffers(ctx.getLogicalDevice(), ctx.get_commandPool(), 1, *this);
+    vkFreeCommandBuffers(ctx.getLogicalDevice(),
+        ctx.getCommonQueueContext(queueFamily).get_commandPool(),
+        1, *this);
 };
 
 void CommandBuffer::executeImmediate() {
@@ -42,6 +46,7 @@ void CommandBuffer::executeImmediate() {
     submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
     submitInfo.commandBufferCount = 1;
     submitInfo.pCommandBuffers = *this;
-    vkQueueSubmit(ctx.getLogicalDevice().graphicsQueue, 1, &submitInfo, VK_NULL_HANDLE);
-    vkQueueWaitIdle(ctx.getLogicalDevice().graphicsQueue);
+    auto queue = ctx.getCommonQueueContext(queueFamily).get_queue();
+    vkQueueSubmit(queue,1, &submitInfo, VK_NULL_HANDLE);
+    vkQueueWaitIdle(queue);
 }

@@ -9,8 +9,7 @@
 
 #include "DeviceContext.h"
 
-CommandPool::CommandPool(DeviceContext &context) : VulkanResource(context){
-    auto queueFamilyIndices = ctx.get_queueFamilyIndices();
+CommandPool::CommandPool(DeviceContext &context, uint32_t queueFamilyIndex, VkCommandPoolCreateFlagBits flags) : VulkanResource(context){
     VkCommandPoolCreateInfo poolInfo{};
 
     poolInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
@@ -25,8 +24,8 @@ CommandPool::CommandPool(DeviceContext &context) : VulkanResource(context){
     so we want to be able to reset and rerecord over it.
     Thus, we need to set the VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT flag bit for our command pool.
      */
-    poolInfo.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
-    poolInfo.queueFamilyIndex = queueFamilyIndices[QueueFamily::QUEUE_FAMILY_GRAPHICS].value();
+    poolInfo.flags = flags;
+    poolInfo.queueFamilyIndex = queueFamilyIndex;
 
     /*
     Command buffers are executed by submitting them on one of the device queues,

@@ -4,26 +4,15 @@
 
 #ifndef VULKANTUT_VULKANAPPCONTEXT_H
 #define VULKANTUT_VULKANAPPCONTEXT_H
-#include <CommandPool.h>
-#include <DescriptorPool.h>
 #include <DescriptorSetLayout.h>
 #include <DescriptorSets.h>
-#include <FrameBuffers.h>
-#include <IndexBuffer.h>
-#include <PipelineLayout.h>
 #include <ValidationLayers.h>
 #include <vector>
-#include <VertexBuffer.h>
 #include <VulkanRenderer.h>
 
 #include "ContextMacros.h"
-#include "SwapChain.h"
 #include "VulkanInstance.h"
-#include "LogicalDevice.h"
-#include "RenderPass.h"
-#include "UniformBufferGroup.h"
-#include "VulkanPipeline.h"
-#include "GLFW/glfw3.h"
+#include "VulkanSetupProcedure.h"
 
 
 struct VulkanAppContext {
@@ -33,48 +22,29 @@ struct VulkanAppContext {
 #else
     const bool enableValidationLayers = true;
 #endif
-
+    VulkanSetupProcedure& setupProcedure;
     const char* name;
     CTX_PROPERTY(VulkanInstance, vulkanInstance)
     CTX_PROPERTY(ValidationLayers, validationLayers)
-    std::vector<std::unique_ptr<DeviceContext>> deviceContexts;
+    std::vector<DeviceContext> deviceContexts;
 
-    // ------------ Logical device created -------------------
-    DescriptorSetLayout descriptorSetLayout{
-        *this,
-        {
-            {VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_VERTEX_BIT},
-            {VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT}
-        }
-    }; // TODO: allow instance
-    DescriptorPool descriptorPool{*this}; // TODO: allow instance
-    UniformBufferGroup uniformBufferGroup{*this}; //TODO: per-object
-    DescriptorSets descriptorSets{*this}; //TODO: per-object
-    SwapChain swapChain{*this}; //TODO: per-window
-    PipelineLayout graphicsPipeline{*this}; //TODO: allow instance
-    RenderPass renderPass{*this}; // TODO: allow instance
-    VulkanPipeline vulkanPipeline{*this}; //TODO: allow instance
-    FrameBuffers frameBuffers{*this}; //TODO: allow instance
-    CommandPool commandPool{*this};
-    VertexBuffer vertexBuffer{*this}; //TODO: per-object
-    IndexBuffer indexBuffer{*this}; //TODO: per-object
-    VulkanRenderer renderer{*this}; //TODO: allow instance
+    template <class T, class... Args>
+    void createDeviceContext(Args&&... VAR_ARGS) {
+        deviceContexts.emplace_back(*this, &T(std::forward<Args>(VAR_ARGS)...));
+    }
 
-    CommandBufferRecorder frameDrawer{0}; //TODO: allow instance
-
-    VulkanAppContext(int w, int h, const char *appName);
+    VulkanAppContext(const char *appName, VulkanSetupProcedure& setupProcedure);
 
     ~VulkanAppContext();
 
-    void resize(int newWidth, int newHeight);
-
-    static void frameBufferResizeCallback(GLFWwindow *window, int width, int height);
-
-    void resize();
-
     void drawFrame();
 
-    [[nodiscard]] const LogicalDevice &getLogicalDevice() const;
+    LogicalDevice& getLogicalDevice(){throw new std::runtime_error("AppContext does not contain single logical device");};
+
+    template<class T, class... Args>
+    static VulkanAppContext* createAppContext(const char *appName, Args&&... VAR_ARGS) {
+        return new VulkanAppContext(appName, &T(std::forward<Args>(VAR_ARGS)...));
+    }
 };
 
 
