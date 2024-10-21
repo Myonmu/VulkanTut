@@ -4,13 +4,13 @@
 
 #ifndef COMMANDBUFFERCOMMAND_H
 #define COMMANDBUFFERCOMMAND_H
+struct WindowContext;
 class CommandBuffer;
-struct VulkanAppContext;
 struct FrameInfo;
 class CommandBufferCmd {
 public:
     virtual ~CommandBufferCmd() = default;
-    virtual void execute(const CommandBuffer &commandBuffer, const VulkanAppContext &context, const FrameInfo &frameInfo) = 0;
+    virtual void execute(const CommandBuffer &commandBuffer, const DeviceContext &context, const FrameInfo &frameInfo) = 0;
 };
 
 #endif //COMMANDBUFFERCOMMAND_H

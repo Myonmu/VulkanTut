@@ -5,7 +5,6 @@
 #include "RenderPass.h"
 
 #include "DeviceContext.h"
-#include "VulkanAppContext.h"
 RenderPass::~RenderPass() {
     vkDestroyRenderPass(ctx.getLogicalDevice(), resource, nullptr);
 }

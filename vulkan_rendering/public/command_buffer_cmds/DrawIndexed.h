@@ -16,12 +16,10 @@ public:
     explicit DrawIndexed(uint32_t indicesCount): CommandBufferCmd() {
         this->indicesCount = indicesCount;
     }
-    void execute(const CommandBuffer &commandBuffer, const VulkanAppContext &context, const FrameInfo &frameInfo) override;
+    void execute(const CommandBuffer &commandBuffer, const DeviceContext &context, const FrameInfo &frameInfo) override {
+        vkCmdDrawIndexed(commandBuffer, indicesCount, 1, 0 , 0, 0);
+    }
 };
-
-inline void DrawIndexed::execute(const CommandBuffer &commandBuffer, const VulkanAppContext &context, const FrameInfo &frameInfo) {
-    vkCmdDrawIndexed(commandBuffer, indicesCount, 1, 0 , 0, 0);
-}
 
 
 #endif //DRAWINDEXED_H

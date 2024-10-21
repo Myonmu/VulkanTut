@@ -10,21 +10,22 @@
 #include "CommandBufferCmd.h"
 
 
-class SetViewport final: public CommandBufferCmd{
+class SetViewport final : public CommandBufferCmd {
 public:
-    void execute(const CommandBuffer &commandBuffer, const VulkanAppContext &context, const FrameInfo &frameInfo) override;
+    void execute(const CommandBuffer &commandBuffer, const DeviceContext &context,
+                 const FrameInfo &frameInfo) override {
+        auto& swapChain = context.get_windowContext_at(frameInfo.windowId).get_swapChain();
+        auto [width, height] = swapChain.swapChainExtent;
+        VkViewport viewport{};
+        viewport.x = 0.0f;
+        viewport.y = 0.0f;
+        viewport.width = static_cast<float>(width);
+        viewport.height = static_cast<float>(height);
+        viewport.minDepth = 0.0f;
+        viewport.maxDepth = 1.0f;
+        vkCmdSetViewport(commandBuffer, 0, 1, &viewport);
+    }
 };
-
-inline void SetViewport::execute(const CommandBuffer &commandBuffer, const VulkanAppContext &context, const FrameInfo &frameInfo) {
-    VkViewport viewport{};
-    viewport.x = 0.0f;
-    viewport.y = 0.0f;
-    viewport.width = static_cast<float>(context.swapChain.swapChainExtent.width);
-    viewport.height = static_cast<float>(context.swapChain.swapChainExtent.height);
-    viewport.minDepth = 0.0f;
-    viewport.maxDepth = 1.0f;
-    vkCmdSetViewport(commandBuffer, 0,1,&viewport);
-}
 
 
 #endif //SETVIEWPORT_H

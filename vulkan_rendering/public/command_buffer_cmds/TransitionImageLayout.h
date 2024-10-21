@@ -21,7 +21,7 @@ public:
                                                            newLayout(newLayout) {
     }
 
-    void execute(const CommandBuffer &commandBuffer, const VulkanAppContext &context, const FrameInfo &frameInfo)
+    void execute(const CommandBuffer &commandBuffer, const DeviceContext &context, const FrameInfo &frameInfo)
     override {
         VkPipelineStageFlags sourceStage;
         VkPipelineStageFlags destinationStage;

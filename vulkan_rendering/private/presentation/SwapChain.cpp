@@ -91,8 +91,8 @@ void SwapChain::createSwapChain(WindowContext& context){
     createInfo.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
 
     QueueFamilyIndices indices = ctx.context.get_queueFamilyIndices();
-    auto size = indices.getQueueFamilyIndicesCount(surface);
-    uint32_t queueFamilyIndices[size];
+    const auto size = indices.getQueueFamilyIndicesCount(surface);
+    auto* queueFamilyIndices = new uint32_t[size]{};
     indices.fillQueueFamilyIndicesArray(queueFamilyIndices, surface);
 
     if (indices.getCommonQueueFamilyIndex(QueueFamily::QUEUE_FAMILY_GRAPHICS).value() !=
@@ -123,6 +123,8 @@ void SwapChain::createSwapChain(WindowContext& context){
 
     swapChainImageFormat = surfaceFormat.format;
     swapChainExtent = extent;
+
+    delete queueFamilyIndices;
 }
 
 void SwapChain::createImageViews(){

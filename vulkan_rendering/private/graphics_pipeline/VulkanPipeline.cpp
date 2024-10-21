@@ -7,7 +7,7 @@
 #include "DeviceContext.h"
 #include "FileUtility.h"
 #include "Vertex.h"
-#include "VulkanAppContext.h"
+#include "PipelineLayout.h"
 
 //TODO: Hardcoded shader path
 //TODO: Refactor pipeline stage construction into smaller methods

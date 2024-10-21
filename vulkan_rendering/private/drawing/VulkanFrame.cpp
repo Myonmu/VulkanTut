@@ -56,8 +56,9 @@ void VulkanFrame::drawFrame(uint32_t currentFrameIndex) {
     // record command buffer
     vkResetCommandBuffer(commandBuffer, 0);
     frameInfo.imageIndex = imageIndex;
+    frameInfo.windowId = context.get_windowId();
     frameInfo.currentFrameIndex = currentFrameIndex;
-    context.frameDrawer.recordCommandBuffer(commandBuffer, context, frameInfo);
+    context.get_renderer().recordCommandBuffer(commandBuffer, context.context, frameInfo);
     // Submit command buffer
     VkSubmitInfo submitInfo{};
     submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;

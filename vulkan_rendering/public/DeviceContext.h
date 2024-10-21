@@ -43,7 +43,7 @@ struct DeviceContext : SubContext<VulkanAppContext> {
     CTX_FORWARD_GET_DECL(VulkanInstance, vulkanInstance)
 
     /*----------- MEMBER FUNCTIONS ----------*/
-    explicit DeviceContext(const VulkanAppContext &ctx, VulkanDeviceSetupProcedure &setupProcedure);
+    explicit DeviceContext(VulkanAppContext &ctx, VulkanDeviceSetupProcedure &setupProcedure);
 
     ~DeviceContext() override;
 
@@ -61,6 +61,8 @@ struct DeviceContext : SubContext<VulkanAppContext> {
 
     [[nodiscard]] QueueContext& getCommonQueueContext(QueueFamily queueFamily) const;
     [[nodiscard]] QueueContext& getPresentQueueContext(const VulkanSurface& surface) const;
+
+    void bindRenderPassToWindow(uint32_t windowId, uint32_t renderPassId) const;
 
     friend class PhysicalDevice;
 

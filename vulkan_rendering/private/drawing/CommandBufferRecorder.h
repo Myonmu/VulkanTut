@@ -25,7 +25,7 @@ class CommandBufferRecorder {
 
     VkCommandBufferUsageFlags flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
 
-    typedef void (*RecordFunc)(const CommandBuffer &commandBuffer, const VulkanAppContext &context, const FrameInfo &frameInfo);
+    typedef void (*RecordFunc)(const CommandBuffer &commandBuffer, const DeviceContext &context, const FrameInfo &frameInfo);
 
     RecordFunc recordFunc = nullptr;
 
@@ -36,7 +36,7 @@ public:
     // Use this to inject custom recorder (e.g. call raw vulkan api)
     void setRecordFunc(const RecordFunc& f);
     virtual ~CommandBufferRecorder();
-    virtual void recordCommandBuffer(const CommandBuffer &commandBuffer, const VulkanAppContext &context,
+    virtual void recordCommandBuffer(const CommandBuffer &commandBuffer, const DeviceContext &context,
                              const FrameInfo &frameInfo) const;
 
     template<typename T, typename... Args>

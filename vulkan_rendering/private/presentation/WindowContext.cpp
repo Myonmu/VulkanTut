@@ -4,14 +4,14 @@
 
 #include "WindowContext.h"
 #include <VulkanAppContext.h>
-
+#include "GlfwWindow.h"
 #include "DeviceContext.h"
 
 WindowContext::~WindowContext() = default;
 
-WindowContext::WindowContext(const DeviceContext &ctx, const char *name, int width, int height, QueueFamily requiredQueueFamilies)
+WindowContext::WindowContext(DeviceContext &ctx, const char *name, int width, int height, QueueFamily requiredQueueFamilies)
     : SubContext(ctx), name(name), width(width), height(height), requiredQueueFamilies(requiredQueueFamilies) {
-    window = std::make_unique<GlfwWindow>(ctx.context, height, width, name, &frameBufferResizeCallback);
+    window = std::make_unique<GlfwWindow>(*this, height, width, name, &frameBufferResizeCallback);
     surface = std::make_unique<VulkanSurface>(*this);
     if (ctx.isLogicalDeviceCreated()) {
         init();
@@ -23,7 +23,9 @@ void WindowContext::init() {
 }
 
 void WindowContext::createFrameBuffers(const RenderPass& renderPass) {
+    if (frameBuffers != nullptr) return;
     frameBuffers = std::make_unique<FrameBuffers>(*this, renderPass);
+    renderer = std::make_unique<VulkanRenderer>(*this);
 }
 
 void WindowContext::resize() {
@@ -38,9 +40,13 @@ void WindowContext::resize() {
 }
 
 void WindowContext::frameBufferResizeCallback(GLFWwindow *window, int width, int height) {
-    const auto app = static_cast<VulkanAppContext *>(glfwGetWindowUserPointer(window));
-    app->renderer.signalResize();
+    const GlfwWindow* w = static_cast<GlfwWindow *>(glfwGetWindowUserPointer(window));
 }
+
+void WindowContext::closeWindow() {
+
+}
+
 
 CTX_FORWARD_GET_BODY(WindowContext, VulkanInstance, vulkanInstance)
 CTX_FORWARD_GET_BODY(WindowContext, PhysicalDevice, physicalDevice)

@@ -6,7 +6,9 @@
 
 #include <VulkanAppContext.h>
 
+#include "DeviceContext.h"
 #include "FrameInfo.h"
+#include "WindowContext.h"
 
 
 RenderPassRecorder::RenderPassRecorder(RenderPass &renderPass) : renderPass(renderPass) {
@@ -19,14 +21,16 @@ RenderPassRecorder::~RenderPassRecorder() {
 }
 
 
-void RenderPassRecorder::recordRenderPass(const CommandBuffer &commandBuffer, const VulkanAppContext &context,
+void RenderPassRecorder::recordRenderPass(const CommandBuffer &commandBuffer, const DeviceContext &context,
                                           const FrameInfo &frameInfo) const {
+    auto& frameBuffers = context.get_windowContext_at(frameInfo.windowId).get_frameBuffers();
+    auto& swapChain = context.get_windowContext_at(frameInfo.windowId).get_swapChain();
     VkRenderPassBeginInfo renderPassInfo{};
     renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
     renderPassInfo.renderPass = renderPass;
-    renderPassInfo.framebuffer = context.frameBuffers.getRaw()[frameInfo.imageIndex];
+    renderPassInfo.framebuffer = frameBuffers.getRaw()[frameInfo.imageIndex];
     renderPassInfo.renderArea.offset = {0, 0};
-    renderPassInfo.renderArea.extent = context.swapChain.swapChainExtent;
+    renderPassInfo.renderArea.extent = swapChain.swapChainExtent;
 
     VkClearValue clearColor = {{{0.0f, 0.0f, 0.0f, 1.0f}}};
     renderPassInfo.clearValueCount = 1;

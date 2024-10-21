@@ -10,6 +10,7 @@
 #include "CommandBufferCmd.h"
 
 
+struct WindowContext;
 class CommandBuffer;
 struct FrameInfo;
 
@@ -26,7 +27,7 @@ public:
 
     ~RenderPassRecorder();
 
-    void recordRenderPass(const CommandBuffer &commandBuffer, const VulkanAppContext &context,
+    void recordRenderPass(const CommandBuffer &commandBuffer, const DeviceContext &context,
                           const FrameInfo &frameInfo) const;
 
     template<typename T, typename... Args>

@@ -14,12 +14,10 @@ class BindPipeline final : public CommandBufferCmd{
 public:
     explicit BindPipeline(VkPipelineBindPoint bindPoint) : bindPoint(bindPoint) {}
 
-    void execute(const CommandBuffer &commandBuffer, const VulkanAppContext &context, const FrameInfo &frameInfo) override;
+    void execute(const CommandBuffer &commandBuffer, const DeviceContext &context, const FrameInfo &frameInfo) override {
+        vkCmdBindPipeline(commandBuffer, bindPoint, context.vulkanPipeline);
+    }
 };
-
-inline void BindPipeline::execute(const CommandBuffer &commandBuffer, const VulkanAppContext &context, const FrameInfo &frameInfo) {
-    vkCmdBindPipeline(commandBuffer, bindPoint, context.vulkanPipeline);
-}
 
 
 #endif //BINDPIPELINE_H

@@ -21,7 +21,7 @@ public:
         buffer(buffer), width(width), height(height) {
     }
 
-    void execute(const CommandBuffer &commandBuffer, const VulkanAppContext &context,
+    void execute(const CommandBuffer &commandBuffer, const DeviceContext &context,
                  const FrameInfo &frameInfo) override {
         VkBufferImageCopy region{};
         region.bufferOffset = 0;

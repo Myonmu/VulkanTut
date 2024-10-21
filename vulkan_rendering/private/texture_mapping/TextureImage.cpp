@@ -81,7 +81,7 @@ uint32_t TextureImage::findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags
 }
 
 void TextureImage::stage() {
-    CommandBuffer cmd{ctx};
+    CommandBuffer cmd{ctx, QueueFamily::QUEUE_FAMILY_GRAPHICS};
     CommandBufferRecorder recorder{};
 
     recorder.enqueueCommand<CopyBufferToImage>(stagingBuffer, *this,
@@ -89,7 +89,7 @@ void TextureImage::stage() {
                                                static_cast<uint32_t>(height)
     );
 
-    recorder.recordCommandBuffer(cmd, ctx.context, FrameInfo::DONT_CARE);
+    recorder.recordCommandBuffer(cmd, ctx, FrameInfo::DONT_CARE);
 
     cmd.executeImmediate();
 }
@@ -101,7 +101,7 @@ void TextureImage::transitionLayout(VkImageLayout newLayout) {
                                                    format,
                                                    currentLayout,
                                                    newLayout);
-    recorder.recordCommandBuffer(cmd, ctx.context, FrameInfo::DONT_CARE);
+    recorder.recordCommandBuffer(cmd, ctx, FrameInfo::DONT_CARE);
     cmd.executeImmediate();
     currentLayout = newLayout;
 }

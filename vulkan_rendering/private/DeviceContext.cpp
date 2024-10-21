@@ -8,19 +8,24 @@
 
 #include "QueueFamilyIndices.h"
 
-DeviceContext::DeviceContext(const VulkanAppContext &ctx, VulkanDeviceSetupProcedure &setupProcedure) : SubContext(ctx) {
+DeviceContext::DeviceContext(VulkanAppContext &ctx, VulkanDeviceSetupProcedure &setupProcedure) : SubContext(ctx) {
     setupProcedure.createWindows(*this);
+    init();
+    setupProcedure.createRenderPasses(*this);
+    setupProcedure.createDescriptorContexts(*this);
 }
 
 void DeviceContext::createWindow(const char *name, int width, int height, QueueFamily requiredQueueFamilies) {
     // when the logical device is not yet created, adding a new window (surface) is safe
     if (!isDeviceCreated) {
-        create_windowContext(*this, name, width, height, requiredQueueFamilies);
+        const auto id = create_windowContext(name, width, height, requiredQueueFamilies);
+        get_windowContext_at(id).id = id;
     } else {
         // or when required queue families are already satisfied
         if (auto combinedRequirements = getCombinedQueueFamilyRequirements();
             (combinedRequirements | requiredQueueFamilies) == combinedRequirements) {
-            create_windowContext(std::make_unique<WindowContext>(*this, name, width, height, requiredQueueFamilies));
+            const auto id = create_windowContext( name, width, height, requiredQueueFamilies);
+            get_windowContext_at(id).id = id;
         } else {
             // or else, requiring a new queue family would cause a device recreation
             // we do not consider allocating a new physical device for now.
@@ -42,7 +47,7 @@ void DeviceContext::init() {
     queryPresentQueues(get_physicalDevice(), *queueFamilyIndices);
     logicalDevice = std::make_unique<LogicalDevice>(*this);
     for (auto id: get_queueFamilyIndices().getUniqueQueueFamilyIndices()) {
-        create_queueContext(*this, id, 0);
+        create_queueContext(id, 0);
     }
 
     isDeviceCreated = true;
@@ -78,8 +83,12 @@ QueueContext &DeviceContext::getPresentQueueContext(const VulkanSurface &surface
 }
 
 QueueContext &DeviceContext::getCommonQueueContext(const QueueFamily queueFamily) const {
-    const auto id = (*queueFamilyIndices)[queueFamily].value();
+    const auto id = queueFamilyIndices->getCommonQueueFamilyIndex(queueFamily).value();
     return get_queueContext_at(id);
+}
+
+void DeviceContext::bindRenderPassToWindow(const uint32_t windowId, const uint32_t renderPassId) const {
+    get_windowContext_at(windowId).createFrameBuffers(get_renderPass_at(renderPassId));
 }
 
 

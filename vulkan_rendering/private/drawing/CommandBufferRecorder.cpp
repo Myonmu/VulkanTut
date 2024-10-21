@@ -29,7 +29,7 @@ void CommandBufferRecorder::endRecordCommandBuffer(const CommandBuffer &commandB
     }
 }
 
-void CommandBufferRecorder::recordCommandBuffer(const CommandBuffer &commandBuffer, const VulkanAppContext &context,
+void CommandBufferRecorder::recordCommandBuffer(const CommandBuffer &commandBuffer, const DeviceContext &context,
                                                 const FrameInfo &frameInfo) const {
     beginRecordCommandBuffer(commandBuffer);
 

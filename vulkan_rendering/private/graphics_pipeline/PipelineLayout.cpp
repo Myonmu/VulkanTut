@@ -5,7 +5,6 @@
 #include "PipelineLayout.h"
 
 #include "DeviceContext.h"
-#include "VulkanAppContext.h"
 
 PipelineLayout::PipelineLayout(DeviceContext &context, std::vector<VkDescriptorSetLayout> layouts): VulkanResource(context) {
     VkPipelineLayoutCreateInfo pipelineLayoutInfo{};

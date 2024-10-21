@@ -9,6 +9,7 @@
 #include <QueueFamilyIndices.h>
 #include <SwapChain.h>
 #include <VulkanInstance.h>
+#include <VulkanRenderer.h>
 #include <VulkanSurface.h>
 
 #include "ContextMacros.h"
@@ -25,11 +26,14 @@ struct WindowContext : public SubContext<DeviceContext>{
     int height;
     QueueFamily requiredQueueFamilies;
     CTX_PROPERTY(GlfwWindow, window)
+
     CTX_PROPERTY(VulkanSurface, surface)
     // requires device
     CTX_PROPERTY(SwapChain, swapChain)
     // requires render pass
     CTX_PROPERTY(FrameBuffers, frameBuffers)
+
+    CTX_PROPERTY(VulkanRenderer, renderer)
 
     CTX_FORWARD_GET_DECL(VulkanInstance, vulkanInstance)
     CTX_FORWARD_GET_DECL(PhysicalDevice, physicalDevice)
@@ -37,16 +41,19 @@ struct WindowContext : public SubContext<DeviceContext>{
     static void frameBufferResizeCallback(GLFWwindow *window, int width, int height);
     ~WindowContext() override;
 
-    WindowContext(const DeviceContext &ctx, const char *name, int width, int height, QueueFamily requiredQueueFamilies);
+    WindowContext(DeviceContext &ctx, const char *name, int width, int height, QueueFamily requiredQueueFamilies);
 
     void resize();
-private:
-    // should be called after device creation
-    void init();
+
+    void closeWindow();
 
     void createFrameBuffers(const RenderPass& renderPass);
 
-
+    [[nodiscard]] uint32_t get_windowId() const{ return id;}
+private:
+    uint32_t id;
+    // should be called after device creation
+    void init();
 };
 
 

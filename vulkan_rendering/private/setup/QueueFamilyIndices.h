@@ -35,11 +35,12 @@ inline QueueFamily operator&(QueueFamily a, QueueFamily b) {
 struct QueueFamilyIndices {
 private:
     bool presentQueryFailed = false;
+
 public:
     QueueFamily requiredBits;
     std::vector<VkQueueFamilyProperties> queueFamilies;
     std::unordered_map<QueueFamily, uint32_t> indices;
-    std::unordered_map<const VulkanSurface*, uint32_t> presentIndices;
+    std::unordered_map<const VulkanSurface *, uint32_t> presentIndices;
 
     [[nodiscard]] bool isComplete() const {
         // For each required bit in `requiredBits`, check if the corresponding index is valid
@@ -57,24 +58,20 @@ public:
         return true; // All required bits are satisfied
     }
 
-    std::optional<uint32_t> operator[](const QueueFamily index) {
-        if(index == QueueFamily::QUEUE_FAMILY_PRESENT)
+    std::optional<uint32_t> getCommonQueueFamilyIndex(const QueueFamily queueFamily) {
+        if (queueFamily == QueueFamily::QUEUE_FAMILY_PRESENT)
             throw std::invalid_argument("PRESENT queue is surface-dependant, use getPresentQueueFamilyIndex instead.");
-        auto pos = indices.find(index);
+        auto pos = indices.find(queueFamily);
         if (pos != indices.end()) {
-            auto val = indices[index];
+            auto val = indices[queueFamily];
             return {val};
         }
         return {};
     }
 
-    std::optional<uint32_t> getCommonQueueFamilyIndex(const QueueFamily queueFamily) {
-
-    }
-
     QueueFamilyIndices(const PhysicalDevice &device,
                        const QueueFamily queueFamilyFlags)
-    : QueueFamilyIndices(static_cast<VkPhysicalDevice>(device), queueFamilyFlags){
+        : QueueFamilyIndices(static_cast<VkPhysicalDevice>(device), queueFamilyFlags) {
     }
 
     QueueFamilyIndices(VkPhysicalDevice device, const QueueFamily queueFamilyFlags): requiredBits(queueFamilyFlags) {
@@ -95,22 +92,22 @@ public:
         return uniqueIndices;
     }
 
-    [[nodiscard]] size_t getQueueFamilyIndicesCount(const VulkanSurface& surface) const {
+    [[nodiscard]] size_t getQueueFamilyIndicesCount(const VulkanSurface &surface) const {
         return indices.size() + (presentIndices.contains(&surface) ? 1 : 0);
     }
 
-    void fillQueueFamilyIndicesArray(uint32_t arr[],const VulkanSurface& surface) const {
+    void fillQueueFamilyIndicesArray(uint32_t arr[], const VulkanSurface &surface) const {
         int i = 0;
         for (const auto &entry: indices) {
             arr[i] = entry.second;
             i++;
         }
-        if(const auto present = presentIndices.find(&surface); present != presentIndices.end()) {
+        if (const auto present = presentIndices.find(&surface); present != presentIndices.end()) {
             arr[i] = present->second;
         }
     }
 
-    [[nodiscard]] std::optional<uint32_t> getPresentQueueFamilyIndex(const VulkanSurface& surface) const {
+    [[nodiscard]] std::optional<uint32_t> getPresentQueueFamilyIndex(const VulkanSurface &surface) const {
         return presentIndices.find(&surface)->second;
     }
 

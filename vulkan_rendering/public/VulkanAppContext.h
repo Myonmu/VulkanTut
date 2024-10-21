@@ -37,9 +37,7 @@ struct VulkanAppContext {
 
     ~VulkanAppContext();
 
-    void drawFrame();
-
-    LogicalDevice& getLogicalDevice(){throw new std::runtime_error("AppContext does not contain single logical device");};
+    LogicalDevice& getLogicalDevice(){throw std::runtime_error("AppContext does not contain single logical device");};
 
     template<class T, class... Args>
     static VulkanAppContext* createAppContext(const char *appName, Args&&... VAR_ARGS) {

@@ -14,8 +14,3 @@ VulkanAppContext::VulkanAppContext(const char *appName, VulkanSetupProcedure &se
 }
 
 VulkanAppContext::~VulkanAppContext() = default;
-
-
-void VulkanAppContext::drawFrame() {
-    renderer.drawFrame();
-}

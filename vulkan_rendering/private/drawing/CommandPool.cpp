@@ -5,7 +5,6 @@
 #include "CommandPool.h"
 
 #include <QueueFamilyIndices.h>
-#include <VulkanAppContext.h>
 
 #include "DeviceContext.h"
 

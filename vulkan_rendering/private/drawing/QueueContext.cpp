@@ -3,7 +3,7 @@
 //
 
 #include "QueueContext.h"
-
+#include "DeviceContext.h"
 QueueContext::QueueContext(DeviceContext& ctx, const uint32_t queueFamilyIndex, uint32_t queueIndex):
 SubContext(ctx),
 queueFamilyIndex(queueFamilyIndex),

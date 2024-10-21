@@ -8,16 +8,18 @@
 #include "GLFW/glfw3.h"
 
 
-struct VulkanAppContext;
+struct WindowContext;
 
 class GlfwWindow {
 public:
-    GlfwWindow(VulkanAppContext &context, int w, int h, const char *appName, GLFWframebuffersizefun resizeFun);
+    GlfwWindow(WindowContext &context, int w, int h, const char *appName, GLFWframebuffersizefun resizeFun);
 
     ~GlfwWindow();
     operator GLFWwindow*() const {return window;}
+
+    void notifyResize();
 private:
-    VulkanAppContext& ctx;
+    const WindowContext& ctx;
     GLFWwindow* window;
 };
 

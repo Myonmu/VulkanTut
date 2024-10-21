@@ -92,11 +92,15 @@ private:
     }
 
     void mainLoop() {
+        for (const auto& device : context->deviceContexts) {
+            for (const auto& window: device.windowContext) {
+
+            }
+        }
         while (!glfwWindowShouldClose(context->window)) {
             glfwPollEvents();
             context->drawFrame();
         }
-
         vkDeviceWaitIdle(context->getLogicalDevice());
     }
 };

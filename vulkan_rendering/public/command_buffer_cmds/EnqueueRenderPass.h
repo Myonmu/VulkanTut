@@ -14,13 +14,10 @@ public:
     explicit EnqueueRenderPass(RenderPassRecorder& recorder): recorder(recorder) {
 
     }
-    void execute(const CommandBuffer &commandBuffer, const VulkanAppContext &context, const FrameInfo &frameInfo) override;
+    void execute(const CommandBuffer &commandBuffer, const DeviceContext &context, const FrameInfo &frameInfo) override {
+        recorder.recordRenderPass(commandBuffer, context,  frameInfo);
+    }
 };
-
-inline void EnqueueRenderPass::execute(const CommandBuffer &commandBuffer, const VulkanAppContext &context, const FrameInfo &frameInfo) {
-    recorder.recordRenderPass(commandBuffer, context,  frameInfo);
-}
-
 
 
 

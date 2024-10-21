@@ -28,7 +28,8 @@ public:
 
     void createRenderPasses(DeviceContext &deviceContext) override {
         auto format = deviceContext.get_windowContext_at(0).swapChain->swapChainImageFormat;
-        deviceContext.create_renderPass(format);
+        const auto passId = deviceContext.create_renderPass(format);
+        deviceContext.bindRenderPassToWindow(0,passId);
     }
 };
 

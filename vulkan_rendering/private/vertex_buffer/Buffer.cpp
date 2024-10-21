@@ -72,7 +72,7 @@ void Buffer::copyBuffer(Buffer &srcBuffer, Buffer &dstBuffer, DeviceContext& ctx
     CommandBufferRecorder recorder{};
 
     recorder.enqueueCommand<CopyBuffer>(srcBuffer, dstBuffer, 0, 0, size);
-    recorder.recordCommandBuffer(cmd, ctx.context, FrameInfo::DONT_CARE);
+    recorder.recordCommandBuffer(cmd, ctx, FrameInfo::DONT_CARE);
 
     cmd.executeImmediate();
 }

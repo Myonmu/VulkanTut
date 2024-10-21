@@ -14,16 +14,13 @@ class CommandBuffer;
 
 class BindDescriptorSet final : public CommandBufferCmd {
 public:
-    void execute(const CommandBuffer &commandBuffer, const VulkanAppContext &context, const FrameInfo &frameInfo) override;
+    void execute(const CommandBuffer &commandBuffer, const DeviceContext &context,
+                 const FrameInfo &frameInfo) override {
+        vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
+                                context.graphicsPipeline,
+                                0, 1, &context.descriptorSets.getRaw()[frameInfo.currentFrameIndex],
+                                0, nullptr);
+    }
 };
-
-inline void BindDescriptorSet::execute(
-    const CommandBuffer &commandBuffer,
-    const VulkanAppContext &context,
-    const FrameInfo &frameInfo) {
-    vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, context.graphicsPipeline,
-                            0, 1, &context.descriptorSets.getRaw()[frameInfo.currentFrameIndex],
-                            0, nullptr);
-}
 
 #endif //BINDDESCRIPTORSET_H
