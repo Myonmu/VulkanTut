@@ -2,8 +2,8 @@
 // Created by miska on 2024/10/19.
 //
 
-#ifndef VULKANQUEUE_H
-#define VULKANQUEUE_H
+#pragma once
+
 #include <VulkanResource.h>
 
 #include "vulkan/vulkan_core.h"
@@ -18,5 +18,3 @@ public:
 };
 
 
-
-#endif //VULKANQUEUE_H

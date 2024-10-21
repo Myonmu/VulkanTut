@@ -2,8 +2,8 @@
 // Created by miska on 2024/02/11.
 //
 
-#ifndef VULKANTUT_GRAPHICSPIPELINE_H
-#define VULKANTUT_GRAPHICSPIPELINE_H
+#pragma once
+
 
 #include "ShaderModule.h"
 
@@ -17,4 +17,3 @@ public:
 };
 
 
-#endif //VULKANTUT_GRAPHICSPIPELINE_H

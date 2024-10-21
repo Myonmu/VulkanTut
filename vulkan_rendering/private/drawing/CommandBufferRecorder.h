@@ -3,8 +3,8 @@
 //https://vulkan-tutorial.com/Drawing_a_triangle/Drawing/Command_buffers#page_Command-buffer-recording
 //
 
-#ifndef COMMANDBUFFERRECORDER_H
-#define COMMANDBUFFERRECORDER_H
+#pragma once
+
 #include <CommandBuffer.h>
 #include <vector>
 
@@ -46,5 +46,3 @@ public:
     }
 };
 
-
-#endif //COMMANDBUFFERRECORDER_H

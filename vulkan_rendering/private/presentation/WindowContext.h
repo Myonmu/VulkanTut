@@ -2,8 +2,8 @@
 // Created by miska on 2024/10/13.
 //
 
-#ifndef WINDOWCONTEXT_H
-#define WINDOWCONTEXT_H
+#pragma once
+
 #include <FrameBuffers.h>
 #include <GlfwWindow.h>
 #include <QueueFamilyIndices.h>
@@ -57,5 +57,3 @@ private:
 };
 
 
-
-#endif //WINDOWCONTEXT_H

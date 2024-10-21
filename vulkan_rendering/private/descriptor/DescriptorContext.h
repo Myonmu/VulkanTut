@@ -2,8 +2,7 @@
 // Created by Tereza on 10/12/2024.
 //
 
-#ifndef DESCRIPTORCONTEXT_H
-#define DESCRIPTORCONTEXT_H
+#pragma once
 #include "ContextMacros.h"
 #include "DescriptorPool.h"
 #include "DescriptorSetLayout.h"
@@ -18,6 +17,3 @@ struct DescriptorContext: public SubContext<DeviceContext>{
 
     DescriptorContext(DeviceContext &ctx, const std::vector<DescriptorSetLayoutBinding> &bindings);
 };
-
-
-#endif //DESCRIPTORCONTEXT_H

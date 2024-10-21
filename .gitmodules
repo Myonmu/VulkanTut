@@ -4,3 +4,6 @@ url = https://github.com/Myonmu/glfw
 [submodule "glm"]
 path = libs/glm
 url = https://github.com/Myonmu/glm
+[submodule "libs/SPIRV-Reflect"]
+	path = libs/SPIRV-Reflect
+	url = https://github.com/Myonmu/SPIRV-Reflect

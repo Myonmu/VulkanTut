@@ -2,8 +2,8 @@
 // Created by miska on 2024/02/10.
 //
 
-#ifndef VULKANTUT_VULKANSURFACE_H
-#define VULKANTUT_VULKANSURFACE_H
+#pragma once
+
 
 #include <vulkan/vulkan_core.h>
 #include "VulkanResource.h"
@@ -18,4 +18,3 @@ private:
     void createSurface(WindowContext& context);
 };
 
-#endif //VULKANTUT_VULKANSURFACE_H

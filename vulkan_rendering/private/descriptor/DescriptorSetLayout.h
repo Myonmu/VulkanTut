@@ -2,8 +2,8 @@
 // Created by miska on 2024/08/21.
 //
 
-#ifndef DESCRIPTORSETLAYOUT_H
-#define DESCRIPTORSETLAYOUT_H
+#pragma once
+
 #include <vector>
 #include <VulkanResource.h>
 #include <vulkan/vulkan_core.h>
@@ -20,6 +20,3 @@ public:
     ~DescriptorSetLayout() override;
 };
 
-
-
-#endif //DESCRIPTORSETLAYOUT_H

@@ -2,8 +2,8 @@
 // Created by miska on 2024/02/11.
 //
 
-#ifndef VULKANTUT_FILEUTILITY_H
-#define VULKANTUT_FILEUTILITY_H
+#pragma once
+
 
 #include <vector>
 #include <string>
@@ -15,4 +15,3 @@ public:
 };
 
 
-#endif //VULKANTUT_FILEUTILITY_H

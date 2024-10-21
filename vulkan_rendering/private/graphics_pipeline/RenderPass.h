@@ -2,8 +2,8 @@
 // Created by miska on 2024/02/11.
 //
 
-#ifndef VULKANTUT_RENDERPASS_H
-#define VULKANTUT_RENDERPASS_H
+#pragma once
+
 
 
 #include "VulkanResource.h"
@@ -16,5 +16,3 @@ public:
     ~RenderPass() override;
 };
 
-
-#endif //VULKANTUT_RENDERPASS_H

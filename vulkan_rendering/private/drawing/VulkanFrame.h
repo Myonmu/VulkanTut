@@ -2,8 +2,8 @@
 // Created by miska on 2024/08/06.
 //
 
-#ifndef VULKANFRAME_H
-#define VULKANFRAME_H
+#pragma once
+
 #include <CommandBufferRecorder.h>
 #include <vulkan/vulkan_core.h>
 
@@ -37,6 +37,3 @@ private:
     bool frameBufferResized = false;
 };
 
-
-
-#endif //VULKANFRAME_H

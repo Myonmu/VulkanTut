@@ -2,8 +2,8 @@
 // Created by miska on 2024/08/06.
 //
 
-#ifndef VERTEX_H
-#define VERTEX_H
+#pragma once
+
 #include <vector>
 #include <array>
 #include <vulkan/vulkan_core.h>
@@ -48,4 +48,3 @@ struct Vertex {
     static const std::vector<uint32_t> testIndices;
 };
 
-#endif //VERTEX_H

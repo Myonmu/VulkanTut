@@ -2,8 +2,8 @@
 // Created by miska on 2024/10/10.
 //
 
-#ifndef TEXTUREANISOTROPYINFO_H
-#define TEXTUREANISOTROPYINFO_H
+#pragma once
+
 #include <optional>
 #include <vulkan/vulkan_core.h>
 
@@ -25,6 +25,3 @@ private:
 
 };
 
-
-
-#endif //TEXTUREANISOTROPYINFO_H

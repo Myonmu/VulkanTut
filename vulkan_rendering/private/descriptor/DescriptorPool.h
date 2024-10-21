@@ -2,8 +2,7 @@
 // Created by miska on 2024/08/23.
 //
 
-#ifndef DESCRIPTORPOOL_H
-#define DESCRIPTORPOOL_H
+#pragma once
 #include <VulkanResource.h>
 #include <vulkan/vulkan_core.h>
 
@@ -20,7 +19,3 @@ public:
     explicit DescriptorPool(DescriptorContext& ctx);
     ~DescriptorPool() override;
 };
-
-
-
-#endif //DESCRIPTORPOOL_H

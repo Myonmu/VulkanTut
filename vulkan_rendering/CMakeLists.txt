@@ -121,6 +121,7 @@ set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
 include_directories(${CMAKE_SOURCE_DIR}/libs/glfw/include)
 include_directories(${CMAKE_SOURCE_DIR}/libs/glm/include)
 include_directories(${CMAKE_SOURCE_DIR}/libs/stb)
+include_directories(${CMAKE_SOURCE_DIR}/libs/SPIRV-Reflect)
 
 # Link GLFW, Vulkan, and GLM with the library
 target_link_libraries(Vk glfw Vulkan::Vulkan glm)

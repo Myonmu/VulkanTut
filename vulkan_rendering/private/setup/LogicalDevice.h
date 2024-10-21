@@ -3,8 +3,8 @@
 // https://vulkan-tutorial.com/Drawing_a_triangle/Setup/Logical_device_and_queues
 //
 
-#ifndef VULKANTUT_LOGICALDEVICE_H
-#define VULKANTUT_LOGICALDEVICE_H
+#pragma once
+
 
 #include <VulkanResource.h>
 #include <vulkan/vulkan_core.h>
@@ -20,4 +20,3 @@ private:
 };
 
 
-#endif //VULKANTUT_LOGICALDEVICE_H

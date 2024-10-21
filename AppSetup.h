@@ -2,8 +2,8 @@
 // Created by miska on 2024/10/20.
 //
 
-#ifndef APPSETUP_H
-#define APPSETUP_H
+#pragma once
+
 #include <QueueFamilyIndices.h>
 #include <VulkanAppContext.h>
 
@@ -41,4 +41,4 @@ public:
 };
 
 
-#endif //APPSETUP_H
+

@@ -2,8 +2,8 @@
 // Created by miska on 10/10/2024.
 //
 
-#ifndef TEXTUREFILTERMODE_H
-#define TEXTUREFILTERMODE_H
+#pragma once
+
 #include <vulkan/vulkan_core.h>
 
 
@@ -14,6 +14,3 @@ struct TextureFilterMode {
     const static TextureFilterMode LINEAR;
     const static TextureFilterMode NEAREST;
 };
-
-
-#endif //TEXTUREFILTERMODE_H

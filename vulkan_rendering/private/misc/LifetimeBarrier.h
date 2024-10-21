@@ -2,8 +2,7 @@
 // Created by Tereza on 10/18/2024.
 //
 
-#ifndef LIFETIMEBARRIER_H
-#define LIFETIMEBARRIER_H
+#pragma once
 
 enum class LifetimeBarrierEventType {
 
@@ -17,5 +16,3 @@ public:
 };
 
 
-
-#endif //LIFETIMEBARRIER_H

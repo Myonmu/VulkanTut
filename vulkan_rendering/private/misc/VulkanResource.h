@@ -1,9 +1,7 @@
 //
 // Created by miska on 2024/02/10.
 //
-
-#ifndef VULKANTUT_VULKANRESOURCE_H
-#define VULKANTUT_VULKANRESOURCE_H
+#pragma once
 
 #include <iostream>
 
@@ -40,5 +38,3 @@ public:
     }
 };
 
-
-#endif //VULKANTUT_VULKANRESOURCE_H

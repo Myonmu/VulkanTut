@@ -2,8 +2,8 @@
 // Created by miska on 2024/10/13.
 //
 
-#ifndef SUBCONTEXT_H
-#define SUBCONTEXT_H
+#pragma once
+
 
 
 class LogicalDevice;
@@ -20,5 +20,3 @@ struct SubContext {
 };
 
 
-
-#endif //SUBCONTEXT_H

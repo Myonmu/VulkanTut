@@ -2,8 +2,8 @@
 // Created by miska on 10/10/2024.
 //
 
-#ifndef IMAGEVIEW_H
-#define IMAGEVIEW_H
+#pragma once
+
 #include <VulkanResource.h>
 #include <vulkan/vulkan_core.h>
 
@@ -17,5 +17,3 @@ public:
 };
 
 
-
-#endif //IMAGEVIEW_H

@@ -3,8 +3,8 @@
 // https://vulkan-tutorial.com/Drawing_a_triangle/Drawing/Command_buffers#page_Command-buffer-allocation
 //
 
-#ifndef COMMANDBUFFER_H
-#define COMMANDBUFFER_H
+#pragma once
+
 #include <VulkanResource.h>
 #include <vulkan/vulkan_core.h>
 
@@ -22,6 +22,3 @@ public:
     void executeImmediate();
 };
 
-
-
-#endif //COMMANDBUFFER_H

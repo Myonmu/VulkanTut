@@ -2,8 +2,8 @@
 // Created by miska on 2024/08/20.
 //
 
-#ifndef UNIFORMBUFFEROBJECT_H
-#define UNIFORMBUFFEROBJECT_H
+#pragma once
+
 #include "glm/mat4x4.hpp"
 
 // Remember alignment requirements!
@@ -16,5 +16,3 @@ struct UniformBufferObject {
 };
 
 
-
-#endif //UNIFORMBUFFEROBJECT_H

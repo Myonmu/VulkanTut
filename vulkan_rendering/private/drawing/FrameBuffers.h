@@ -3,8 +3,8 @@
 // https://vulkan-tutorial.com/Drawing_a_triangle/Drawing/Framebuffers
 //
 
-#ifndef FRAMEBUFFERS_H
-#define FRAMEBUFFERS_H
+#pragma once
+
 #include <RenderPass.h>
 #include <vector>
 #include <VulkanResource.h>
@@ -27,5 +27,3 @@ private:
 };
 
 
-
-#endif //FRAMEBUFFERS_H

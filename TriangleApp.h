@@ -1,9 +1,8 @@
 //
 // Created by miska on 2024/02/07.
 //
+#pragma once
 
-#ifndef VULKANTUT_TRIANGLEAPP_H
-#define VULKANTUT_TRIANGLEAPP_H
 
 #include <vector>
 #include <optional>
@@ -105,5 +104,3 @@ private:
     }
 };
 
-
-#endif //VULKANTUT_TRIANGLEAPP_H

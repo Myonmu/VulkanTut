@@ -1,9 +1,8 @@
 //
 // Created by miska on 10/9/2024.
 //
+#pragma once
 
-#ifndef RENDERPASSRECORDER_H
-#define RENDERPASSRECORDER_H
 #include <RenderPass.h>
 #include <vector>
 
@@ -37,5 +36,3 @@ public:
     }
 };
 
-
-#endif //RENDERPASSRECORDER_H

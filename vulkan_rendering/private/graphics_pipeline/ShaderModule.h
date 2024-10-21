@@ -2,8 +2,7 @@
 // Created by miska on 2024/02/11.
 //
 
-#ifndef VULKANTUT_SHADERMODULE_H
-#define VULKANTUT_SHADERMODULE_H
+#pragma once
 
 
 #include "VulkanResource.h"
@@ -19,4 +18,3 @@ public:
 };
 
 
-#endif //VULKANTUT_SHADERMODULE_H

@@ -2,8 +2,8 @@
 // Created by miska on 2024/10/10.
 //
 
-#ifndef TEXTURECOMPAREINFO_H
-#define TEXTURECOMPAREINFO_H
+#pragma once
+
 #include <vulkan/vulkan_core.h>
 
 
@@ -13,5 +13,3 @@ struct TextureCompareInfo {
 };
 
 
-
-#endif //TEXTURECOMPAREINFO_H

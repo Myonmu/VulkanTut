@@ -2,8 +2,8 @@
 // Created by miska on 2024/02/08.
 //
 
-#ifndef VULKANTUT_VALIDATIONLAYERS_H
-#define VULKANTUT_VALIDATIONLAYERS_H
+#pragma once
+
 
 #include <vulkan/vulkan_core.h>
 #include "VulkanResource.h"
@@ -35,4 +35,4 @@ private:
 };
 
 
-#endif //VULKANTUT_VALIDATIONLAYERS_H
+

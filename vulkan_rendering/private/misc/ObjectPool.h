@@ -2,8 +2,8 @@
 // Created by miska on 2024/10/19.
 //
 
-#ifndef OBJECTPOOL_H
-#define OBJECTPOOL_H
+#pragma once
+
 #include <functional>
 #include <queue>
 
@@ -26,5 +26,3 @@ public:
     }
 };
 
-
-#endif //OBJECTPOOL_H

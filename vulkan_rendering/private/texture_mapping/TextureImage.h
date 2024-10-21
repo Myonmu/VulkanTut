@@ -2,8 +2,8 @@
 // Created by miska on 2024/09/02.
 //
 
-#ifndef TEXTUREIMAGE_H
-#define TEXTUREIMAGE_H
+
+#pragma once
 #include <Buffer.h>
 #include <Texture2D.h>
 
@@ -36,4 +36,3 @@ private:
 
 
 
-#endif //TEXTUREIMAGE_H

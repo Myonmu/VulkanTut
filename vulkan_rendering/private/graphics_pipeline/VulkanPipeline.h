@@ -2,9 +2,7 @@
 // Created by miska on 2024/02/11.
 //
 
-#ifndef VULKANTUT_VULKANPIPELINE_H
-#define VULKANTUT_VULKANPIPELINE_H
-
+#pragma once
 
 #include "VulkanResource.h"
 #include "ShaderModule.h"
@@ -34,6 +32,3 @@ private:
     ShaderModule frag;
     ShaderModule vert;
 };
-
-
-#endif //VULKANTUT_VULKANPIPELINE_H

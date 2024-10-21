@@ -2,8 +2,8 @@
 // Created by miska on 2024/10/10.
 //
 
-#ifndef TEXTUREMIPMAPINFO_H
-#define TEXTUREMIPMAPINFO_H
+#pragma once
+
 #include <vulkan/vulkan_core.h>
 
 
@@ -16,6 +16,3 @@ struct TextureMipmapInfo {
     const static TextureMipmapInfo DEFAULT;
 };
 
-
-
-#endif //TEXTUREMIPMAPINFO_H

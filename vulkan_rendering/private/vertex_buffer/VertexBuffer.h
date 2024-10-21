@@ -1,9 +1,8 @@
 //
 // Created by miska on 2024/08/06.
 //
+#pragma once
 
-#ifndef VERTEXBUFFER_H
-#define VERTEXBUFFER_H
 #include <Buffer.h>
 #include <VulkanResource.h>
 
@@ -21,5 +20,3 @@ public:
     operator VkBuffer() const {return buffer;}
 };
 
-
-#endif //VERTEXBUFFER_H

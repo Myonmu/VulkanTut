@@ -2,9 +2,8 @@
 // Created by miska on 10/10/2024.
 //
 
-#ifndef TEXTUREADDRESSINGMODE_H
-#define TEXTUREADDRESSINGMODE_H
-#include "TextureSampler.h"
+#pragma once
+#include "TextureFilterMode.h"
 
 
 struct TextureAddressMode {
@@ -21,5 +20,3 @@ struct TextureAddressMode {
 };
 
 
-
-#endif //TEXTUREADDRESSINGMODE_H

@@ -2,8 +2,8 @@
 // Created by miska on 2024/02/09.
 //
 
-#ifndef VULKANTUT_SWAPCHAIN_H
-#define VULKANTUT_SWAPCHAIN_H
+#pragma once
+
 
 
 #include <vulkan/vulkan_core.h>
@@ -40,6 +40,3 @@ private:
     static VkExtent2D chooseSwapExtend(const VkSurfaceCapabilitiesKHR& capabilities, WindowContext& context);
     void createImageViews();
 };
-
-
-#endif //VULKANTUT_SWAPCHAIN_H

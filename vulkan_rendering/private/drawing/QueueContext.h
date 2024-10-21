@@ -2,8 +2,8 @@
 // Created by miska on 2024/10/19.
 //
 
-#ifndef QUEUECONTEXT_H
-#define QUEUECONTEXT_H
+#pragma once
+
 #include "ContextMacros.h"
 #include "SubContext.h"
 #include "VulkanQueue.h"
@@ -22,6 +22,3 @@ public:
     ~QueueContext() override;
 };
 
-
-
-#endif //QUEUECONTEXT_H

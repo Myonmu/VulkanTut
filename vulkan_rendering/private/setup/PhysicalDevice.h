@@ -2,8 +2,8 @@
 // Created by miska on 2024/02/08.
 //
 
-#ifndef VULKANTUT_PHYSICALDEVICE_H
-#define VULKANTUT_PHYSICALDEVICE_H
+#pragma once
+
 
 #include <vulkan/vulkan_core.h>
 #include "VulkanResource.h"
@@ -19,5 +19,3 @@ private:
     static int rateDeviceSuitability(VkPhysicalDevice device, DeviceContext& context);
 };
 
-
-#endif //VULKANTUT_PHYSICALDEVICE_H

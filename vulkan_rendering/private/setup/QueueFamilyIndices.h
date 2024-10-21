@@ -2,8 +2,8 @@
 // Created by miska on 2024/02/08.
 //
 
-#ifndef VULKANTUT_QUEUEFAMILYINDICES_H
-#define VULKANTUT_QUEUEFAMILYINDICES_H
+#pragma once
+
 
 #include <optional>
 #include <PhysicalDevice.h>
@@ -147,4 +147,4 @@ private:
 };
 
 
-#endif //VULKANTUT_QUEUEFAMILYINDICES_H
+

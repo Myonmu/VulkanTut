@@ -2,8 +2,8 @@
 // Created by miska on 2024/02/08.
 //
 
-#ifndef VULKANTUT_VULKANAPPCONTEXT_H
-#define VULKANTUT_VULKANAPPCONTEXT_H
+#pragma once
+
 #include <DescriptorSetLayout.h>
 #include <DescriptorSets.h>
 #include <ValidationLayers.h>
@@ -44,6 +44,3 @@ struct VulkanAppContext {
         return new VulkanAppContext(appName, &T(std::forward<Args>(VAR_ARGS)...));
     }
 };
-
-
-#endif //VULKANTUT_VULKANAPPCONTEXT_H

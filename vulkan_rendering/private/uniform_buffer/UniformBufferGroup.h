@@ -2,8 +2,8 @@
 // Created by miska on 2024/08/21.
 //
 
-#ifndef UNIFORMBUFFERGROUP_H
-#define UNIFORMBUFFERGROUP_H
+#pragma once
+
 #include <Buffer.h>
 #include <vector>
 
@@ -22,5 +22,3 @@ public:
 };
 
 
-
-#endif //UNIFORMBUFFERGROUP_H

@@ -3,8 +3,8 @@
 // https://vulkan-tutorial.com/Drawing_a_triangle/Drawing/Command_buffers#page_Command-pools
 //
 
-#ifndef COMMANDPOOL_H
-#define COMMANDPOOL_H
+#pragma once
+
 #include <VulkanResource.h>
 #include <vulkan/vulkan_core.h>
 
@@ -19,5 +19,3 @@ public:
 };
 
 
-
-#endif //COMMANDPOOL_H

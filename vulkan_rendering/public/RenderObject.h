@@ -2,8 +2,8 @@
 // Created by miska on 2024/10/13.
 //
 
-#ifndef RENDEROBJECT_H
-#define RENDEROBJECT_H
+#pragma once
+
 #include "UniformBufferGroup.h"
 #include "DescriptorSets.h"
 
@@ -15,7 +15,3 @@ public:
     std::vector<ImageView*> images{};
     std::vector<TextureSampler*> samplers{};
 };
-
-
-
-#endif //RENDEROBJECT_H

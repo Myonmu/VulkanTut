@@ -2,8 +2,8 @@
 // Created by miska on 2024/08/27.
 //
 
-#ifndef DESCRIPTORSETS_H
-#define DESCRIPTORSETS_H
+#pragma once
+
 #include <vector>
 #include <VulkanResource.h>
 #include <vulkan/vulkan_core.h>
@@ -29,7 +29,3 @@ public:
     void AddTextureImageView(ImageView* textureImage);
     void AddTextureSampler(TextureSampler* textureSampler);
 };
-
-
-
-#endif //DESCRIPTORSETS_H

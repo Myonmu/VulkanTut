@@ -2,8 +2,8 @@
 // Created by miska on 2024/08/14.
 //
 
-#ifndef BUFFER_H
-#define BUFFER_H
+#pragma once
+
 
 #include <VulkanResource.h>
 #include <vulkan/vulkan_core.h>
@@ -27,5 +27,3 @@ protected:
 };
 
 
-
-#endif //BUFFER_H

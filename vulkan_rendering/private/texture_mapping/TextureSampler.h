@@ -2,8 +2,8 @@
 // Created by miska on 10/10/2024.
 //
 
-#ifndef TEXTURESAMPLER_H
-#define TEXTURESAMPLER_H
+#pragma once
+
 #include <VulkanResource.h>
 #include <vulkan/vulkan_core.h>
 
@@ -30,5 +30,3 @@ public:
     ~TextureSampler() override;
 };
 
-
-#endif //TEXTURESAMPLER_H

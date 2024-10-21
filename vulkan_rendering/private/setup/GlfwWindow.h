@@ -2,8 +2,8 @@
 // Created by miska on 2024/08/14.
 //
 
-#ifndef GLFWWINDOW_H
-#define GLFWWINDOW_H
+#pragma once
+
 
 #include "GLFW/glfw3.h"
 
@@ -24,5 +24,3 @@ private:
 };
 
 
-
-#endif //GLFWWINDOW_H
