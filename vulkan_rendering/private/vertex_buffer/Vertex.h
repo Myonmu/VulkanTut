@@ -24,6 +24,17 @@ struct Vertex {
     }
 
     static std::array<VkVertexInputAttributeDescription, 3> getAttributeDescriptions() {
+        /* NOTE:
+         *
+         * Unlike HLSL that has POSITION, TEXCOORD0 semantics,
+         * GLSL only has locations e.g. layout( location = 0 )
+         * This suggests if the location mismatches c++ declarations,
+         * e.g. swizzling position and color,
+         * the SPIRV-Cross reflection will *not* know such swizzle happened,
+         * and then we cannot counter it by swizzle the vertex input data.
+         *
+         *  Hence, the vertex input attribute description is hard-coded here.
+         */
         std::array<VkVertexInputAttributeDescription, 3> attributeDescriptions{};
         attributeDescriptions[0].binding = 0;
         attributeDescriptions[0].format = VK_FORMAT_R32G32B32_SFLOAT;
