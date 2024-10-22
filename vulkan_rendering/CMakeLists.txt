@@ -106,6 +106,8 @@ set(SOURCES
         private/misc/SubContext.cpp
         private/graphics_pipeline/Material.cpp
         private/graphics_pipeline/Material.h
+        private/graphics_pipeline/Shader.cpp
+        private/graphics_pipeline/Shader.h
 )
 
 # Create static library

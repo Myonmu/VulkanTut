@@ -16,19 +16,13 @@ VulkanPipeline::VulkanPipeline(DeviceContext &context,
                                const RenderPass &renderPass,
                                const SwapChain &swapChain)
     : VulkanResource(context),
-      frag("../shaders/frag.spv", ctx),
-      vert("../shaders/vert.spv", ctx) {
+      frag("../shaders/frag.spv", ctx, VK_SHADER_STAGE_FRAGMENT_BIT),
+      vert("../shaders/vert.spv", ctx, VK_SHADER_STAGE_VERTEX_BIT) {
     VkPipelineShaderStageCreateInfo vertShaderStageInfo{};
-    vertShaderStageInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
-    vertShaderStageInfo.stage = VK_SHADER_STAGE_VERTEX_BIT;
-    vertShaderStageInfo.module = vert;
-    vertShaderStageInfo.pName = "main";
+    vert.fillShaderStageCreateInfo(vertShaderStageInfo);
 
     VkPipelineShaderStageCreateInfo fragShaderStageInfo{};
-    fragShaderStageInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
-    fragShaderStageInfo.stage = VK_SHADER_STAGE_FRAGMENT_BIT;
-    fragShaderStageInfo.module = frag;
-    fragShaderStageInfo.pName = "main";
+    frag.fillShaderStageCreateInfo(fragShaderStageInfo);
 
     VkPipelineShaderStageCreateInfo shaderStages[] = {vertShaderStageInfo, fragShaderStageInfo};
     VkGraphicsPipelineCreateInfo pipelineInfo{};

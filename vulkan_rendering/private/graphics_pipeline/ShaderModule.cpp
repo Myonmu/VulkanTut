@@ -10,8 +10,8 @@
 #include "VulkanAppContext.h"
 
 
-ShaderModule::ShaderModule(const std::vector<char>& code , DeviceContext& context):
-VulkanResource(context){
+ShaderModule::ShaderModule(const std::vector<char>& code , DeviceContext& context, VkShaderStageFlagBits stageFlags):
+VulkanResource(context), stageFlags(stageFlags){
     VkShaderModuleCreateInfo createInfo{};
     createInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
     createInfo.codeSize = code.size();
@@ -25,7 +25,8 @@ VulkanResource(context){
     }
 }
 
-ShaderModule::ShaderModule(std::string shaderPath, DeviceContext& context) : VulkanResource(context){
+ShaderModule::ShaderModule(std::string shaderPath, DeviceContext& context, VkShaderStageFlagBits stageFlags) :
+VulkanResource(context), stageFlags(stageFlags){
     auto code = FileUtility::ReadFile(shaderPath);
     VkShaderModuleCreateInfo createInfo{};
     createInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
@@ -42,4 +43,12 @@ ShaderModule::ShaderModule(std::string shaderPath, DeviceContext& context) : Vul
 
 ShaderModule::~ShaderModule() {
     vkDestroyShaderModule(ctx.getLogicalDevice(), resource, nullptr);
+}
+
+
+void ShaderModule::fillShaderStageCreateInfo(VkPipelineShaderStageCreateInfo &createInfo) const {
+    createInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
+    createInfo.stage = stageFlags;
+    createInfo.module = resource;
+    createInfo.pName = entryPoint;
 }
