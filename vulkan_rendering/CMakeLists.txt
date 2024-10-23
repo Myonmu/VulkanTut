@@ -108,6 +108,8 @@ set(SOURCES
         private/graphics_pipeline/Material.h
         private/graphics_pipeline/Shader.cpp
         private/graphics_pipeline/Shader.h
+        private/graphics_pipeline/ShaderReflectionResult.cpp
+        private/graphics_pipeline/ShaderReflectionResult.h
 )
 
 # Create static library

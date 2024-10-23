@@ -7,15 +7,15 @@
 #include <FileUtility.h>
 
 #include "DeviceContext.h"
-#include "VulkanAppContext.h"
+#include "Shader.h"
 
 
-ShaderModule::ShaderModule(const std::vector<char>& code , DeviceContext& context, VkShaderStageFlagBits stageFlags):
-VulkanResource(context), stageFlags(stageFlags){
+ShaderModule::ShaderModule(const std::vector<uint32_t> &code, DeviceContext &context,
+                           const VkShaderStageFlagBits stageFlags): VulkanResource(context), stageFlags(stageFlags) {
     VkShaderModuleCreateInfo createInfo{};
     createInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
     createInfo.codeSize = code.size();
-    createInfo.pCode = reinterpret_cast<const uint32_t*>(code.data());
+    createInfo.pCode = code.data();
 
     if (vkCreateShaderModule(context.getLogicalDevice(),
                              &createInfo,
@@ -25,20 +25,13 @@ VulkanResource(context), stageFlags(stageFlags){
     }
 }
 
-ShaderModule::ShaderModule(std::string shaderPath, DeviceContext& context, VkShaderStageFlagBits stageFlags) :
-VulkanResource(context), stageFlags(stageFlags){
-    auto code = FileUtility::ReadFile(shaderPath);
-    VkShaderModuleCreateInfo createInfo{};
-    createInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
-    createInfo.codeSize = code.size();
-    createInfo.pCode = reinterpret_cast<const uint32_t*>(code.data());
+ShaderModule::ShaderModule(const std::string &shaderPath, DeviceContext &context,
+                           const VkShaderStageFlagBits stageFlags) : ShaderModule(
+    FileUtility::ReadSpv(shaderPath), context, stageFlags) {
+}
 
-    if (vkCreateShaderModule(context.getLogicalDevice(),
-                             &createInfo,
-                             nullptr,
-                             &resource) != VK_SUCCESS) {
-        throw std::runtime_error("failed to create shader module!");
-                             }
+ShaderModule::ShaderModule(const Shader& shader, DeviceContext &context):
+ShaderModule(shader.code, context, shader.stage) {
 }
 
 ShaderModule::~ShaderModule() {
@@ -46,9 +39,11 @@ ShaderModule::~ShaderModule() {
 }
 
 
-void ShaderModule::fillShaderStageCreateInfo(VkPipelineShaderStageCreateInfo &createInfo) const {
+VkPipelineShaderStageCreateInfo ShaderModule::getShaderStageCreateInfo() const {
+    VkPipelineShaderStageCreateInfo createInfo{};
     createInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
     createInfo.stage = stageFlags;
     createInfo.module = resource;
     createInfo.pName = entryPoint;
+    return createInfo;
 }

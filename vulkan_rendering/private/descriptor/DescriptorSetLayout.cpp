@@ -12,11 +12,11 @@ DescriptorSetLayout::DescriptorSetLayout(DescriptorContext &ctx, const std::vect
     layoutBindings.resize(bindings.size());
     for (int i = 0; i < layoutBindings.size(); ++i) {
         VkDescriptorSetLayoutBinding b{};
-        b.binding = i;
-        b.descriptorCount = 1;
+        b.binding = bindings[i].binding;
+        b.descriptorCount = bindings[i].descriptorCount;
         b.descriptorType = bindings[i].type;
         b.stageFlags = bindings[i].stageFlags;
-        b.pImmutableSamplers = nullptr;
+        b.pImmutableSamplers = bindings[i].pImmutableSamplers;
         layoutBindings[i] = b;
     }
 

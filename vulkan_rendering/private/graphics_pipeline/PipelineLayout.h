@@ -12,7 +12,7 @@ class DescriptorSetLayout;
 
 class PipelineLayout : public VulkanResource<VkPipelineLayout, DeviceContext>{
 public:
-    explicit PipelineLayout(DeviceContext& context, std::vector<VkDescriptorSetLayout> layouts);
+    explicit PipelineLayout(DeviceContext& context, const std::vector<VkDescriptorSetLayout> &layouts);
     ~PipelineLayout() override;
 };
 

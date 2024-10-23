@@ -6,9 +6,18 @@
 #include <spirv_cross.hpp>
 #include <vector>
 
+#include "DescriptorSetLayoutBinding.h"
+#include "ShaderReflectionResult.h"
+
 class Shader {
     spirv_cross::ShaderResources resources;
+    void analyzeBinding(const spirv_cross::Compiler& compiler, const spirv_cross::Resource& resource, VkDescriptorType type);
 public:
-    explicit Shader(std::vector<uint32_t> code);
+    explicit Shader(std::vector<uint32_t> code, VkShaderStageFlagBits stage);
     ~Shader();
+
+    VkShaderStageFlagBits stage;
+    const std::vector<uint32_t> code;
+    ShaderReflectionResult reflectionResult{};
+    static std::vector<DescriptorSetLayoutBinding> getMergedBindings(std::vector<Shader> shaders);
 };
