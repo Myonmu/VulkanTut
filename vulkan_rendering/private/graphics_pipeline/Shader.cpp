@@ -40,8 +40,12 @@ Shader::Shader(std::vector<uint32_t> code, const VkShaderStageFlagBits stage): s
     }
 }
 
-Shader::~Shader() {
-}
+Shader::~Shader() = default;
 
-std::vector<DescriptorSetLayoutBinding> Shader::getMergedBindings(std::vector<Shader> shaders) {
+ShaderReflectionResult Shader::getMergedBindings(std::vector<Shader> shaders) {
+    ShaderReflectionResult result{};
+    for (auto &shader: shaders) {
+        result.merge(shader.reflectionResult);
+    }
+    return result;
 }

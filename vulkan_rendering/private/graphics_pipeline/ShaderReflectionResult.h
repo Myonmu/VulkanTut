@@ -11,16 +11,19 @@
 struct ShaderReflectionResult {
     std::map<uint32_t, std::map<uint32_t, DescriptorSetLayoutBinding> > descriptorSets{};
 
-    void addBinding(const DescriptorSetLayoutBinding &binding) {
-        if (descriptorSets.contains(binding.setId) && descriptorSets[binding.setId][binding.binding] != binding
-        ) {
-            std::cout << "Conflicting descriptor set declaration found at (" << binding.setId << "," << binding.binding
-                    << ")" << std::endl;
-        }
-        descriptorSets[binding.setId][binding.binding] = binding;
+    void addBinding(const DescriptorSetLayoutBinding &binding);
+
+    uint32_t getMaxSetId() {
+        auto last = descriptorSets.end();
+        --last;
+        return last->first;
     }
 
-    ShaderReflectionResult operator|(const ShaderReflectionResult &a, const ShaderReflectionResult &b) {
-        ShaderReflectionResult result{};
+    uint32_t getMaxBindingInSet(const uint32_t setId) {
+        auto last = descriptorSets[setId].end();
+        --last;
+        return last->first;
     }
+
+    void merge(ShaderReflectionResult &other);
 };

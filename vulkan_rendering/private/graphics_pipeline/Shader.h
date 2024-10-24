@@ -19,5 +19,5 @@ public:
     VkShaderStageFlagBits stage;
     const std::vector<uint32_t> code;
     ShaderReflectionResult reflectionResult{};
-    static std::vector<DescriptorSetLayoutBinding> getMergedBindings(std::vector<Shader> shaders);
+    static ShaderReflectionResult getMergedBindings(std::vector<Shader> shaders);
 };

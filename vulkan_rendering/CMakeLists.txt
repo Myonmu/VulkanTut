@@ -96,8 +96,6 @@ set(SOURCES
         private/misc/ContextMacros.h
         public/VulkanSetupProcedure.h
         public/VulkanSetupProcedure.h
-        private/misc/LifetimeBarrier.cpp
-        private/misc/LifetimeBarrier.h
         private/misc/ObjectPool.h
         private/setup/VulkanQueue.cpp
         private/setup/VulkanQueue.h
@@ -128,6 +126,7 @@ include_directories(${CMAKE_SOURCE_DIR}/libs/glfw/include)
 include_directories(${CMAKE_SOURCE_DIR}/libs/glm/include)
 include_directories(${CMAKE_SOURCE_DIR}/libs/stb)
 include_directories(${CMAKE_SOURCE_DIR}/libs/SPIRV-Cross)
+include_directories(${CMAKE_SOURCE_DIR}/libs/yaml-cpp)
 
 # Link GLFW, Vulkan, and GLM with the library
 target_link_libraries(Vk glfw Vulkan::Vulkan glm)

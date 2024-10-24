@@ -4,8 +4,6 @@
 
 #include "Material.h"
 
-#include <stdexcept>
-
 Material::Material(const std::vector<char> &code, DeviceContext &context) {
 
 }
