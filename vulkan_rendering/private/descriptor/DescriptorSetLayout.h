@@ -4,6 +4,7 @@
 
 #pragma once
 
+#include <map>
 #include <vector>
 #include <VulkanResource.h>
 #include <vulkan/vulkan_core.h>
@@ -16,7 +17,8 @@ struct DescriptorContext;
 class DescriptorSetLayout:public VulkanResource<VkDescriptorSetLayout, DescriptorContext> {
 public:
     std::vector<VkDescriptorSetLayoutBinding> layoutBindings{};
-    explicit DescriptorSetLayout(DescriptorContext& ctx, const std::vector<DescriptorSetLayoutBinding> &bindings);
+    DescriptorSetLayout(DescriptorContext& ctx, const std::vector<DescriptorSetLayoutBinding> &bindings);
+    DescriptorSetLayout(DescriptorContext& ctx, const std::map<uint32_t, DescriptorSetLayoutBinding> &bindings);
     ~DescriptorSetLayout() override;
 };
 

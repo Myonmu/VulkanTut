@@ -16,4 +16,5 @@ struct DescriptorContext: public SubContext<DeviceContext>{
     CTX_PROPERTY(DescriptorPool, descriptorPool)
 
     DescriptorContext(DeviceContext &ctx, const std::vector<DescriptorSetLayoutBinding> &bindings);
+    DescriptorContext(DeviceContext &ctx, const std::map<uint32_t, DescriptorSetLayoutBinding> &bindings);
 };

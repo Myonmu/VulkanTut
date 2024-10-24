@@ -17,10 +17,10 @@ class VulkanPipeline : public VulkanResource<VkPipeline, DeviceContext> {
 public:
     explicit VulkanPipeline(
         DeviceContext &context,
+        const std::vector<Shader> &shaders,
         const PipelineLayout &layout,
-        const RenderPass &renderPass,
-        const SwapChain& swapChain
-        );
+        const RenderPass &renderPass
+    );
 
     ~VulkanPipeline() override;
 
@@ -29,6 +29,5 @@ private:
         VK_DYNAMIC_STATE_VIEWPORT,
         VK_DYNAMIC_STATE_SCISSOR
     };
-    ShaderModule frag;
-    ShaderModule vert;
+    std::vector<std::unique_ptr<ShaderModule> > shaderModules;
 };

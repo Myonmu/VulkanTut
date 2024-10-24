@@ -3,9 +3,8 @@
 //
 
 #include "VulkanPipeline.h"
-
+#include "Shader.h"
 #include "DeviceContext.h"
-#include "FileUtility.h"
 #include "Vertex.h"
 #include "PipelineLayout.h"
 
@@ -33,21 +32,21 @@ VkPipelineInputAssemblyStateCreateInfo getInputAssemblyCreateInfo() {
     return inputAssembly;
 }
 
-VkViewport getFullWindowViewport(const SwapChain &swapChain) {
+VkViewport getFullWindowViewport() {
     VkViewport viewport{};
     viewport.x = 0.0f;
     viewport.y = 0.0f;
-    viewport.width = static_cast<float>(swapChain.swapChainExtent.width);
-    viewport.height = static_cast<float>(swapChain.swapChainExtent.height);
+    viewport.width = 0;
+    viewport.height = 0;
     viewport.minDepth = 0.0f;
     viewport.maxDepth = 1.0f;
     return viewport;
 }
 
-VkRect2D getFullWindowScissorRect(const SwapChain &swapChain) {
+VkRect2D getFullWindowScissorRect() {
     VkRect2D scissor{};
     scissor.offset = {0, 0};
-    scissor.extent = swapChain.swapChainExtent;
+    scissor.extent = {0,0};
     return scissor;
 }
 
@@ -88,21 +87,20 @@ VkPipelineMultisampleStateCreateInfo getPipelineMultisampleStateCreateInfo() {
 //TODO: Hardcoded shader path
 //TODO: Refactor pipeline stage construction into smaller methods
 VulkanPipeline::VulkanPipeline(DeviceContext &context,
+                               const std::vector<Shader>& shaders,
                                const PipelineLayout &layout,
-                               const RenderPass &renderPass,
-                               const SwapChain &swapChain)
-    : VulkanResource(context),
-      frag("../shaders/frag.spv", ctx, VK_SHADER_STAGE_FRAGMENT_BIT),
-      vert("../shaders/vert.spv", ctx, VK_SHADER_STAGE_VERTEX_BIT) {
+                               const RenderPass &renderPass)
+    : VulkanResource(context){
 
-    auto vertShaderStageInfo = vert.getShaderStageCreateInfo();
-    auto fragShaderStageInfo = frag.getShaderStageCreateInfo();
-
-    VkPipelineShaderStageCreateInfo shaderStages[] = {vertShaderStageInfo, fragShaderStageInfo};
+    std::vector<VkPipelineShaderStageCreateInfo> shaderStages;
+    for (auto& shader: shaders) {
+        auto& s = shaderModules.emplace_back(std::make_unique<ShaderModule>(shader, context));
+        shaderStages.push_back(s->getShaderStageCreateInfo());
+    }
     VkGraphicsPipelineCreateInfo pipelineInfo{};
     pipelineInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
-    pipelineInfo.stageCount = 2;
-    pipelineInfo.pStages = shaderStages;
+    pipelineInfo.stageCount = shaderStages.size();
+    pipelineInfo.pStages = shaderStages.data();
 
     VkPipelineDynamicStateCreateInfo dynamicState{};
     dynamicState.sType = VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO;
@@ -119,8 +117,8 @@ VulkanPipeline::VulkanPipeline(DeviceContext &context,
     vertexInputInfo.pVertexAttributeDescriptions = attrDesc.data(); // Optional
 
     auto inputAssembly = getInputAssemblyCreateInfo();
-    auto viewport = getFullWindowViewport(swapChain);
-    auto scissor = getFullWindowScissorRect(swapChain);
+    auto viewport = getFullWindowViewport();
+    auto scissor = getFullWindowScissorRect();
 
     VkPipelineViewportStateCreateInfo viewportState{};
     viewportState.sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO;

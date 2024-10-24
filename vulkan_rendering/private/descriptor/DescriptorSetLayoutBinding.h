@@ -24,4 +24,18 @@ struct DescriptorSetLayoutBinding {
     bool operator!=(const DescriptorSetLayoutBinding &other) const {
         return !(*this == other);
     }
+
+    [[nodiscard]] VkDescriptorSetLayoutBinding asVkDescriptorSetLayoutBinding() const {
+        VkDescriptorSetLayoutBinding b{};
+        b.binding = binding;
+        b.descriptorCount = descriptorCount;
+        b.descriptorType = type;
+        b.stageFlags = stageFlags;
+        b.pImmutableSamplers = pImmutableSamplers;
+        return b;
+    }
+
+    operator VkDescriptorSetLayoutBinding() const {
+        return asVkDescriptorSetLayoutBinding();
+    }
 };
