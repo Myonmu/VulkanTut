@@ -3,6 +3,7 @@
 //
 
 #pragma once
+#include <DescriptorSets.h>
 #include <map>
 #include <VulkanPipeline.h>
 
@@ -13,11 +14,14 @@ struct DescriptorContext;
 struct DeviceContext;
 
 class Material {
+
+    ShaderReflectionResult combinedReflectionResult{};
     std::vector<VkDescriptorSetLayout> vkLayouts;
     std::map<uint32_t, std::unique_ptr<DescriptorContext>> descriptorContexts;
+    std::map<uint32_t, std::unique_ptr<DescriptorSets>> descriptorSets;
     std::unique_ptr<PipelineLayout> pipelineLayout;
     std::unique_ptr<VulkanPipeline> pipeline;
-    ShaderReflectionResult combinedReflectionResult{};
+
 
     Material(DeviceContext& ctx, std::vector<Shader> shaders,  RenderPass& renderPass);
     ~Material();

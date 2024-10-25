@@ -18,9 +18,11 @@ Material::Material(DeviceContext& ctx, std::vector<Shader> shaders, RenderPass& 
     for(auto& [set, layouts] : combinedReflectionResult.descriptorSets) {
         descriptorContexts[set] = std::make_unique<DescriptorContext>(ctx, layouts);
         vkLayouts.push_back(descriptorContexts[set]->get_descriptorSetLayout());
+        descriptorSets[set] = std::make_unique<DescriptorSets>(*descriptorContexts[set]);
     }
     pipelineLayout = std::make_unique<PipelineLayout>(ctx, vkLayouts);
     pipeline = std::make_unique<VulkanPipeline>(ctx, shaders, *pipelineLayout, renderPass);
+
 }
 
 Material::~Material() {

@@ -126,7 +126,8 @@ include_directories(${CMAKE_SOURCE_DIR}/libs/glfw/include)
 include_directories(${CMAKE_SOURCE_DIR}/libs/glm/include)
 include_directories(${CMAKE_SOURCE_DIR}/libs/stb)
 include_directories(${CMAKE_SOURCE_DIR}/libs/SPIRV-Cross)
-include_directories(${CMAKE_SOURCE_DIR}/libs/yaml-cpp)
+include_directories(${CMAKE_SOURCE_DIR}/libs/rapidyaml)
+include_directories(${CMAKE_SOURCE_DIR}/libs/shaderc)
 
 # Link GLFW, Vulkan, and GLM with the library
 target_link_libraries(Vk glfw Vulkan::Vulkan glm)

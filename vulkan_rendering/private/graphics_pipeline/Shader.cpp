@@ -13,7 +13,7 @@ void Shader::analyzeBinding(const spirv_cross::Compiler &compiler,
     uint32_t set = compiler.get_decoration(resource.id, spv::DecorationDescriptorSet);
     uint32_t binding = compiler.get_decoration(resource.id, spv::DecorationBinding);
     reflectionResult.addBinding({
-        set, binding, t.array.empty() ? 1 : t.array.back(),
+        set, binding, resource.name,t.array.empty() ? 1 : t.array.back(),
         type,
         static_cast<VkShaderStageFlags>(stage), nullptr
     });

@@ -10,6 +10,7 @@
 struct DescriptorSetLayoutBinding {
     uint32_t setId{};
     uint32_t binding{};
+    std::string name{};
     uint32_t descriptorCount{1};
     VkDescriptorType type{};
     VkPipelineStageFlags stageFlags{};
