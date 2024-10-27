@@ -5,12 +5,12 @@
 #pragma once
 
 #include <DescriptorSetLayout.h>
-#include <DescriptorSets.h>
 #include <ValidationLayers.h>
 #include <vector>
 #include <VulkanRenderer.h>
 
 #include "ContextMacros.h"
+#include "vk_mem_alloc.h"
 #include "VulkanInstance.h"
 #include "VulkanSetupProcedure.h"
 

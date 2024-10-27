@@ -3,19 +3,21 @@
 //
 
 #pragma once
+#include <vector>
 #include <VulkanResource.h>
 #include <vulkan/vulkan_core.h>
 
 
-struct DescriptorContext;
+struct DeviceContext;
 
 /*
 A descriptor pool maintains a pool of descriptors, from which descriptor sets are allocated.
 Descriptor pools are externally synchronized, meaning that the application must not allocate
 and/or free descriptor sets from the same pool in multiple threads simultaneously.
 */
-class DescriptorPool: public VulkanResource<VkDescriptorPool, DescriptorContext>{
+class DescriptorPool: public VulkanResource<VkDescriptorPool, DeviceContext>{
 public:
-    explicit DescriptorPool(DescriptorContext& ctx);
+    explicit DescriptorPool(DeviceContext& ctx, std::vector<VkDescriptorPoolSize>& sizes);
     ~DescriptorPool() override;
+    void reset(VkDescriptorPoolResetFlags flags) const;
 };

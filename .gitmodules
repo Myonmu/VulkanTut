@@ -13,3 +13,6 @@ url = https://github.com/Myonmu/glm
 [submodule "libs/shaderc"]
 	path = libs/shaderc
 	url = https://github.com/Myonmu/shaderc
+[submodule "libs/fmt"]
+	path = libs/fmt
+	url = https://github.com/Myonmu/fmt

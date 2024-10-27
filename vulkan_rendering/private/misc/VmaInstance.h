@@ -6,11 +6,18 @@
 
 #include "vk_mem_alloc.h"
 
-// TODO: Stub.
-class VmaInstance{
-  VmaAllocator allocator;
-public:
-  VmaInstance();
-  ~VmaInstance();
-};
+struct DeviceContext;
 
+// TODO: Stub.
+class VmaInstance {
+    VmaAllocator allocator;
+
+public:
+    VmaInstance(DeviceContext &ctx);
+
+    ~VmaInstance();
+
+    operator VmaAllocator() const {
+        return allocator;
+    }
+};

@@ -8,6 +8,8 @@
 #include <VulkanResource.h>
 #include <vulkan/vulkan_core.h>
 
+#include "vk_mem_alloc.h"
+
 struct DeviceContext;
 struct VulkanAppContext;
 class CommandPool;
@@ -23,6 +25,8 @@ public:
 protected:
     VkDeviceSize size;
     VkDeviceMemory bufferMemory{};
+    VmaAllocation vmaAllocation;
+    VmaAllocationInfo vmaAllocationInfo;
     [[nodiscard]] uint32_t findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties) const;
 };
 

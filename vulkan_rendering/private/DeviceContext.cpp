@@ -5,7 +5,6 @@
 #include "DeviceContext.h"
 
 #include <VulkanAppContext.h>
-
 #include "QueueFamilyIndices.h"
 
 DeviceContext::DeviceContext(VulkanAppContext &ctx, VulkanDeviceSetupProcedure &setupProcedure) : SubContext(ctx) {
@@ -55,6 +54,8 @@ void DeviceContext::init() {
     for (const auto &window: windowContext) {
         window->init();
     }
+
+    vma = std::make_unique<VmaInstance>(*this);
 }
 
 DeviceContext::~DeviceContext() = default;

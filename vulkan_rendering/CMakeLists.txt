@@ -84,8 +84,6 @@ set(SOURCES
         private/texture_mapping/TextureAnisotropyInfo.cpp
         private/texture_mapping/TextureAnisotropyInfo.h
         private/descriptor/DescriptorSetLayoutBinding.h
-        private/descriptor/DescriptorContext.h
-        private/descriptor/DescriptorContext.cpp
         private/RenderObject.cpp
         public/RenderObject.h
         private/presentation/WindowContext.cpp
@@ -108,6 +106,10 @@ set(SOURCES
         private/graphics_pipeline/Shader.h
         private/graphics_pipeline/ShaderReflectionResult.cpp
         private/graphics_pipeline/ShaderReflectionResult.h
+        private/descriptor/DescriptorPoolAllocator.cpp
+        private/descriptor/DescriptorPoolAllocator.h
+        private/descriptor/DescriptorWriter.cpp
+        private/descriptor/DescriptorWriter.h
 )
 
 # Create static library
@@ -128,6 +130,10 @@ include_directories(${CMAKE_SOURCE_DIR}/libs/stb)
 include_directories(${CMAKE_SOURCE_DIR}/libs/SPIRV-Cross)
 include_directories(${CMAKE_SOURCE_DIR}/libs/rapidyaml)
 include_directories(${CMAKE_SOURCE_DIR}/libs/shaderc)
+
+# TODO: move to lower-level module
+include_directories(${CMAKE_SOURCE_DIR}/libs/fmt)
+
 
 # Link GLFW, Vulkan, and GLM with the library
 target_link_libraries(Vk glfw Vulkan::Vulkan glm)

@@ -12,13 +12,13 @@
 #include "DescriptorSetLayoutBinding.h"
 
 
-struct DescriptorContext;
+struct DeviceContext;
 
-class DescriptorSetLayout:public VulkanResource<VkDescriptorSetLayout, DescriptorContext> {
+class DescriptorSetLayout:public VulkanResource<VkDescriptorSetLayout, DeviceContext> {
 public:
     std::vector<VkDescriptorSetLayoutBinding> layoutBindings{};
-    DescriptorSetLayout(DescriptorContext& ctx, const std::vector<DescriptorSetLayoutBinding> &bindings);
-    DescriptorSetLayout(DescriptorContext& ctx, const std::map<uint32_t, DescriptorSetLayoutBinding> &bindings);
+    DescriptorSetLayout(DeviceContext& ctx, const std::vector<DescriptorSetLayoutBinding> &bindings);
+    DescriptorSetLayout(DeviceContext& ctx, const std::map<uint32_t, DescriptorSetLayoutBinding> &bindings);
     ~DescriptorSetLayout() override;
 };
 

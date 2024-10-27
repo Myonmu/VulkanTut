@@ -3,24 +3,26 @@
 //
 
 #include "DescriptorSets.h"
-
 #include <UniformBufferObject.h>
 #include <VulkanAppContext.h>
-
-#include "DescriptorContext.h"
 #include "DeviceContext.h"
 #include "RenderObject.h"
+#include "DescriptorPool.h"
 
-DescriptorSets::DescriptorSets(DescriptorContext &ctx): VulkanResource(ctx) {
-    auto maxFrameInFlight = ctx.context.context.MAX_FRAMES_IN_FLIGHT;
-    std::vector<VkDescriptorSetLayout> layouts(maxFrameInFlight, ctx.get_descriptorSetLayout());
+DescriptorSets::DescriptorSets(DeviceContext &ctx, DescriptorPool& pool, DescriptorSetLayout& layout): VulkanResource(ctx) {
+    auto maxFrameInFlight = ctx.context.MAX_FRAMES_IN_FLIGHT;
+    std::vector<VkDescriptorSetLayout> layouts(maxFrameInFlight, layout);
     resource.resize(maxFrameInFlight);
     VkDescriptorSetAllocateInfo allocInfo = {};
     allocInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
-    allocInfo.descriptorPool = ctx.get_descriptorPool();
+    allocInfo.descriptorPool = pool;
     allocInfo.descriptorSetCount = static_cast<uint32_t>(maxFrameInFlight);
     allocInfo.pSetLayouts = layouts.data();
-    if (vkAllocateDescriptorSets(ctx.getLogicalDevice(), &allocInfo, resource.data()) != VK_SUCCESS) {
+    const auto result = vkAllocateDescriptorSets(ctx.getLogicalDevice(), &allocInfo, resource.data());
+    if (result == VK_ERROR_OUT_OF_POOL_MEMORY || result == VK_ERROR_FRAGMENTED_POOL) {
+        throw DescriptorPoolOutOfMemoryException("Descriptor Pool does not have enough memory");
+    }
+    if (result != VK_SUCCESS) {
         throw std::runtime_error("failed to allocate descriptor sets!");
     }
     //configureDescriptorSets();

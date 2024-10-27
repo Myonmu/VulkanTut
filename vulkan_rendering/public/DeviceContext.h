@@ -8,12 +8,12 @@
 #include <LogicalDevice.h>
 #include <PhysicalDevice.h>
 #include <vector>
+#include <VmaInstance.h>
 #include <VulkanInstance.h>
 #include "QueueContext.h"
 #include "SubContext.h"
 #include "VulkanSetupProcedure.h"
 #include "WindowContext.h"
-#include "DescriptorContext.h"
 #include "ContextMacros.h"
 
 struct VulkanAppContext;
@@ -32,9 +32,10 @@ struct DeviceContext : SubContext<VulkanAppContext> {
     CTX_PROPERTY(QueueFamilyIndices, queueFamilyIndices)
     // VkDevice
     CTX_PROPERTY(LogicalDevice, logicalDevice)
+    // VMA Allocator
+    CTX_PROPERTY(VmaInstance, vma);
 
     CTX_PROPERTY_LIST(RenderPass, renderPass)
-    CTX_PROPERTY_LIST(DescriptorContext, descriptorContext)
     //Queues (should always be ordered)
     CTX_PROPERTY_LIST(QueueContext, queueContext)
 

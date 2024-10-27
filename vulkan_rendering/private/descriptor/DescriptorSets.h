@@ -12,15 +12,22 @@
 #include "TextureSampler.h"
 
 
+class DescriptorPool;
+class DescriptorSetLayout;
 class RenderObject;
 struct DescriptorContext;
 
-class DescriptorSets : public VulkanResource<std::vector<VkDescriptorSet>, DescriptorContext> {
+class DescriptorPoolOutOfMemoryException final : public std::runtime_error {
+public:
+    explicit DescriptorPoolOutOfMemoryException(const std::string& what) : std::runtime_error(what) {}
+};
+
+class DescriptorSets : public VulkanResource<std::vector<VkDescriptorSet>, DeviceContext> {
     std::vector<ImageView*> images{};
     std::vector<TextureSampler*> samplers{};
     uint32_t textureResIndex = 0;
 public:
-    explicit DescriptorSets(DescriptorContext& ctx);
+    explicit DescriptorSets(DeviceContext& ctx, DescriptorPool& pool, DescriptorSetLayout& layout);
     ~DescriptorSets() override;
     VkDescriptorSet& operator[](size_t index);
 
