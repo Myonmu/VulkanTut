@@ -10,6 +10,10 @@ Hence, the repo tries to mitigate this:
 - Long methods are chopped into smaller chunks
 - Better interdependencies between objects
 
+We also use Vulkan Guide as supplementary reference.
+
+A homebrew OOP version (more specifically, custom RAII wrapers from scratch), is potentially not optimal compared to the official RAII but should allow us to understand better the inner workings of the API. 
+
 ## Topics
 
 ### Vulkan Initialization and Surfaces
