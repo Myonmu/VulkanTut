@@ -13,3 +13,6 @@ url = https://github.com/Myonmu/glm
 [submodule "libs/fmt"]
 	path = libs/fmt
 	url = https://github.com/Myonmu/fmt
+[submodule "libs/rapidyaml"]
+	path = libs/rapidyaml
+	url = https://github.com/Myonmu/rapidyaml
