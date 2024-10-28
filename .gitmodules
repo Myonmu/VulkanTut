@@ -7,9 +7,6 @@ url = https://github.com/Myonmu/glm
 [submodule "libs/SPIRV-Cross"]
 	path = libs/SPIRV-Cross
 	url = https://github.com/Myonmu/SPIRV-Cross
-[submodule "libs/rapidyaml"]
-	path = libs/rapidyaml
-	url = https://github.com/Myonmu/rapidyaml
 [submodule "libs/shaderc"]
 	path = libs/shaderc
 	url = https://github.com/Myonmu/shaderc
