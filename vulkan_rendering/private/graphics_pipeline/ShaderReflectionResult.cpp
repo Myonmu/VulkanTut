@@ -4,6 +4,8 @@
 
 #include "ShaderReflectionResult.h"
 
+#include <ranges>
+
 void ShaderReflectionResult::addBinding(const DescriptorSetLayoutBinding &binding) {
     if (descriptorSets.contains(binding.setId) &&
         descriptorSets[binding.setId].contains(binding.binding)
@@ -53,4 +55,17 @@ void ShaderReflectionResult::merge(ShaderReflectionResult &other) {
             }
         }
     }
+}
+
+std::map<VkDescriptorType, uint32_t> ShaderReflectionResult::getCountByType() {
+    auto result = std::map<VkDescriptorType, uint32_t>();
+    for (const auto &layouts: descriptorSets | std::views::values) {
+        for (const auto &binding: layouts | std::views::values) {
+            if (result.contains(binding.type)) result[binding.type] ++;
+            else {
+                result[binding.type] = 1;
+            }
+        }
+    }
+    return result;
 }

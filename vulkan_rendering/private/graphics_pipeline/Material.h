@@ -16,9 +16,22 @@ struct DeviceContext;
 
 class Material {
 
+    /* The descriptors can get complicated here.
+     *
+     * The shaders can declare usage of multiple descriptor sets.
+     * However, it doesn't mean these descriptors sets have different layouts.
+     *
+     * Descriptor pools do not really care the bindings of the descriptor set layouts,
+     * therefore the pools are determined by on type-count pairs.
+     *
+     *
+     *
+     */
+
+    // reflection data from all shader stages
     ShaderReflectionResult combinedReflectionResult{};
     std::map<uint32_t, std::unique_ptr<DescriptorSetLayout>> descriptorSetLayouts;
-    std::unique_ptr<DescriptorAllocator> descriptorAllocator;
+    std::map<uint32_t, std::unique_ptr<DescriptorAllocator>> descriptorAllocator;
     std::unique_ptr<PipelineLayout> pipelineLayout;
     std::unique_ptr<VulkanPipeline> pipeline;
 

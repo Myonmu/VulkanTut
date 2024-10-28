@@ -26,4 +26,5 @@ struct ShaderReflectionResult {
     }
 
     void merge(ShaderReflectionResult &other);
+    std::map<VkDescriptorType, uint32_t> getCountByType();
 };

@@ -3,6 +3,8 @@
 //
 
 #include "DescriptorSetLayout.h"
+
+#include <ranges>
 #include <VulkanAppContext.h>
 #include "DeviceContext.h"
 
@@ -11,6 +13,11 @@ DescriptorSetLayout::DescriptorSetLayout(DeviceContext &ctx, const std::vector<D
     layoutBindings.resize(bindings.size());
     for (int i = 0; i < layoutBindings.size(); ++i) {
         layoutBindings[i] = bindings[i].asVkDescriptorSetLayoutBinding();
+        if (auto type = layoutBindings[i].descriptorType; requirements.contains(type)) {
+            requirements[type]++;
+        }else {
+            requirements[type] = 1;
+        }
     }
 
     VkDescriptorSetLayoutCreateInfo layoutInfo{};
@@ -25,7 +32,7 @@ DescriptorSetLayout::DescriptorSetLayout(DeviceContext &ctx, const std::vector<D
 
 DescriptorSetLayout::DescriptorSetLayout(DeviceContext& ctx, const std::map<uint32_t, DescriptorSetLayoutBinding> &bindings)
 : VulkanResource(ctx) {
-    for (const auto &[fst, snd] : bindings) {
+    for (const auto &snd: bindings | std::views::values) {
         layoutBindings.push_back(snd.asVkDescriptorSetLayoutBinding());
     }
     VkDescriptorSetLayoutCreateInfo layoutInfo{};

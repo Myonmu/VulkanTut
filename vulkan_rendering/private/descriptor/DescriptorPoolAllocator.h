@@ -6,6 +6,7 @@
 #include <DescriptorPool.h>
 #include <DescriptorSets.h>
 #include <span>
+#include <unordered_set>
 
 #include "BindDescriptorSet.h"
 
@@ -17,19 +18,21 @@ public:
         float ratio;
     };
 
-    DescriptorAllocator(DeviceContext& ctx);
+    explicit DescriptorAllocator(DeviceContext& ctx);
     ~DescriptorAllocator();
-    void init(uint32_t initialSets, std::span<PoolSizeRatio> poolRatios);
+    void init(uint32_t initialSets, std::vector<PoolSizeRatio>& poolRatios);
     void clear();
     void destroy();
-    DescriptorSets allocate(DescriptorSetLayout layout, void* pNext = nullptr);
+    DescriptorSets allocate(DescriptorSetLayout layout&, void* pNext = nullptr);
+    [[nodiscard]] bool isCompatible(const DescriptorSetLayout& layout) const;
 private:
     DeviceContext& ctx;
     std::unique_ptr<DescriptorPool> getPool();
-    std::unique_ptr<DescriptorPool> createPool(uint32_t setCount, std::span<PoolSizeRatio> poolRatios);
+    std::unique_ptr<DescriptorPool> createPool(uint32_t setCount, std::vector<PoolSizeRatio>& poolRatios);
 
+    std::unordered_set<VkDescriptorType> uniqueTypes;
     std::vector<PoolSizeRatio> ratios;
     std::vector<std::unique_ptr<DescriptorPool>> fullPools;
     std::vector<std::unique_ptr<DescriptorPool>> readyPools;
-    uint32_t setsPerPool;
+    uint32_t setsPerPool{};
 };

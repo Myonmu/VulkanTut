@@ -15,7 +15,12 @@ Material::Material(DeviceContext& ctx, std::vector<Shader> shaders, RenderPass& 
     }
 
     descriptorAllocator = std::make_unique<DescriptorAllocator>(ctx);
-    descriptorAllocator->init();
+    auto stats = combinedReflectionResult.getCountByType();
+    std::vector<DescriptorAllocator::PoolSizeRatio> ratios;
+    for (auto&[type, count]: stats) {
+        ratios.push_back({type, static_cast<float>(count)});
+    }
+    descriptorAllocator->init(1, ratios);
 
     std::vector<VkDescriptorSetLayout> vkLayouts;
     for(auto& [set, layouts] : combinedReflectionResult.descriptorSets) {

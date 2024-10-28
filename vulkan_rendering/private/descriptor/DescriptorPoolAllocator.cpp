@@ -5,6 +5,7 @@
 #include "DescriptorPoolAllocator.h"
 
 #include <LogicalDevice.h>
+#include <ranges>
 
 #include "DeviceContext.h"
 
@@ -15,11 +16,13 @@ DescriptorAllocator::DescriptorAllocator(DeviceContext &ctx): ctx(ctx) {
 DescriptorAllocator::~DescriptorAllocator() = default;
 
 
-void DescriptorAllocator::init(uint32_t maxSets, std::span<PoolSizeRatio> poolRatios)
+void DescriptorAllocator::init(uint32_t maxSets, std::vector<PoolSizeRatio>& poolRatios)
 {
     ratios.clear();
+	uniqueTypes.clear();
     for (auto r : poolRatios) {
         ratios.push_back(r);
+    	uniqueTypes.insert(r.type);
     }
     createPool(maxSets, poolRatios);
     setsPerPool = maxSets * 1.5; //grow it next allocation
@@ -62,7 +65,7 @@ std::unique_ptr<DescriptorPool> DescriptorAllocator::getPool()
     }
 }
 
-std::unique_ptr<DescriptorPool> DescriptorAllocator::createPool(uint32_t setCount, std::span<PoolSizeRatio> poolRatios)
+std::unique_ptr<DescriptorPool> DescriptorAllocator::createPool(uint32_t setCount, std::vector<PoolSizeRatio>& poolRatios)
 {
 	std::vector<VkDescriptorPoolSize> poolSizes;
 	for (PoolSizeRatio ratio : poolRatios) {
@@ -74,8 +77,20 @@ std::unique_ptr<DescriptorPool> DescriptorAllocator::createPool(uint32_t setCoun
 	return std::make_unique<DescriptorPool>(ctx, poolSizes);
 }
 
-DescriptorSets DescriptorAllocator::allocate(DescriptorSetLayout layout, void* pNext)
+bool DescriptorAllocator::isCompatible(const DescriptorSetLayout &layout) const {
+	for (auto &requirements = layout.requirements;
+	     const auto &key: requirements | std::views::keys) {
+		if (!uniqueTypes.contains(key))return false;
+	}
+	return true;
+}
+
+
+DescriptorSets DescriptorAllocator::allocate(DescriptorSetLayout& layout, void* pNext)
 {
+	if (!isCompatible(layout)) {
+		throw std::runtime_error("Cannot allocate with this allocator due to incompatible descriptor set types");
+	}
     //get or create a pool to allocate from
     const auto& poolToUse = getPool();
 	try {
