@@ -14,7 +14,9 @@
 class DescriptorAllocator {
 public:
     struct PoolSizeRatio {
+        // type of the descriptor
         VkDescriptorType type;
+        // number of this type of descriptor per set
         float ratio;
     };
 
@@ -26,6 +28,7 @@ public:
     DescriptorSets allocate(DescriptorSetLayout layout&, void* pNext = nullptr);
     [[nodiscard]] bool isCompatible(const DescriptorSetLayout& layout) const;
 private:
+    const float growth = 2;
     DeviceContext& ctx;
     std::unique_ptr<DescriptorPool> getPool();
     std::unique_ptr<DescriptorPool> createPool(uint32_t setCount, std::vector<PoolSizeRatio>& poolRatios);

@@ -16,7 +16,7 @@ DescriptorAllocator::DescriptorAllocator(DeviceContext &ctx): ctx(ctx) {
 DescriptorAllocator::~DescriptorAllocator() = default;
 
 
-void DescriptorAllocator::init(uint32_t maxSets, std::vector<PoolSizeRatio>& poolRatios)
+void DescriptorAllocator::init(uint32_t initialSets, std::vector<PoolSizeRatio>& poolRatios)
 {
     ratios.clear();
 	uniqueTypes.clear();
@@ -24,8 +24,8 @@ void DescriptorAllocator::init(uint32_t maxSets, std::vector<PoolSizeRatio>& poo
         ratios.push_back(r);
     	uniqueTypes.insert(r.type);
     }
-    createPool(maxSets, poolRatios);
-    setsPerPool = maxSets * 1.5; //grow it next allocation
+    createPool(initialSets, poolRatios);
+    setsPerPool = initialSets * growth; //grow it next allocation
 }
 
 void DescriptorAllocator::clear()
@@ -57,7 +57,7 @@ std::unique_ptr<DescriptorPool> DescriptorAllocator::getPool()
 	    //need to create a new pool
 	    auto newPool = createPool(setsPerPool, ratios);
 
-	    setsPerPool *= 1.5;
+	    setsPerPool *= growth;
 	    if (setsPerPool > 4092) {
 		    setsPerPool = 4092;
 	    }
@@ -71,10 +71,10 @@ std::unique_ptr<DescriptorPool> DescriptorAllocator::createPool(uint32_t setCoun
 	for (PoolSizeRatio ratio : poolRatios) {
 		poolSizes.push_back(VkDescriptorPoolSize{
 			.type = ratio.type,
-			.descriptorCount = uint32_t(ratio.ratio * setCount)
+			.descriptorCount = static_cast<uint32_t>(ratio.ratio * setCount)
 		});
 	}
-	return std::make_unique<DescriptorPool>(ctx, poolSizes);
+	return std::make_unique<DescriptorPool>(ctx, setCount, poolSizes);
 }
 
 bool DescriptorAllocator::isCompatible(const DescriptorSetLayout &layout) const {

@@ -8,13 +8,13 @@
 
 #include "DeviceContext.h"
 
-DescriptorPool::DescriptorPool(DeviceContext &ctx, std::vector<VkDescriptorPoolSize>& sizes): VulkanResource(ctx) {
+DescriptorPool::DescriptorPool(DeviceContext &ctx, uint32_t maxSets, std::vector<VkDescriptorPoolSize>& sizes): VulkanResource(ctx) {
     auto maxFramesInFlight = ctx.context.MAX_FRAMES_IN_FLIGHT;
     VkDescriptorPoolCreateInfo poolInfo{};
     poolInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
     poolInfo.poolSizeCount = static_cast<uint32_t>(sizes.size());
     poolInfo.pPoolSizes = sizes.data();
-    poolInfo.maxSets = static_cast<uint32_t>(maxFramesInFlight);
+    poolInfo.maxSets = maxSets;
 
     if(vkCreateDescriptorPool(ctx.getLogicalDevice(), &poolInfo, nullptr, &resource) != VK_SUCCESS) {
         throw std::runtime_error("failed to create descriptor pool!");

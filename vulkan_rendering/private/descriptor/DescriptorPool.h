@@ -17,7 +17,7 @@ and/or free descriptor sets from the same pool in multiple threads simultaneousl
 */
 class DescriptorPool: public VulkanResource<VkDescriptorPool, DeviceContext>{
 public:
-    explicit DescriptorPool(DeviceContext& ctx, std::vector<VkDescriptorPoolSize>& sizes);
+    explicit DescriptorPool(DeviceContext& ctx, uint32_t maxSets, std::vector<VkDescriptorPoolSize>& sizes);
     ~DescriptorPool() override;
     void reset(VkDescriptorPoolResetFlags flags) const;
 };
