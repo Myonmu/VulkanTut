@@ -76,3 +76,12 @@ VkSwapchainKHR
 
 The compatibility requirements seem strict, but consider the following scenario: a scene is being rendered with multiple windows, using the same device and likely the same render pipeline. For consistency, there's no reason to fiddle with the render pass parameters, thus it is very likely that we can use the same render pass for all these windows. 
 
+### Descriptor Set Layout, Descriptor Pool, Descriptor Set
+
+Descriptor related concepts was rather tricky (for us) to understand. 
+
+Like Pipelines, *Descriptor Set Layout* act as the mold for *Descriptor Set*. *Descriptor Pool* is where descriptor sets are allocated from. 
+
+Yet, a descriptor pool isn't tied to a descriptor set layout... An analogy would be, Descriptor Set Layouts are product blueprints, Descriptor Pools are raw material reserves, and Descriptor Sets are assembled products. This analogy means several things:
+
+- Descriptor pool only cares about *unique types* of descriptor sets 
