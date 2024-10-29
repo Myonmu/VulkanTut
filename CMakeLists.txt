@@ -11,6 +11,7 @@ set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
 # Add subdirectories
 add_subdirectory(libs/glfw)
 add_subdirectory(libs/glm)
+add_subdirectory(libs/SPIRV-Cross)
 add_subdirectory(vulkan_rendering)
 
 # Application executable
@@ -26,6 +27,9 @@ target_link_libraries(VulkanTut
         glfw
         Vulkan::Vulkan
         glm
+        spirv-cross-core
+        spirv-cross-util
+        spirv-cross-glsl
 )
 
 # Include directories for the app

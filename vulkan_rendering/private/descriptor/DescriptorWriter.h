@@ -16,8 +16,8 @@ struct  DescriptorWriter {
     std::deque<VkDescriptorBufferInfo> bufferInfos;
     std::vector<VkWriteDescriptorSet> writes;
 
-    void writeImage(int binding, const ImageView& image, const TextureSampler &sampler , VkImageLayout layout, VkDescriptorType type);
-    void writeBuffer(int binding,const Buffer& buffer,size_t size, size_t offset,VkDescriptorType type);
+    void writeImage(uint32_t binding, const ImageView& image, const TextureSampler &sampler , VkImageLayout layout, VkDescriptorType type);
+    void writeBuffer(uint32_t binding,const Buffer& buffer,size_t size, size_t offset,VkDescriptorType type);
 
     void clear();
     void updateSet(VkDevice device, VkDescriptorSet set);

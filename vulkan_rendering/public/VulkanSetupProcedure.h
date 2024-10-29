@@ -20,7 +20,6 @@ public:
     virtual ~VulkanDeviceSetupProcedure() = default;
     // called before selecting physical device
     virtual void createWindows(DeviceContext& deviceContext) = 0;
-    virtual void createDescriptorContexts(DeviceContext& deviceContext) = 0;
     virtual void createRenderPasses(DeviceContext& deviceContext) = 0;
 
 };

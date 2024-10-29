@@ -11,7 +11,6 @@ DeviceContext::DeviceContext(VulkanAppContext &ctx, VulkanDeviceSetupProcedure &
     setupProcedure.createWindows(*this);
     init();
     setupProcedure.createRenderPasses(*this);
-    setupProcedure.createDescriptorContexts(*this);
 }
 
 void DeviceContext::createWindow(const char *name, int width, int height, QueueFamily requiredQueueFamilies) {

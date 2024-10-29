@@ -41,11 +41,11 @@ class Material {
     std::map<uint32_t, std::unique_ptr<DescriptorSetLayout>> descriptorSetLayouts;
     std::unique_ptr<DescriptorAllocator> descriptorAllocator;
     //TODO: Pipeline layout can be shared between materials (pipelines) if compatible
-    std::unique_ptr<PipelineLayout> pipelineLayout;
-    std::unique_ptr<VulkanPipeline> pipeline;
     DeviceContext& ctx;
 public:
-    Material(DeviceContext& ctx, std::vector<Shader> shaders,  RenderPass& renderPass);
+    std::unique_ptr<VulkanPipeline> pipeline;
+    std::unique_ptr<PipelineLayout> pipelineLayout;
+    Material(DeviceContext& ctx, std::vector<Shader>& shaders,  RenderPass& renderPass);
     ~Material();
 
     friend class MaterialInstance;

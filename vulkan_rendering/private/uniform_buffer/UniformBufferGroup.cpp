@@ -23,8 +23,8 @@ UniformBufferGroup::UniformBufferGroup(DeviceContext &ctx) :ctx(ctx) {
 }
 
 UniformBufferGroup::~UniformBufferGroup() {
-    for (auto i = 0; i < uniformBuffers.size(); i++) {
-        delete uniformBuffers[i];
+    for (const auto & uniformBuffer : uniformBuffers) {
+        delete uniformBuffer;
     }
 }
 

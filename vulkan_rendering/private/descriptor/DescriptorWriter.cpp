@@ -9,7 +9,7 @@
 #include "ImageView.h"
 #include "TextureSampler.h"
 
-void DescriptorWriter::writeImage(int binding,
+void DescriptorWriter::writeImage(uint32_t binding,
                                   const ImageView &image,
                                   const TextureSampler &sampler,
                                   VkImageLayout layout,
@@ -31,7 +31,7 @@ void DescriptorWriter::writeImage(int binding,
     writes.push_back(write);
 }
 
-void DescriptorWriter::writeBuffer(int binding, const Buffer &buffer, size_t size, size_t offset,
+void DescriptorWriter::writeBuffer(uint32_t binding, const Buffer &buffer, size_t size, size_t offset,
                                    VkDescriptorType type) {
     VkDescriptorBufferInfo &info = bufferInfos.emplace_back(VkDescriptorBufferInfo{
         .buffer = buffer,

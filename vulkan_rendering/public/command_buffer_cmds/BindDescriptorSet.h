@@ -2,16 +2,14 @@
 // Created by miska on 2024/10/08.
 //
 
-#ifndef BINDDESCRIPTORSET_H
-#define BINDDESCRIPTORSET_H
+#pragma once
+#include <DescriptorSets.h>
 #include <PipelineLayout.h>
-#include <VulkanAppContext.h>
 #include <vulkan/vulkan_core.h>
 
 #include "CommandBufferCmd.h"
+#include "CommandBuffer.h"
 #include "FrameInfo.h"
-
-class CommandBuffer;
 
 class BindDescriptorSet final : public CommandBufferCmd {
     PipelineLayout &pipelineLayout;
@@ -30,4 +28,3 @@ public:
     }
 };
 
-#endif //BINDDESCRIPTORSET_H

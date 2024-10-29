@@ -29,7 +29,7 @@ DescriptorSets::DescriptorSets(DeviceContext &ctx, DescriptorPool& pool, Descrip
 }
 
 DescriptorSets::~DescriptorSets() = default;
-
+/*
 void DescriptorSets::configureDescriptorSets(const RenderObject& obj) {
     for (size_t i = 0; i < resource.size(); i++) {
         textureResIndex = 0;
@@ -67,7 +67,7 @@ void DescriptorSets::configureDescriptorSets(const RenderObject& obj) {
                                0, nullptr);
     }
 }
-
+*/
 VkDescriptorSet &DescriptorSets::operator[](size_t index) {
     return resource[index];
 }

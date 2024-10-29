@@ -19,13 +19,6 @@ public:
         );
     }
 
-    void createDescriptorContexts(DeviceContext &deviceContext) override {
-        deviceContext.create_descriptorContext(std::vector<DescriptorSetLayoutBinding>{
-            {VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_VERTEX_BIT},
-            {VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT}
-        });
-    }
-
     void createRenderPasses(DeviceContext &deviceContext) override {
         auto format = deviceContext.get_windowContext_at(0).swapChain->swapChainImageFormat;
         const auto passId = deviceContext.create_renderPass(format);

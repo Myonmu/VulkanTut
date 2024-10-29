@@ -31,7 +31,7 @@ public:
     ~DescriptorSets() override;
     VkDescriptorSet& operator[](size_t index);
 
-    void configureDescriptorSets(const RenderObject& obj);
+    //void configureDescriptorSets(const RenderObject& obj);
 
     void AddTextureImageView(ImageView* textureImage);
     void AddTextureSampler(TextureSampler* textureSampler);

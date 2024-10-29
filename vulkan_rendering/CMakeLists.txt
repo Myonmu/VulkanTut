@@ -84,8 +84,6 @@ set(SOURCES
         private/texture_mapping/TextureAnisotropyInfo.cpp
         private/texture_mapping/TextureAnisotropyInfo.h
         private/descriptor/DescriptorSetLayoutBinding.h
-        private/RenderObject.cpp
-        public/RenderObject.h
         private/presentation/WindowContext.cpp
         private/presentation/WindowContext.h
         private/misc/SubContext.h
@@ -139,6 +137,7 @@ include_directories(${CMAKE_SOURCE_DIR}/libs/fmt)
 
 # Link GLFW, Vulkan, and GLM with the library
 target_link_libraries(Vk glfw Vulkan::Vulkan glm)
+target_link_libraries(Vk STATIC spirv-cross-core spirv-cross-util spirv-cross-glsl)
 
 # Add include directories to target
 target_include_directories(Vk

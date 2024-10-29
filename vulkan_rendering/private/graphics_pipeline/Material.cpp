@@ -9,7 +9,7 @@
 #include "Shader.h"
 #include "ShaderReflectionResult.h"
 
-Material::Material(DeviceContext& ctx, std::vector<Shader> shaders, RenderPass& renderPass):
+Material::Material(DeviceContext& ctx, std::vector<Shader>& shaders, RenderPass& renderPass):
 ctx(ctx)
 {
     for (auto& shader: shaders) {
