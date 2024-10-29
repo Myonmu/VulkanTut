@@ -25,6 +25,9 @@ public:
 
     void stage();
     void transitionLayout(VkImageLayout newLayout);
+    [[nodiscard]] inline VkImageLayout getCurrentLayout() const {
+        return currentLayout;
+    };
 private:
     VkImageLayout currentLayout = VK_IMAGE_LAYOUT_UNDEFINED;
     int width, height, channels;

@@ -86,7 +86,7 @@ bool DescriptorAllocator::isCompatible(const DescriptorSetLayout &layout) const 
 }
 
 
-DescriptorSets DescriptorAllocator::allocate(DescriptorSetLayout& layout, void* pNext)
+std::unique_ptr<DescriptorSets> DescriptorAllocator::allocate(DescriptorSetLayout& layout, void* pNext)
 {
 	if (!isCompatible(layout)) {
 		throw std::runtime_error("Cannot allocate with this allocator due to incompatible descriptor set types");
@@ -94,8 +94,7 @@ DescriptorSets DescriptorAllocator::allocate(DescriptorSetLayout& layout, void* 
     //get or create a pool to allocate from
     const auto& poolToUse = getPool();
 	try {
-		DescriptorSets ds{ctx, *poolToUse, layout};
-		return ds;
+		return std::make_unique<DescriptorSets>(ctx, *poolToUse, layout);
 	}catch (DescriptorPoolOutOfMemoryException& e) {
 		fullPools.push_back(poolToUse);
         return allocate(layout, pNext);

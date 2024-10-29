@@ -110,6 +110,8 @@ set(SOURCES
         private/descriptor/DescriptorPoolAllocator.h
         private/descriptor/DescriptorWriter.cpp
         private/descriptor/DescriptorWriter.h
+        private/graphics_pipeline/MaterialInstance.h
+        private/graphics_pipeline/MaterialInstance.cpp
 )
 
 # Create static library

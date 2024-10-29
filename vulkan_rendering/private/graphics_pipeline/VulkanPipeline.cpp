@@ -84,8 +84,6 @@ VkPipelineMultisampleStateCreateInfo getPipelineMultisampleStateCreateInfo() {
     return multisampling;
 }
 
-//TODO: Hardcoded shader path
-//TODO: Refactor pipeline stage construction into smaller methods
 VulkanPipeline::VulkanPipeline(DeviceContext &context,
                                const std::vector<Shader>& shaders,
                                const PipelineLayout &layout,

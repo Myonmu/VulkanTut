@@ -163,3 +163,18 @@ From these declarations we can see the following procedure:
 2. The bindings can be combined (sum per type) to create `VkDescriptorSetLayout`
 3. Multiple layouts (e.g. from different shader stages) can be combined to create `VkDescriptorPool`. The implementation is in `VulkanPendingState.cpp`, and it shows how UE sums descriptors by type and fill the descriptor pool sizes with $setCount * descriptorSumOfType$ per type.
 
+### Pipeline Layout, Pipeline, Descriptor Sets
+
+Consider this scenario in *Unity*: When we want to create a *Material*, we first right-click on a shader and then click Create Material. This will add a Material asset in the project. And then, we could assign textures, change numbers, in the inspector of that material asset. Finally, when the material is dragged on a renderer, it exposes a *Material Property Block* that can be used to further override the properties.
+
+Despite the lack of source code evidence, we could make an analogy between the Unity terms and Vulkan terms, or, how we can use Vulkan concepts to mimic this behavior.
+
+- **Shader Asset**: the inspector of the shader asset suggests a serialized version of shader's reflection data (*Descriptor Bindings*). This data would allow us to construct a *Descriptor Set Layout* and a *Pipeline Layout*.
+- **Material Asset**: *Pipeline* and shared *descriptor sets*. 
+- **Material Property Block**: per-instance *descriptor sets*.
+
+Though, it isn't always true that between *Shader Asset* and *Descriptor Set Layout/Pipeline Layout* is a one-to-one relationship. The only thing that can be directly created from shader code is *Shader Modules*. 
+
+Different shaders can have the same *Descriptor Set Layout* if they have the same layout declarations (we don't care the variable names except for vertex input), and *Pipeline Layout* can be shared if they have
+
+Now recall that binding pipeline and binding descriptor sets are two distinct function calls: `vkCmdBindPipeline` and `vkCmdBindDescriptorSets`. Moreover, descriptor sets are bound to *pipeline layout* rather than pipeline (we bind them according to descriptor set layout, and the descriptor set layout is stored in pipeline layout).  

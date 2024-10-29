@@ -9,7 +9,9 @@
 #include "Shader.h"
 #include "ShaderReflectionResult.h"
 
-Material::Material(DeviceContext& ctx, std::vector<Shader> shaders, RenderPass& renderPass) {
+Material::Material(DeviceContext& ctx, std::vector<Shader> shaders, RenderPass& renderPass):
+ctx(ctx)
+{
     for (auto& shader: shaders) {
         combinedReflectionResult.merge(shader.reflectionResult);
     }
@@ -20,7 +22,7 @@ Material::Material(DeviceContext& ctx, std::vector<Shader> shaders, RenderPass& 
     for (auto&[type, count]: stats) {
         ratios.push_back({type, static_cast<float>(count)});
     }
-    descriptorAllocator->init(1, ratios);
+    descriptorAllocator->init(100, ratios);
 
     std::vector<VkDescriptorSetLayout> vkLayouts;
     for(auto& [set, layouts] : combinedReflectionResult.descriptorSets) {
@@ -29,7 +31,6 @@ Material::Material(DeviceContext& ctx, std::vector<Shader> shaders, RenderPass& 
     }
     pipelineLayout = std::make_unique<PipelineLayout>(ctx, vkLayouts);
     pipeline = std::make_unique<VulkanPipeline>(ctx, shaders, *pipelineLayout, renderPass);
-
 }
 
 Material::~Material() {
