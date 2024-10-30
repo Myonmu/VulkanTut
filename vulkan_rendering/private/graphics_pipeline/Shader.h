@@ -6,7 +6,6 @@
 #include <spirv_cross.hpp>
 #include <vector>
 
-#include "DescriptorSetLayoutBinding.h"
 #include "ShaderReflectionResult.h"
 
 class Shader {

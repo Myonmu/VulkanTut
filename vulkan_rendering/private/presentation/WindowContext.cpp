@@ -11,7 +11,7 @@ WindowContext::~WindowContext() = default;
 
 WindowContext::WindowContext(DeviceContext &ctx, const char *name, int width, int height, QueueFamily requiredQueueFamilies)
     : SubContext(ctx), name(name), width(width), height(height), requiredQueueFamilies(requiredQueueFamilies) {
-    window = std::make_unique<GlfwWindow>(*this, height, width, name, &frameBufferResizeCallback);
+    window = std::make_unique<GlfwWindow>(*this, width, height, name, &frameBufferResizeCallback);
     surface = std::make_unique<VulkanSurface>(*this);
     if (ctx.isLogicalDeviceCreated()) {
         init();

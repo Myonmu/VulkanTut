@@ -25,7 +25,9 @@ void ShaderReflectionResult::addBinding(const DescriptorSetLayoutBinding &bindin
 
 
 void ShaderReflectionResult::merge(ShaderReflectionResult &other) {
-    auto maxSetId = std::max(other.getMaxSetId(), getMaxSetId());
+    auto otherMaxSetId = other.getMaxSetId();
+    auto thisMaxSetId = getMaxSetId();
+    auto maxSetId = std::max(otherMaxSetId, thisMaxSetId);
     for (uint32_t i = 0; i <= maxSetId; ++i) {
         if (other.descriptorSets.contains(i)) {
             if (!descriptorSets.contains(i)) {
