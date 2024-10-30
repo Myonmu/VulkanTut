@@ -13,14 +13,15 @@
 
 MaterialInstance::MaterialInstance(Material &material) : srcMaterial(material), ctx(material.ctx) {
     for (auto &[id, layout]: material.descriptorSetLayouts) {
-        descriptorSets.emplace(id, material.descriptorAllocator->allocate(*layout));
+        auto result = material.descriptorAllocator->allocate(*layout);
+        descriptorSets.emplace(id, std::move(result));
     }
 }
 
 MaterialInstance::~MaterialInstance() = default;
 
 DescriptorSets &MaterialInstance::getDescriptorSet(const uint32_t setId) {
-    return descriptorSets.at(setId);
+    return *descriptorSets.at(setId);
 }
 
 

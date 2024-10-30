@@ -16,7 +16,7 @@ struct SubContext {
     }
 
     T &context;
-    [[nodiscard]] virtual LogicalDevice& getLogicalDevice() const;
+    [[nodiscard]] virtual LogicalDevice& getLogicalDevice() const = 0 ;
 };
 
 

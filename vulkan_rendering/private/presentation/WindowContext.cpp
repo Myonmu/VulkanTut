@@ -47,6 +47,10 @@ void WindowContext::closeWindow() {
 
 }
 
+LogicalDevice &WindowContext::getLogicalDevice() const {
+    return context.get_logicalDevice();
+}
+
 
 CTX_FORWARD_GET_BODY(WindowContext, VulkanInstance, vulkanInstance)
 CTX_FORWARD_GET_BODY(WindowContext, PhysicalDevice, physicalDevice)

@@ -4,16 +4,15 @@
 
 #pragma once
 
-#include <DescriptorSetLayout.h>
 #include <ValidationLayers.h>
 #include <vector>
-#include <VulkanRenderer.h>
 
 #include "ContextMacros.h"
-#include "vk_mem_alloc.h"
 #include "VulkanInstance.h"
 #include "VulkanSetupProcedure.h"
 
+
+class LogicalDevice;
 
 struct VulkanAppContext {
     const int MAX_FRAMES_IN_FLIGHT = 2;
@@ -26,21 +25,13 @@ struct VulkanAppContext {
     const char* name;
     CTX_PROPERTY(VulkanInstance, vulkanInstance)
     CTX_PROPERTY(ValidationLayers, validationLayers)
-    std::vector<DeviceContext> deviceContexts;
+    std::vector<std::unique_ptr<DeviceContext>> deviceContexts;
 
-    template <class T, class... Args>
-    void createDeviceContext(Args&&... VAR_ARGS) {
-        deviceContexts.emplace_back(*this, &T(std::forward<Args>(VAR_ARGS)...));
-    }
+    void createDeviceContext(VulkanDeviceSetupProcedure &setupProcedure);
 
     VulkanAppContext(const char *appName, VulkanSetupProcedure& setupProcedure);
 
     ~VulkanAppContext();
 
     LogicalDevice& getLogicalDevice(){throw std::runtime_error("AppContext does not contain single logical device");};
-
-    template<class T, class... Args>
-    static VulkanAppContext* createAppContext(const char *appName, Args&&... VAR_ARGS) {
-        return new VulkanAppContext(appName, &T(std::forward<Args>(VAR_ARGS)...));
-    }
 };

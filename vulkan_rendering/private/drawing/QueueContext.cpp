@@ -16,3 +16,7 @@ queueIndex(queueIndex)
 QueueContext::~QueueContext() {
     commandPool.reset();
 }
+
+LogicalDevice &QueueContext::getLogicalDevice() const {
+    return context.get_logicalDevice();
+}

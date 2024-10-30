@@ -24,18 +24,18 @@ void DescriptorAllocator::init(uint32_t initialSets, std::vector<PoolSizeRatio>&
         ratios.push_back(r);
     	uniqueTypes.insert(r.type);
     }
-    createPool(initialSets, poolRatios);
+    readyPools.push_back(createPool(initialSets, poolRatios));
     setsPerPool = initialSets * growth; //grow it next allocation
 }
 
 void DescriptorAllocator::clear()
 {
     for (const auto& p : readyPools) {
-        p.reset(0);
+        p->reset(0);
     }
-    for (const auto& p : fullPools) {
-        p.reset(0);
-        readyPools.push_back(p);
+    for (auto& p : fullPools) {
+        p->reset(0);
+        readyPools.push_back(std::move(p));
     }
     fullPools.clear();
 }
@@ -46,10 +46,10 @@ void DescriptorAllocator::destroy()
     fullPools.clear();
 }
 
-DescriptorPool& DescriptorAllocator::getPool()
+std::unique_ptr<DescriptorPool> DescriptorAllocator::getPool()
 {
     if (!readyPools.empty()) {
-    	auto& p = readyPools.back();
+    	auto p = std::move(readyPools.back());
     	readyPools.pop_back();
         return p;
     }
@@ -65,7 +65,7 @@ DescriptorPool& DescriptorAllocator::getPool()
     }
 }
 
-DescriptorPool DescriptorAllocator::createPool(uint32_t setCount, std::vector<PoolSizeRatio>& poolRatios)
+std::unique_ptr<DescriptorPool> DescriptorAllocator::createPool(uint32_t setCount, std::vector<PoolSizeRatio>& poolRatios)
 {
 	std::vector<VkDescriptorPoolSize> poolSizes;
 	for (PoolSizeRatio ratio : poolRatios) {
@@ -74,7 +74,8 @@ DescriptorPool DescriptorAllocator::createPool(uint32_t setCount, std::vector<Po
 			.descriptorCount = static_cast<uint32_t>(ratio.ratio * setCount)
 		});
 	}
-	return DescriptorPool{ctx, setCount, poolSizes};
+
+	return std::make_unique<DescriptorPool>(ctx, setCount, poolSizes);
 }
 
 bool DescriptorAllocator::isCompatible(const DescriptorSetLayout &layout) const {
@@ -86,18 +87,19 @@ bool DescriptorAllocator::isCompatible(const DescriptorSetLayout &layout) const 
 }
 
 
-DescriptorSets DescriptorAllocator::allocate(DescriptorSetLayout& layout, void* pNext)
+std::unique_ptr<DescriptorSets> DescriptorAllocator::allocate(DescriptorSetLayout& layout, void* pNext)
 {
 	if (!isCompatible(layout)) {
 		throw std::runtime_error("Cannot allocate with this allocator due to incompatible descriptor set types");
 	}
     //get or create a pool to allocate from
-	DescriptorPool &poolToUse = getPool();
+	auto poolToUse = getPool();
 	try {
-		DescriptorSets a(ctx, poolToUse, layout);
-		return a;
+		auto result =  std::make_unique<DescriptorSets>(ctx, *poolToUse, layout);
+		readyPools.push_back(std::move(poolToUse));
+		return result;
 	}catch (DescriptorPoolOutOfMemoryException& e) {
-		fullPools.push_back(poolToUse);
+		fullPools.push_back(std::move(poolToUse));
         return allocate(layout, pNext);
 	}catch (std::exception& e) {
 		throw;

@@ -9,11 +9,11 @@
 
 #define CTX_PROPERTY(type, name)\
     std::unique_ptr<type> name;\
-    inline type& get_##name() {return *(name);}
+    inline type& get_##name() const {return *(name);}
 
 #define CTX_PROPERTY_RAW_PTR(type, name)\
     type* name;\
-    inline type& get_##name() {return *(name);}
+    inline type& get_##name() const {return *(name);}
 
 #define CTX_PROPERTY_LIST(type, name)\
     std::vector<std::unique_ptr<type>> (name);\
@@ -25,8 +25,8 @@
     inline type & get_##name##_at(uint32_t i) const {return * name[i];}
 
 #define CTX_FORWARD_GET_DECL(type, name)\
-    inline const type& get_##name() const;
+    const type& get_##name() const;
 
 #define CTX_FORWARD_GET_BODY(belongType, type, name)\
-    inline const type& belongType::get_##name() const{ return context.get_##name(); }
+    const type& belongType::get_##name() const{ return context.get_##name(); }
 

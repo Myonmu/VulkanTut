@@ -21,17 +21,17 @@ public:
     void init(uint32_t initialSets, std::vector<PoolSizeRatio>& poolRatios);
     void clear();
     void destroy();
-    DescriptorSets allocate(DescriptorSetLayout &layout, void* pNext = nullptr);
+    std::unique_ptr<DescriptorSets> allocate(DescriptorSetLayout &layout, void* pNext = nullptr);
     [[nodiscard]] bool isCompatible(const DescriptorSetLayout& layout) const;
 private:
     const float growth = 2;
     DeviceContext& ctx;
-    DescriptorPool& getPool();
-    DescriptorPool createPool(uint32_t setCount, std::vector<PoolSizeRatio>& poolRatios);
+    std::unique_ptr<DescriptorPool> getPool();
+    std::unique_ptr<DescriptorPool> createPool(uint32_t setCount, std::vector<PoolSizeRatio>& poolRatios);
 
     std::unordered_set<VkDescriptorType> uniqueTypes;
     std::vector<PoolSizeRatio> ratios;
-    std::vector<DescriptorPool> fullPools;
-    std::vector<DescriptorPool> readyPools;
+    std::vector<std::unique_ptr<DescriptorPool>> fullPools;
+    std::vector<std::unique_ptr<DescriptorPool>> readyPools;
     uint32_t setsPerPool{};
 };

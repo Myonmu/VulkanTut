@@ -18,6 +18,7 @@ public:
     CTX_PROPERTY(VulkanQueue, queue)
     CTX_PROPERTY(CommandPool, commandPool)
 
+    LogicalDevice &getLogicalDevice() const override;
     QueueContext(DeviceContext& ctx, uint32_t queueFamilyIndex, uint32_t queueIndex);
     ~QueueContext() override;
 };

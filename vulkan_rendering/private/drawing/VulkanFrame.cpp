@@ -119,7 +119,7 @@ void VulkanFrame::updateUniformBuffer(uint32_t currentFrame) {
      */
     ubo.projection[1][1] *= -1;
 
-    context.uniformBufferGroup.CopyMemoryToBuffer(currentFrame, &ubo, sizeof(ubo));
+    //context.uniformBufferGroup.CopyMemoryToBuffer(currentFrame, &ubo, sizeof(ubo));
 }
 
 

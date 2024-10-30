@@ -39,7 +39,7 @@ const uint32_t HEIGHT = 600;
 class TriangleApp {
 public :
     void Run() {
-        context = VulkanAppContext::createAppContext<AppSetup>("VulkanApp");
+        context = std::make_unique<VulkanAppContext>("VulkanApp", appSetup);
         setup();
         mainLoop();
     }
@@ -49,11 +49,11 @@ public :
         delete textureImageView;
         delete textureImage;
         delete mainPass;
-        delete context;
     }
 
 private:
-    VulkanAppContext *context = nullptr;
+    AppSetup appSetup{};
+    std::unique_ptr<VulkanAppContext> context;
     std::vector<Shader> shaders;
     std::unique_ptr<Material> material;
     std::unique_ptr<MaterialInstance> materialInstance;
@@ -63,7 +63,7 @@ private:
     TextureSampler *sampler = nullptr;
 
     void setup() {
-        auto& deviceCtx = context->deviceContexts[0];
+        auto& deviceCtx = *context->deviceContexts[0];
 
         shaders.emplace_back(FileUtility::ReadSpv("../shaders/vert.spv"), VK_SHADER_STAGE_VERTEX_BIT);
         shaders.emplace_back(FileUtility::ReadSpv("../shaders/frag.spv"), VK_SHADER_STAGE_FRAGMENT_BIT);
@@ -99,13 +99,13 @@ private:
         mainPass->enqueueCommand<BindDescriptorSet>(*material->pipelineLayout, *materialInstance->descriptorSets[0]);
         mainPass->enqueueCommand<DrawIndexed>(static_cast<uint32_t>(Vertex::testIndices.size()));
         //TODO: stub
-        auto &mainRecorder = context->frameDrawer;
-        mainRecorder.enqueueCommand<EnqueueRenderPass>(*mainPass);
+        //auto &mainRecorder = context->frameDrawer;
+        //mainRecorder.enqueueCommand<EnqueueRenderPass>(*mainPass);
     }
 
     void mainLoop() {
         for (auto& device : context->deviceContexts) {
-            for (auto& window: device.windowContext) {
+            for (auto& window: device->windowContext) {
                 window->get_renderer().drawFrame();
             }
         }

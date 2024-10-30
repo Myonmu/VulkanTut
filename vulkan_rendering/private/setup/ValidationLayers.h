@@ -6,6 +6,7 @@
 
 
 #include <vulkan/vulkan_core.h>
+#include <vector>
 #include "VulkanResource.h"
 
 struct VulkanAppContext;

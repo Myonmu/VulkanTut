@@ -49,6 +49,8 @@ struct WindowContext : public SubContext<DeviceContext>{
 
     void createFrameBuffers(const RenderPass& renderPass);
 
+    LogicalDevice &getLogicalDevice() const override;
+
     [[nodiscard]] uint32_t get_windowId() const{ return id;}
 private:
     uint32_t id;

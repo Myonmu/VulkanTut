@@ -3,7 +3,7 @@
 //
 
 #include "DeviceContext.h"
-
+#include "LogicalDevice.h"
 #include <VulkanAppContext.h>
 #include "QueueFamilyIndices.h"
 

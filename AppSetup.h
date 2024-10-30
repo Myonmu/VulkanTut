@@ -27,9 +27,10 @@ public:
 };
 
 class AppSetup final : public VulkanSetupProcedure {
+    DeviceSetup deviceSetup{};
 public:
     void createDeviceContexts(VulkanAppContext &appContext) override {
-        appContext.createDeviceContext<AppSetup>();
+        appContext.createDeviceContext(deviceSetup);
     }
 };
 

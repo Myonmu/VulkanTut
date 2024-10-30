@@ -3,15 +3,18 @@
 //
 
 #include "DescriptorSets.h"
-#include <UniformBufferObject.h>
 #include <VulkanAppContext.h>
 #include "DeviceContext.h"
-#include "RenderObject.h"
 #include "DescriptorPool.h"
+#include "DescriptorSetLayout.h"
+#include <vector>
 
 DescriptorSets::DescriptorSets(DeviceContext &ctx, DescriptorPool& pool, DescriptorSetLayout& layout): VulkanResource(ctx) {
     auto maxFrameInFlight = ctx.context.MAX_FRAMES_IN_FLIGHT;
-    std::vector<VkDescriptorSetLayout> layouts(maxFrameInFlight, layout);
+    std::vector<VkDescriptorSetLayout> layouts;
+    for (uint32_t i = 0; i < maxFrameInFlight; i++) {
+        layouts.push_back(layout);
+    }
     resource.resize(maxFrameInFlight);
     VkDescriptorSetAllocateInfo allocInfo = {};
     allocInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;

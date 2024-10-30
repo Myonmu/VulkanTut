@@ -20,7 +20,7 @@ class MaterialInstance {
     DescriptorWriter descriptorWriter{};
 
 public:
-    std::map<uint32_t, DescriptorSets> descriptorSets;
+    std::map<uint32_t, std::unique_ptr<DescriptorSets>> descriptorSets;
     explicit MaterialInstance(Material &material);
 
     ~MaterialInstance();
