@@ -70,7 +70,7 @@ struct DeviceContext : SubContext<VulkanAppContext> {
 private:
 
     // fills a QueueFamilyIndices object with present queue info.
-    void queryPresentQueues(VkPhysicalDevice physicalDevice, QueueFamilyIndices& queueFamilies) const;
+    void queryPresentQueues(QueueFamilyIndices &queueFamilyIndices, VkPhysicalDevice physicalDevice, QueueFamilyIndices &queueFamilies) const;
     bool isDeviceCreated = false;
 };
 

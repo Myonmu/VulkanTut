@@ -12,18 +12,18 @@
 std::optional<bool> TextureAnisotropyInfo::supportsAnisotropy{};
 std::optional<float> TextureAnisotropyInfo::supportedMaxAnisotropy{};
 
-void TextureAnisotropyInfo::queryAnisotropyInfo(const DeviceContext& ctx) {
+void TextureAnisotropyInfo::queryAnisotropyInfo(VkPhysicalDevice device) {
     if(supportsAnisotropy.has_value())return;
 
     VkPhysicalDeviceFeatures supportedFeatures;
-    vkGetPhysicalDeviceFeatures(ctx.get_physicalDevice(), &supportedFeatures);
+    vkGetPhysicalDeviceFeatures(device, &supportedFeatures);
     supportsAnisotropy = supportedFeatures.samplerAnisotropy;
     if(!supportsAnisotropy) {
         supportedMaxAnisotropy = 1.0f;
         return;
     }
     VkPhysicalDeviceProperties properties{};
-    vkGetPhysicalDeviceProperties(ctx.get_physicalDevice(), &properties);
+    vkGetPhysicalDeviceProperties(device, &properties);
     supportedMaxAnisotropy = properties.limits.maxSamplerAnisotropy;
 
 }

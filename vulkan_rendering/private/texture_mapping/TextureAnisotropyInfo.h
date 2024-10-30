@@ -18,7 +18,7 @@ struct TextureAnisotropyInfo {
     static TextureAnisotropyInfo getAutoAnisotropyInfo();
     static bool isAnisotropySupported();
     static float getMaxAnisotropy();
-    static void queryAnisotropyInfo(const DeviceContext& ctx);
+    static void queryAnisotropyInfo(VkPhysicalDevice device);
 private:
     static std::optional<bool> supportsAnisotropy;
     static std::optional<float> supportedMaxAnisotropy;

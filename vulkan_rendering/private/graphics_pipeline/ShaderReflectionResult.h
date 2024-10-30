@@ -14,15 +14,25 @@ struct ShaderReflectionResult {
     void addBinding(const DescriptorSetLayoutBinding &binding);
 
     uint32_t getMaxSetId() {
-        auto last = descriptorSets.end();
-        --last;
-        return last->first;
+        // Check if the map is not empty
+        if (!descriptorSets.empty()) {
+            // Access the last key using rbegin
+            return descriptorSets.rbegin()->first;
+        } else {
+            std::cout << "Map is empty!" << std::endl;
+        }
+        return 0;
     }
 
     uint32_t getMaxBindingInSet(const uint32_t setId) {
-        auto last = descriptorSets[setId].end();
-        --last;
-        return last->first;
+        // Check if the map is not empty
+        if (!descriptorSets[setId].empty()) {
+            // Access the last key using rbegin
+            return descriptorSets[setId].rbegin()->first;
+        } else {
+            std::cout << "Map is empty!" << std::endl;
+        }
+        return 0;
     }
 
     void merge(ShaderReflectionResult &other);

@@ -16,7 +16,6 @@
 #include "BindPipeline.h"
 #include "BindVertexBuffer.h"
 #include "DrawIndexed.h"
-#include "EnqueueRenderPass.h"
 #include "Material.h"
 #include "MaterialInstance.h"
 #include "RenderPassRecorder.h"
@@ -39,6 +38,7 @@ const uint32_t HEIGHT = 600;
 class TriangleApp {
 public :
     void Run() {
+        glfwInit();
         context = std::make_unique<VulkanAppContext>("VulkanApp", appSetup);
         setup();
         mainLoop();

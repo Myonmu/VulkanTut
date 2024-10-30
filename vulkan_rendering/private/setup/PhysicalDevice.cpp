@@ -43,8 +43,9 @@ int PhysicalDevice::rateDeviceSuitability(VkPhysicalDevice device, DeviceContext
     score += deviceProperties.limits.maxImageDimension2D;
 
     auto indicesInfo = QueueFamilyIndices(device, context.getCombinedQueueFamilyRequirements());
-    context.queryPresentQueues(device, indicesInfo);
-    if (!context.get_queueFamilyIndices().isComplete()) {
+    indicesInfo.queryCommonQueueFamilies();
+    context.queryPresentQueues(indicesInfo, device, indicesInfo);
+    if (!indicesInfo.isComplete()) {
         return 0;
     }
 
@@ -100,5 +101,5 @@ void PhysicalDevice::pickPhysicalDevice(DeviceContext &context) {
 
 PhysicalDevice::PhysicalDevice(DeviceContext &context): VulkanResource(context) {
     pickPhysicalDevice(context);
-    TextureAnisotropyInfo::queryAnisotropyInfo(context);
+    TextureAnisotropyInfo::queryAnisotropyInfo(resource);
 }

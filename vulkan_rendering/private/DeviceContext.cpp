@@ -42,7 +42,8 @@ void DeviceContext::init() {
     queueFamilyIndices = std::make_unique<QueueFamilyIndices>(get_physicalDevice(),
                                                               getCombinedQueueFamilyRequirements());
     //cannot use getter (const)
-    queryPresentQueues(get_physicalDevice(), *queueFamilyIndices);
+    queueFamilyIndices->queryCommonQueueFamilies();
+    queryPresentQueues(*queueFamilyIndices, get_physicalDevice(), *queueFamilyIndices);
     logicalDevice = std::make_unique<LogicalDevice>(*this);
     for (auto id: get_queueFamilyIndices().getUniqueQueueFamilyIndices()) {
         create_queueContext(id, 0);
@@ -71,9 +72,9 @@ QueueFamily DeviceContext::getCombinedQueueFamilyRequirements() const {
     return q;
 }
 
-void DeviceContext::queryPresentQueues(VkPhysicalDevice physicalDevice, QueueFamilyIndices &queueFamilies) const {
+void DeviceContext::queryPresentQueues(QueueFamilyIndices& queueFamilyIndices, VkPhysicalDevice physicalDevice, QueueFamilyIndices &queueFamilies) const {
     for (auto &window: windowContext) {
-        queueFamilies.queryPresentFamilyIndex(physicalDevice, window->get_surface());
+        queueFamilyIndices.queryPresentFamilyIndex(physicalDevice, window->get_surface());
     }
 }
 

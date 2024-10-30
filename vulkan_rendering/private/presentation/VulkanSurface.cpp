@@ -10,8 +10,9 @@
 #include "WindowContext.h"
 
 void VulkanSurface::createSurface(WindowContext& context){
-    if(glfwCreateWindowSurface(context.context.context.get_vulkanInstance(),
-                               context.get_window(), nullptr, &resource) != VK_SUCCESS){
+    auto result = glfwCreateWindowSurface(context.get_vulkanInstance(),
+                               context.get_window(), nullptr, &resource);
+    if(result != VK_SUCCESS){
         throw std::runtime_error("failed to create window surface");
     }
 }
@@ -21,5 +22,5 @@ VulkanSurface::VulkanSurface(WindowContext &context): VulkanResource(context) {
 }
 
 VulkanSurface::~VulkanSurface() {
-    vkDestroySurfaceKHR(ctx.context.context.get_vulkanInstance(), resource, nullptr);
+    vkDestroySurfaceKHR(ctx.get_vulkanInstance(), resource, nullptr);
 }

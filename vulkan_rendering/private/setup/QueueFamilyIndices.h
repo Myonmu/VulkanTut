@@ -50,7 +50,7 @@ public:
                 // If the bit is set in `requiredBits`
                 // Check if the corresponding queue family index exists and is valid
                 if (bit == QueueFamily::QUEUE_FAMILY_PRESENT && presentQueryFailed) return false;
-                if (auto it = indices.find(bit); it == indices.end() || it->second == static_cast<uint32_t>(-1)) {
+                if (bit != QueueFamily::QUEUE_FAMILY_PRESENT && !indices.contains(bit)) {
                     return false;
                 }
             }
