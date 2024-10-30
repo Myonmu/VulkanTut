@@ -103,3 +103,9 @@ PhysicalDevice::PhysicalDevice(DeviceContext &context): VulkanResource(context) 
     pickPhysicalDevice(context);
     TextureAnisotropyInfo::queryAnisotropyInfo(resource);
 }
+
+uint32_t PhysicalDevice::getApiVersion() const {
+    VkPhysicalDeviceProperties properties;
+    vkGetPhysicalDeviceProperties(resource, &properties);
+    return properties.apiVersion;
+}

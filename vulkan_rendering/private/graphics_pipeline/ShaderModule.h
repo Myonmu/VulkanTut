@@ -15,7 +15,7 @@ class ShaderModule : public VulkanResource<VkShaderModule, DeviceContext>{
     VkShaderStageFlagBits stageFlags;
     const char* entryPoint = "main";
 public:
-    ShaderModule(const std::string& shaderPath, DeviceContext& ontext, VkShaderStageFlagBits stageFlags);
+    ShaderModule(const std::string& shaderPath, DeviceContext& context, VkShaderStageFlagBits stageFlags);
     ShaderModule(const std::vector<uint32_t>& code ,DeviceContext& context, VkShaderStageFlagBits stageFlags);
     ShaderModule(const Shader& shader, DeviceContext& context);
     ~ShaderModule() override;

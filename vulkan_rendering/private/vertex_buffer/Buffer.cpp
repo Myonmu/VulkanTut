@@ -12,7 +12,7 @@
 
 
 Buffer::Buffer(DeviceContext &context, VkDeviceSize size, VkBufferUsageFlags usage,
-               VkMemoryPropertyFlags props) : VulkanResource(context) {
+               VmaMemoryUsage memUsage) : VulkanResource(context) {
     this->size = size;
     VkBufferCreateInfo bufferInfo{};
     bufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
@@ -21,7 +21,8 @@ Buffer::Buffer(DeviceContext &context, VkDeviceSize size, VkBufferUsageFlags usa
     bufferInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
 
     VmaAllocationCreateInfo allocationInfo{};
-    allocationInfo.usage = VMA_MEMORY_USAGE_AUTO;
+    allocationInfo.usage = memUsage;
+    allocationInfo.flags = VMA_ALLOCATION_CREATE_MAPPED_BIT;
 
     if (vmaCreateBuffer(ctx.get_vma(), &bufferInfo, &allocationInfo,
                         &resource, &vmaAllocation, &vmaAllocationInfo) !=

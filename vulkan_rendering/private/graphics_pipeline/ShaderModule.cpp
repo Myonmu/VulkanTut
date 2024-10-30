@@ -14,7 +14,7 @@ ShaderModule::ShaderModule(const std::vector<uint32_t> &code, DeviceContext &con
                            const VkShaderStageFlagBits stageFlags): VulkanResource(context), stageFlags(stageFlags) {
     VkShaderModuleCreateInfo createInfo{};
     createInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
-    createInfo.codeSize = code.size();
+    createInfo.codeSize = code.size()*(sizeof(uint32_t)/sizeof(char));
     createInfo.pCode = code.data();
 
     if (vkCreateShaderModule(context.getLogicalDevice(),

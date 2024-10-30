@@ -3,7 +3,6 @@
 //
 
 #pragma once
-
 #include "vk_mem_alloc.h"
 
 struct DeviceContext;
@@ -13,7 +12,7 @@ class VmaInstance {
     VmaAllocator allocator;
 
 public:
-    VmaInstance(DeviceContext &ctx);
+    explicit VmaInstance(DeviceContext &ctx);
 
     ~VmaInstance();
 

@@ -13,6 +13,7 @@ struct DeviceContext;
 class PhysicalDevice: public VulkanResource<VkPhysicalDevice, DeviceContext>{
 public:
     explicit PhysicalDevice(DeviceContext& context);
+    [[nodiscard]] uint32_t getApiVersion() const;
 private:
     void pickPhysicalDevice(DeviceContext& context);
     static bool checkDeviceExtensionSupport(VkPhysicalDevice device, DeviceContext& context);

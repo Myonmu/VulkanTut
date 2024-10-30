@@ -16,8 +16,10 @@ UniformBufferGroup::UniformBufferGroup(DeviceContext &ctx) :ctx(ctx) {
     uniformBuffersData.resize(maxFramesInFlight);
 
     for (auto i = 0; i < maxFramesInFlight; i++) {
-        uniformBuffers[i] = new Buffer(ctx, bufferSize, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT ,
-            VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+        uniformBuffers[i] = new Buffer(ctx, bufferSize, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
+            VMA_MEMORY_USAGE_CPU_TO_GPU
+            //VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT
+            );
         uniformBuffers[i]->mapBufferMemory(uniformBuffersData[i]);
     }
 }

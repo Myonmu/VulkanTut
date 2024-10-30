@@ -13,6 +13,7 @@ struct VulkanAppContext;
 
 class VulkanInstance : public VulkanResource<VkInstance, VulkanAppContext> {
 public:
+    const uint32_t apiVersion = VK_API_VERSION_1_3;
     explicit VulkanInstance(VulkanAppContext& context);
     ~VulkanInstance() override;
 private:
