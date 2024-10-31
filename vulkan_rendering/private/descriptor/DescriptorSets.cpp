@@ -2,11 +2,11 @@
 // Created by miska on 2024/08/27.
 //
 
+#include "DescriptorSetLayout.h"
+#include "DescriptorPool.h"
 #include "DescriptorSets.h"
 #include <VulkanAppContext.h>
 #include "DeviceContext.h"
-#include "DescriptorPool.h"
-#include "DescriptorSetLayout.h"
 #include <vector>
 
 DescriptorSets::DescriptorSets(DeviceContext &ctx, DescriptorPool& pool, DescriptorSetLayout& layout): VulkanResource(ctx) {
@@ -75,6 +75,7 @@ VkDescriptorSet &DescriptorSets::operator[](size_t index) {
     return resource[index];
 }
 
+/*
 void DescriptorSets::AddTextureImageView(ImageView *textureImage) {
     images.push_back(textureImage);
 }
@@ -82,4 +83,5 @@ void DescriptorSets::AddTextureImageView(ImageView *textureImage) {
 void DescriptorSets::AddTextureSampler(TextureSampler *textureSampler) {
     samplers.push_back(textureSampler);
 }
+*/
 

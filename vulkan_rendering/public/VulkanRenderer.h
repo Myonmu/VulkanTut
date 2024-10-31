@@ -2,8 +2,8 @@
 // Created by miska on 2024/08/05.
 //
 
-#ifndef VULKANRENDERER_H
-#define VULKANRENDERER_H
+#pragma once
+
 #include <CommandBufferRecorder.h>
 #include <vector>
 
@@ -27,7 +27,3 @@ private:
     std::vector<std::unique_ptr<VulkanFrame>> frames;
     uint32_t currentFrame = 0;
 };
-
-
-
-#endif //VULKANRENDERER_H

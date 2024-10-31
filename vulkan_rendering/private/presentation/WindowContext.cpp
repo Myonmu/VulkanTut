@@ -40,7 +40,8 @@ void WindowContext::resize() {
 }
 
 void WindowContext::frameBufferResizeCallback(GLFWwindow *window, int width, int height) {
-    const GlfwWindow* w = static_cast<GlfwWindow *>(glfwGetWindowUserPointer(window));
+    auto* w = static_cast<WindowContext *>(glfwGetWindowUserPointer(window));
+    w->resize();
 }
 
 void WindowContext::closeWindow() {

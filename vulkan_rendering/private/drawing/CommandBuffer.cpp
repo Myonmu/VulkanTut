@@ -46,7 +46,7 @@ void CommandBuffer::executeImmediate() {
     submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
     submitInfo.commandBufferCount = 1;
     submitInfo.pCommandBuffers = *this;
-    auto queue = ctx.getCommonQueueContext(queueFamily).get_queue();
+    const auto& queue = ctx.getCommonQueueContext(queueFamily).get_queue();
     vkQueueSubmit(queue,1, &submitInfo, VK_NULL_HANDLE);
     vkQueueWaitIdle(queue);
 }

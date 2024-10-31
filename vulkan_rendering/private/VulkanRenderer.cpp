@@ -13,7 +13,7 @@
 
 
 VulkanRenderer::VulkanRenderer(WindowContext &context) : ctx(context) {
-    auto maxFrameInFlight = context.context.context.MAX_FRAMES_IN_FLIGHT;
+	const auto maxFrameInFlight = context.context.context.MAX_FRAMES_IN_FLIGHT;
     frames.resize(maxFrameInFlight);
     for (int i = 0; i < maxFrameInFlight; ++i) {
         frames.emplace_back(std::make_unique<VulkanFrame>(context));
@@ -42,6 +42,7 @@ void VulkanRenderer::drawFrame() {
         frames[currentFrame]->drawFrame(currentFrame);
         currentFrame = (currentFrame + 1) % ctx.context.context.MAX_FRAMES_IN_FLIGHT;
     }else {
+        vkDeviceWaitIdle(ctx.getLogicalDevice());
         ctx.closeWindow();
     }
 }

@@ -23,3 +23,7 @@ GlfwWindow::~GlfwWindow() {
     glfwTerminate();
 }
 
+void GlfwWindow::notifyResize() {
+
+}
+

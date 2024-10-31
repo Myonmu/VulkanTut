@@ -23,9 +23,9 @@ public:
 };
 
 class DescriptorSets : public VulkanResource<std::vector<VkDescriptorSet>, DeviceContext> {
-    std::vector<ImageView*> images{};
-    std::vector<TextureSampler*> samplers{};
-    uint32_t textureResIndex = 0;
+    //std::vector<ImageView*> images{};
+    //std::vector<TextureSampler*> samplers{};
+    //uint32_t textureResIndex = 0;
 public:
     explicit DescriptorSets(DeviceContext& ctx, DescriptorPool& pool, DescriptorSetLayout& layout);
     ~DescriptorSets() override;
@@ -33,6 +33,6 @@ public:
 
     //void configureDescriptorSets(const RenderObject& obj);
 
-    void AddTextureImageView(ImageView* textureImage);
-    void AddTextureSampler(TextureSampler* textureSampler);
+    //void AddTextureImageView(ImageView* textureImage);
+    //void AddTextureSampler(TextureSampler* textureSampler);
 };

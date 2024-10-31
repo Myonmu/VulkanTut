@@ -110,6 +110,8 @@ set(SOURCES
         private/descriptor/DescriptorWriter.h
         private/graphics_pipeline/MaterialInstance.h
         private/graphics_pipeline/MaterialInstance.cpp
+        private/misc/ObjectHierarchy.h
+        private/misc/ObjectHierarchy.cpp
 )
 
 # Create static library

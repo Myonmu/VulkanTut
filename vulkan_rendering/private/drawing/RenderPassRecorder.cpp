@@ -23,8 +23,9 @@ RenderPassRecorder::~RenderPassRecorder() {
 
 void RenderPassRecorder::recordRenderPass(const CommandBuffer &commandBuffer, const DeviceContext &context,
                                           const FrameInfo &frameInfo) const {
-    auto& frameBuffers = context.get_windowContext_at(frameInfo.windowId).get_frameBuffers();
-    auto& swapChain = context.get_windowContext_at(frameInfo.windowId).get_swapChain();
+    auto& window = context.get_windowContext_at(frameInfo.windowId);
+    auto& frameBuffers = window.get_frameBuffers();
+    auto& swapChain = window.get_swapChain();
     VkRenderPassBeginInfo renderPassInfo{};
     renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
     renderPassInfo.renderPass = renderPass;

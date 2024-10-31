@@ -56,6 +56,7 @@ void DeviceContext::init() {
     }
 
     vma = std::make_unique<VmaInstance>(*this);
+    deviceObjectPool = std::make_unique<DeviceObjectPool>();
 }
 
 DeviceContext::~DeviceContext() = default;

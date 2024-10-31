@@ -39,6 +39,7 @@ struct WindowContext : public SubContext<DeviceContext>{
     CTX_FORWARD_GET_DECL(PhysicalDevice, physicalDevice)
 
     static void frameBufferResizeCallback(GLFWwindow *window, int width, int height);
+
     ~WindowContext() override;
 
     WindowContext(DeviceContext &ctx, const char *name, int width, int height, QueueFamily requiredQueueFamilies);

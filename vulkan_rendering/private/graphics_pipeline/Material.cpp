@@ -6,11 +6,13 @@
 #include <DescriptorSetLayout.h>
 #include <PipelineLayout.h>
 #include <set>
+
+#include "DeviceContext.h"
 #include "Shader.h"
 #include "ShaderReflectionResult.h"
 
 Material::Material(DeviceContext& ctx, std::vector<Shader>& shaders, RenderPass& renderPass):
-ctx(ctx)
+ctx(ctx), ObjectHierarchy(ctx.get_objectPool())
 {
     for (auto& shader: shaders) {
         combinedReflectionResult.merge(shader.reflectionResult);
@@ -19,7 +21,7 @@ ctx(ctx)
     descriptorAllocator = std::make_unique<DescriptorAllocator>(ctx);
     auto stats = combinedReflectionResult.getCountByType();
     std::vector<DescriptorAllocator::PoolSizeRatio> ratios;
-    for (auto&[type, count]: stats) {
+    for (auto const&[type, count]: stats) {
         ratios.push_back({type, static_cast<float>(count)});
     }
     descriptorAllocator->init(100, ratios);
@@ -33,6 +35,4 @@ ctx(ctx)
     pipeline = std::make_unique<VulkanPipeline>(ctx, shaders, *pipelineLayout, renderPass);
 }
 
-Material::~Material() {
-
-}
+Material::~Material() = default;

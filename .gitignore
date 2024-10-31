@@ -6,3 +6,7 @@ cmake-build-*/
 libs/glfw
 
 libs/glm
+
+out/
+
+.vs/

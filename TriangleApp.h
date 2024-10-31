@@ -91,12 +91,12 @@ private:
         materialInstance->updateDescriptorSet(0, 0);
 
         mainPass = new RenderPassRecorder(deviceCtx.get_renderPass_at(0));
-        mainPass->enqueueCommand<BindPipeline>( *material->pipeline , VK_PIPELINE_BIND_POINT_GRAPHICS);
+        mainPass->enqueueCommand<BindPipeline>( material->get_pipeline() , VK_PIPELINE_BIND_POINT_GRAPHICS);
         mainPass->enqueueCommand<SetViewport>();
         mainPass->enqueueCommand<SetScissors>();
         mainPass->enqueueCommand<BindVertexBuffer>();
         mainPass->enqueueCommand<BindIndexBuffer>();
-        mainPass->enqueueCommand<BindDescriptorSet>(*material->pipelineLayout, *materialInstance->descriptorSets[0]);
+        mainPass->enqueueCommand<BindDescriptorSet>(material->get_pipelineLayout(), *materialInstance->descriptorSets[0]);
         mainPass->enqueueCommand<DrawIndexed>(static_cast<uint32_t>(Vertex::testIndices.size()));
         //TODO: stub
         //auto &mainRecorder = context->frameDrawer;
@@ -104,18 +104,22 @@ private:
     }
 
     void mainLoop() {
-        for (auto& device : context->deviceContexts) {
-            for (auto& window: device->windowContext) {
-                window->get_renderer().drawFrame();
+        bool anyWindowAlive = false;
+        do {
+            for (auto& device : context->deviceContexts) {
+                for (auto& window: device->windowContext) {
+                    anyWindowAlive = true;
+                    window->get_renderer().drawFrame();
+                }
             }
-        }
+        }while (anyWindowAlive);
         /*
         while (!glfwWindowShouldClose(context->window)) {
             glfwPollEvents();
             context->drawFrame();
         }
         */
-        vkDeviceWaitIdle(context->getLogicalDevice());
+        //vkDeviceWaitIdle(context->getLogicalDevice());
     }
 };
 

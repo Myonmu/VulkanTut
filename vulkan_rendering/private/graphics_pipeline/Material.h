@@ -7,14 +7,16 @@
 #include <map>
 #include <VulkanPipeline.h>
 
+#include "ContextMacros.h"
 #include "DescriptorPoolAllocator.h"
+#include "ObjectHierarchy.h"
 #include "ShaderReflectionResult.h"
 
 
 struct DescriptorContext;
 struct DeviceContext;
 
-class Material {
+class Material: public ObjectHierarchy {
 
     /* The descriptors can get complicated here.
      *
@@ -37,16 +39,17 @@ class Material {
      */
 
     // reflection data from all shader stages
+    DeviceContext& ctx;
     ShaderReflectionResult combinedReflectionResult{};
     std::map<uint32_t, std::unique_ptr<DescriptorSetLayout>> descriptorSetLayouts;
     std::unique_ptr<DescriptorAllocator> descriptorAllocator;
+
+    CTX_PROPERTY(VulkanPipeline, pipeline)
     //TODO: Pipeline layout can be shared between materials (pipelines) if compatible
-    DeviceContext& ctx;
-public:
-    std::unique_ptr<VulkanPipeline> pipeline;
-    std::unique_ptr<PipelineLayout> pipelineLayout;
+    CTX_PROPERTY(PipelineLayout, pipelineLayout)
+
     Material(DeviceContext& ctx, std::vector<Shader>& shaders,  RenderPass& renderPass);
-    ~Material();
+    ~Material() override;
 
     friend class MaterialInstance;
 };

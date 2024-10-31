@@ -20,7 +20,7 @@ public:
 
     void drawFrame(uint32_t currentFrameIndex);
 
-    //TODO: Per-object rater than per-frame
+    //TODO: Per-object rather than per-frame
     void updateUniformBuffer(uint32_t currentFrame);
 
     void signalResize();

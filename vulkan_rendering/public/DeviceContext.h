@@ -1,9 +1,7 @@
 //
 // Created by miska on 2024/10/14.
 //
-
-#ifndef DEVICECONTEXT_H
-#define DEVICECONTEXT_H
+#pragma once
 
 #include <LogicalDevice.h>
 #include <PhysicalDevice.h>
@@ -15,6 +13,7 @@
 #include "VulkanSetupProcedure.h"
 #include "WindowContext.h"
 #include "ContextMacros.h"
+#include "ObjectHierarchy.h"
 
 struct VulkanAppContext;
 
@@ -38,6 +37,9 @@ struct DeviceContext : SubContext<VulkanAppContext> {
     CTX_PROPERTY_LIST(RenderPass, renderPass)
     //Queues (should always be ordered)
     CTX_PROPERTY_LIST(QueueContext, queueContext)
+
+    // All non-vulkan-native objects that need to be destroyed before device destruction
+    OBJECT_HIERARCHY_NODE
 
     /*----------- FORWARD CALLS ----------*/
 
@@ -74,5 +76,3 @@ private:
     bool isDeviceCreated = false;
 };
 
-
-#endif //DEVICECONTEXT_H

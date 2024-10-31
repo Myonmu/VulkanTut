@@ -5,11 +5,11 @@
 #pragma once
 
 
-#include <memory.h>
+#include <memory>
 
 #define CTX_PROPERTY(type, name)\
-    std::unique_ptr<type> name;\
-    inline type& get_##name() const {return *(name);}
+    private: std::unique_ptr<type> name;\
+    public: inline type& get_##name() const {return *(name);}
 
 #define CTX_PROPERTY_RAW_PTR(type, name)\
     type* name;\
