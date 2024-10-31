@@ -55,8 +55,6 @@ private:
     AppSetup appSetup{};
     std::unique_ptr<VulkanAppContext> context;
     std::vector<Shader> shaders;
-    std::unique_ptr<Material> material;
-    std::unique_ptr<MaterialInstance> materialInstance;
     RenderPassRecorder *mainPass = nullptr;
     TextureImage *textureImage = nullptr;
     ImageView *textureImageView = nullptr;
@@ -68,8 +66,8 @@ private:
         shaders.emplace_back(FileUtility::ReadSpv("../shaders/vert.spv"), VK_SHADER_STAGE_VERTEX_BIT);
         shaders.emplace_back(FileUtility::ReadSpv("../shaders/frag.spv"), VK_SHADER_STAGE_FRAGMENT_BIT);
 
-        material = std::make_unique<Material>(deviceCtx, shaders, deviceCtx.get_renderPass_at(0));
-        materialInstance = std::make_unique<MaterialInstance>(*material);
+        auto& material = deviceCtx.createObject<Material>(deviceCtx, shaders, deviceCtx.get_renderPass_at(0));
+        auto& materialInstance = material.createInstance();
 
         Texture2D t2d{"../textures/texture.jpg"};
         textureImage = new TextureImage(deviceCtx, t2d);
@@ -87,16 +85,16 @@ private:
                                      VK_BORDER_COLOR_INT_OPAQUE_BLACK,
                                      VK_FALSE);
 
-        materialInstance->setCombinedImageSampler(1, *textureImage, *sampler, *textureImageView);
-        materialInstance->updateDescriptorSet(0, 0);
+        materialInstance.setCombinedImageSampler(1, *textureImage, *sampler, *textureImageView);
+        materialInstance.updateDescriptorSet(0, 0);
 
         mainPass = new RenderPassRecorder(deviceCtx.get_renderPass_at(0));
-        mainPass->enqueueCommand<BindPipeline>( material->get_pipeline() , VK_PIPELINE_BIND_POINT_GRAPHICS);
+        mainPass->enqueueCommand<BindPipeline>( material.get_pipeline() , VK_PIPELINE_BIND_POINT_GRAPHICS);
         mainPass->enqueueCommand<SetViewport>();
         mainPass->enqueueCommand<SetScissors>();
         mainPass->enqueueCommand<BindVertexBuffer>();
         mainPass->enqueueCommand<BindIndexBuffer>();
-        mainPass->enqueueCommand<BindDescriptorSet>(material->get_pipelineLayout(), *materialInstance->descriptorSets[0]);
+        mainPass->enqueueCommand<BindDescriptorSet>(material.get_pipelineLayout(), *materialInstance.descriptorSets[0]);
         mainPass->enqueueCommand<DrawIndexed>(static_cast<uint32_t>(Vertex::testIndices.size()));
         //TODO: stub
         //auto &mainRecorder = context->frameDrawer;

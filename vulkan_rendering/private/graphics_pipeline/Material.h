@@ -13,10 +13,10 @@
 #include "ShaderReflectionResult.h"
 
 
-struct DescriptorContext;
+class MaterialInstance;
 struct DeviceContext;
 
-class Material: public ObjectHierarchy {
+class Material: public ObjectNode {
 
     /* The descriptors can get complicated here.
      *
@@ -48,8 +48,9 @@ class Material: public ObjectHierarchy {
     //TODO: Pipeline layout can be shared between materials (pipelines) if compatible
     CTX_PROPERTY(PipelineLayout, pipelineLayout)
 
+public:
     Material(DeviceContext& ctx, std::vector<Shader>& shaders,  RenderPass& renderPass);
-    ~Material() override;
-
+    ~Material() override = default;
+    MaterialInstance& createInstance();
     friend class MaterialInstance;
 };

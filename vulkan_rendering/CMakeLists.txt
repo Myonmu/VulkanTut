@@ -111,7 +111,6 @@ set(SOURCES
         private/graphics_pipeline/MaterialInstance.h
         private/graphics_pipeline/MaterialInstance.cpp
         private/misc/ObjectHierarchy.h
-        private/misc/ObjectHierarchy.cpp
 )
 
 # Create static library

@@ -38,8 +38,7 @@ struct DeviceContext : SubContext<VulkanAppContext> {
     //Queues (should always be ordered)
     CTX_PROPERTY_LIST(QueueContext, queueContext)
 
-    // All non-vulkan-native objects that need to be destroyed before device destruction
-    OBJECT_HIERARCHY_NODE
+    CTX_PROPERTY(ObjectNode, sceneRoot)
 
     /*----------- FORWARD CALLS ----------*/
 
@@ -60,19 +59,24 @@ struct DeviceContext : SubContext<VulkanAppContext> {
     // manually called after all surfaces are created
     void init();
 
-    [[nodiscard]] bool isLogicalDeviceCreated() const {return isDeviceCreated;}
+    [[nodiscard]] bool isLogicalDeviceCreated() const { return isDeviceCreated; }
 
-    [[nodiscard]] QueueContext& getCommonQueueContext(QueueFamily queueFamily) const;
-    [[nodiscard]] QueueContext& getPresentQueueContext(const VulkanSurface& surface) const;
+    [[nodiscard]] QueueContext &getCommonQueueContext(QueueFamily queueFamily) const;
+
+    [[nodiscard]] QueueContext &getPresentQueueContext(const VulkanSurface &surface) const;
 
     void bindRenderPassToWindow(uint32_t windowId, uint32_t renderPassId) const;
 
-    friend class PhysicalDevice;
+    template<ObjectNodeType T, typename... Args>
+    T &createObject(Args &&... args) {
+        return get_sceneRoot().createChildObject<T>(std::forward<Args>(args)...);
+    }
 
 private:
-
     // fills a QueueFamilyIndices object with present queue info.
-    void queryPresentQueues(QueueFamilyIndices &queueFamilyIndices, VkPhysicalDevice physicalDevice, QueueFamilyIndices &queueFamilies) const;
+    void queryPresentQueues(QueueFamilyIndices &queueFamilyIndices, VkPhysicalDevice physicalDevice,
+                            QueueFamilyIndices &queueFamilies) const;
+
+    friend class PhysicalDevice;
     bool isDeviceCreated = false;
 };
-

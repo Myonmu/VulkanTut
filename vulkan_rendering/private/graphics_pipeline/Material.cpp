@@ -2,17 +2,16 @@
 // Created by miska on 2024/10/21.
 //
 #include "Material.h"
-
 #include <DescriptorSetLayout.h>
 #include <PipelineLayout.h>
 #include <set>
-
 #include "DeviceContext.h"
 #include "Shader.h"
 #include "ShaderReflectionResult.h"
+#include "MaterialInstance.h"
 
 Material::Material(DeviceContext& ctx, std::vector<Shader>& shaders, RenderPass& renderPass):
-ctx(ctx), ObjectHierarchy(ctx.get_objectPool())
+ctx(ctx)
 {
     for (auto& shader: shaders) {
         combinedReflectionResult.merge(shader.reflectionResult);
@@ -35,4 +34,7 @@ ctx(ctx), ObjectHierarchy(ctx.get_objectPool())
     pipeline = std::make_unique<VulkanPipeline>(ctx, shaders, *pipelineLayout, renderPass);
 }
 
-Material::~Material() = default;
+MaterialInstance &Material::createInstance() {
+    return createChildObject<MaterialInstance>(*this);
+}
+

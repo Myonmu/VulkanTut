@@ -8,6 +8,7 @@
 #include "QueueFamilyIndices.h"
 
 DeviceContext::DeviceContext(VulkanAppContext &ctx, VulkanDeviceSetupProcedure &setupProcedure) : SubContext(ctx) {
+    sceneRoot = std::make_unique<ObjectNode>();
     setupProcedure.createWindows(*this);
     init();
     setupProcedure.createRenderPasses(*this);
@@ -56,7 +57,6 @@ void DeviceContext::init() {
     }
 
     vma = std::make_unique<VmaInstance>(*this);
-    deviceObjectPool = std::make_unique<DeviceObjectPool>();
 }
 
 DeviceContext::~DeviceContext() = default;

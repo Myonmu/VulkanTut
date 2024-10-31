@@ -20,7 +20,7 @@ MaterialInstance::MaterialInstance(Material &material) : srcMaterial(material), 
 
 MaterialInstance::~MaterialInstance() = default;
 
-DescriptorSets &MaterialInstance::getDescriptorSet(const uint32_t setId) {
+DescriptorSets &MaterialInstance::getDescriptorSet(const uint32_t setId) const {
     return *descriptorSets.at(setId);
 }
 
