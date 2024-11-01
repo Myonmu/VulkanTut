@@ -54,3 +54,5 @@ public:
     MaterialInstance& createInstance();
     friend class MaterialInstance;
 };
+
+

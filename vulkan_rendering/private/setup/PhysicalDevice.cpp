@@ -11,7 +11,7 @@
 #include "DeviceContext.h"
 #include "QueueFamilyIndices.h"
 #include "SwapChain.h"
-#include "TextureAnisotropyInfo.h"
+#include "TextureSampler.h"
 
 bool PhysicalDevice::checkDeviceExtensionSupport(VkPhysicalDevice device, DeviceContext &context) {
     uint32_t extensionsCount;

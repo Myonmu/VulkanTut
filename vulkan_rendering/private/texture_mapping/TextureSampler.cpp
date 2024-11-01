@@ -3,13 +3,70 @@
 //
 
 #include "TextureSampler.h"
-
 #include "DeviceContext.h"
-#include "TextureAddressMode.h"
-#include "TextureAnisotropyInfo.h"
-#include "TextureCompareInfo.h"
-#include "TextureFilterMode.h"
-#include "TextureMipmapInfo.h"
+
+const TextureAddressMode TextureAddressMode::REPEAT = {
+    VK_SAMPLER_ADDRESS_MODE_REPEAT, VK_SAMPLER_ADDRESS_MODE_REPEAT, VK_SAMPLER_ADDRESS_MODE_REPEAT
+};
+
+
+const TextureAddressMode TextureAddressMode::CLAMP_TO_BORDER = {
+    VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_BORDER, VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_BORDER,
+    VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_BORDER
+};
+
+const TextureAddressMode TextureAddressMode::CLAMP_TO_EDGE = {
+    VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE, VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE, VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE
+};
+
+const TextureAddressMode TextureAddressMode::MIRRORED_REPEAT = {
+    VK_SAMPLER_ADDRESS_MODE_MIRRORED_REPEAT, VK_SAMPLER_ADDRESS_MODE_MIRRORED_REPEAT,
+    VK_SAMPLER_ADDRESS_MODE_MIRRORED_REPEAT
+};
+
+const TextureAddressMode TextureAddressMode::MIRROR_CLAMP_TO_EDGE = {
+    VK_SAMPLER_ADDRESS_MODE_MIRROR_CLAMP_TO_EDGE, VK_SAMPLER_ADDRESS_MODE_MIRROR_CLAMP_TO_EDGE,
+    VK_SAMPLER_ADDRESS_MODE_MIRROR_CLAMP_TO_EDGE
+};
+
+std::optional<bool> TextureAnisotropyInfo::supportsAnisotropy{};
+std::optional<float> TextureAnisotropyInfo::supportedMaxAnisotropy{};
+
+void TextureAnisotropyInfo::queryAnisotropyInfo(VkPhysicalDevice device) {
+    if(supportsAnisotropy.has_value())return;
+
+    VkPhysicalDeviceFeatures supportedFeatures;
+    vkGetPhysicalDeviceFeatures(device, &supportedFeatures);
+    supportsAnisotropy = supportedFeatures.samplerAnisotropy;
+    if(!supportsAnisotropy) {
+        supportedMaxAnisotropy = 1.0f;
+        return;
+    }
+    VkPhysicalDeviceProperties properties{};
+    vkGetPhysicalDeviceProperties(device, &properties);
+    supportedMaxAnisotropy = properties.limits.maxSamplerAnisotropy;
+
+}
+
+bool TextureAnisotropyInfo::isAnisotropySupported() {
+    return supportsAnisotropy.value();
+}
+
+float TextureAnisotropyInfo::getMaxAnisotropy() {
+    return supportedMaxAnisotropy.value();
+}
+
+TextureAnisotropyInfo TextureAnisotropyInfo::getAutoAnisotropyInfo() {
+    return TextureAnisotropyInfo{isAnisotropySupported(), getMaxAnisotropy()};
+}
+
+const TextureFilterMode TextureFilterMode::LINEAR = {VK_FILTER_LINEAR, VK_FILTER_LINEAR};
+
+const TextureFilterMode TextureFilterMode::NEAREST = {VK_FILTER_NEAREST, VK_FILTER_NEAREST};
+
+const TextureMipmapInfo TextureMipmapInfo::DEFAULT{
+    VK_SAMPLER_MIPMAP_MODE_LINEAR, 0.0f, 0.0f, 0.0f
+};
 
 TextureSampler::TextureSampler(DeviceContext &ctx,
                                const TextureAddressMode addressMode,

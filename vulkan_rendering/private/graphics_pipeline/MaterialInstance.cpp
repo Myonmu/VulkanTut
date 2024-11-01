@@ -9,6 +9,7 @@
 
 #include "DeviceContext.h"
 #include "Material.h"
+#include "UnifiedTexture2D.h"
 #include "UniformBufferGroup.h"
 
 MaterialInstance::MaterialInstance(Material &material) : srcMaterial(material), ctx(material.ctx) {
@@ -28,6 +29,12 @@ DescriptorSets &MaterialInstance::getDescriptorSet(const uint32_t setId) const {
 void MaterialInstance::updateDescriptorSet(uint32_t setId, uint32_t i) {
     descriptorWriter.updateSet(ctx.getLogicalDevice(), getDescriptorSet(setId)[i]);
 }
+
+void MaterialInstance::setCombinedImageSampler(uint32_t binding, const UnifiedTexture2D &unifiedT2d,
+    const TextureSampler& sampler) {
+    setCombinedImageSampler(binding, unifiedT2d.get_textureImage(), sampler, unifiedT2d.get_imageView() );
+}
+
 
 void MaterialInstance::setCombinedImageSampler(const uint32_t binding, const TextureImage &textureImage,
                                                const TextureSampler &sampler, const ImageView &imageView) {

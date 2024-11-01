@@ -10,6 +10,7 @@
 #include "ObjectHierarchy.h"
 
 
+class UnifiedTexture2D;
 class UniformBufferGroup;
 class TextureImage;
 struct FrameInfo;
@@ -31,6 +32,8 @@ public:
 
     // TODO: Remove "i"
     void updateDescriptorSet(uint32_t setId, uint32_t i);
+
+    void setCombinedImageSampler(uint32_t binding, const UnifiedTexture2D &unifiedT2d, const TextureSampler &sampler);
 
     void setCombinedImageSampler(uint32_t binding, const TextureImage &textureImage, const TextureSampler &sampler,
                                  const ImageView &imageView);

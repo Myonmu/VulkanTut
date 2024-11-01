@@ -7,11 +7,13 @@
 #include <Buffer.h>
 #include <Texture2D.h>
 
+#include "ObjectHierarchy.h"
+
 struct DeviceContext;
 /*
  * Texture2D but on the GPU side
  */
-class TextureImage: public VulkanResource<VkImage, DeviceContext> {
+class TextureImage: public VulkanResource<VkImage, DeviceContext>, public ObjectNode {
 public:
     TextureImage(DeviceContext& ctx, Texture2D& t2d);
 

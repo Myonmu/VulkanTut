@@ -7,8 +7,6 @@
 #include <FileUtility.h>
 #include <vector>
 #include <optional>
-#include <Texture2D.h>
-#include <TextureImage.h>
 
 #include "AppSetup.h"
 #include "BindDescriptorSet.h"
@@ -22,18 +20,10 @@
 #include "SetScissors.h"
 #include "SetViewport.h"
 #include "Shader.h"
-#include "TextureAddressMode.h"
-#include "TextureAnisotropyInfo.h"
-#include "TextureCompareInfo.h"
-#include "TextureFilterMode.h"
-#include "TextureMipmapInfo.h"
 #include "TextureSampler.h"
 #include "GLFW/glfw3.h"
 #include "VulkanAppContext.h"
-
-
-const uint32_t WIDTH = 800;
-const uint32_t HEIGHT = 600;
+#include "UnifiedTexture2D.h"
 
 class TriangleApp {
 public :
@@ -45,9 +35,6 @@ public :
     }
 
     ~TriangleApp() {
-        delete sampler;
-        delete textureImageView;
-        delete textureImage;
         delete mainPass;
     }
 
@@ -56,40 +43,31 @@ private:
     std::unique_ptr<VulkanAppContext> context;
     std::vector<Shader> shaders;
     RenderPassRecorder *mainPass = nullptr;
-    TextureImage *textureImage = nullptr;
-    ImageView *textureImageView = nullptr;
-    TextureSampler *sampler = nullptr;
 
     void setup() {
-        auto& deviceCtx = *context->deviceContexts[0];
+        auto &deviceCtx = *context->deviceContexts[0];
 
         shaders.emplace_back(FileUtility::ReadSpv("../shaders/vert.spv"), VK_SHADER_STAGE_VERTEX_BIT);
         shaders.emplace_back(FileUtility::ReadSpv("../shaders/frag.spv"), VK_SHADER_STAGE_FRAGMENT_BIT);
 
-        auto& material = deviceCtx.createObject<Material>(deviceCtx, shaders, deviceCtx.get_renderPass_at(0));
-        auto& materialInstance = material.createInstance();
+        auto &material = deviceCtx.createObject<Material>(deviceCtx, shaders, deviceCtx.get_renderPass_at(0));
+        auto &materialInstance = material.createInstance();
 
-        Texture2D t2d{"../textures/texture.jpg"};
-        textureImage = new TextureImage(deviceCtx, t2d);
-        textureImage->transitionLayout(VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
-        textureImage->stage();
-        textureImage->transitionLayout(VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
-        textureImageView = new ImageView(deviceCtx, textureImage->getRaw(), t2d.getFormat());
+        auto const &tex = deviceCtx.createObject<UnifiedTexture2D>(deviceCtx, "../textures/texture.jpg");
+        auto const &sampler = deviceCtx.createObject<TextureSampler>(deviceCtx,
+                                                                     TextureAddressMode::REPEAT,
+                                                                     TextureFilterMode::LINEAR,
+                                                                     TextureAnisotropyInfo::getAutoAnisotropyInfo(),
+                                                                     TextureCompareInfo(),
+                                                                     TextureMipmapInfo::DEFAULT,
+                                                                     VK_BORDER_COLOR_INT_OPAQUE_BLACK,
+                                                                     VK_FALSE);
 
-        sampler = new TextureSampler(deviceCtx,
-                                     TextureAddressMode::REPEAT,
-                                     TextureFilterMode::LINEAR,
-                                     TextureAnisotropyInfo::getAutoAnisotropyInfo(),
-                                     TextureCompareInfo(),
-                                     TextureMipmapInfo::DEFAULT,
-                                     VK_BORDER_COLOR_INT_OPAQUE_BLACK,
-                                     VK_FALSE);
-
-        materialInstance.setCombinedImageSampler(1, *textureImage, *sampler, *textureImageView);
+        materialInstance.setCombinedImageSampler(1, tex, sampler);
         materialInstance.updateDescriptorSet(0, 0);
 
         mainPass = new RenderPassRecorder(deviceCtx.get_renderPass_at(0));
-        mainPass->enqueueCommand<BindPipeline>( material.get_pipeline() , VK_PIPELINE_BIND_POINT_GRAPHICS);
+        mainPass->enqueueCommand<BindPipeline>(material.get_pipeline(), VK_PIPELINE_BIND_POINT_GRAPHICS);
         mainPass->enqueueCommand<SetViewport>();
         mainPass->enqueueCommand<SetScissors>();
         mainPass->enqueueCommand<BindVertexBuffer>();
@@ -104,20 +82,12 @@ private:
     void mainLoop() {
         bool anyWindowAlive = false;
         do {
-            for (auto& device : context->deviceContexts) {
-                for (auto& window: device->windowContext) {
+            for (auto const &device: context->deviceContexts) {
+                for (auto const &window: device->windowContext) {
                     anyWindowAlive = true;
                     window->get_renderer().drawFrame();
                 }
             }
-        }while (anyWindowAlive);
-        /*
-        while (!glfwWindowShouldClose(context->window)) {
-            glfwPollEvents();
-            context->drawFrame();
-        }
-        */
-        //vkDeviceWaitIdle(context->getLogicalDevice());
+        } while (anyWindowAlive);
     }
 };
-
