@@ -24,7 +24,6 @@ struct DeviceContext : SubContext<VulkanAppContext> {
 
     /*----------- PROPERTIES ----------*/
 
-    CTX_PROPERTY_LIST(WindowContext, windowContext)
     // VkPhysicalDevice, requires surfaces to select device
     CTX_PROPERTY(PhysicalDevice, physicalDevice)
     // Queue family indices info of the selected physical device
@@ -34,9 +33,12 @@ struct DeviceContext : SubContext<VulkanAppContext> {
     // VMA Allocator
     CTX_PROPERTY(VmaInstance, vma);
 
+    CTX_PROPERTY_LIST(QueueContext, queueContext)
+
+    CTX_PROPERTY_LIST(WindowContext, windowContext)
+
     CTX_PROPERTY_LIST(RenderPass, renderPass)
     //Queues (should always be ordered)
-    CTX_PROPERTY_LIST(QueueContext, queueContext)
 
     CTX_PROPERTY(ObjectNode, sceneRoot)
 

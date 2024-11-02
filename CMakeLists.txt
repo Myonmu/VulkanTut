@@ -36,3 +36,6 @@ target_link_libraries(VulkanTut
 target_include_directories(VulkanTut PUBLIC
         ${CMAKE_SOURCE_DIR}/core/public
 )
+
+add_custom_command(TARGET VulkanTut POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/shaders ${CMAKE_CURRENT_BINARY_DIR}/shaders )
+add_custom_command(TARGET VulkanTut POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/textures ${CMAKE_CURRENT_BINARY_DIR}/textures )

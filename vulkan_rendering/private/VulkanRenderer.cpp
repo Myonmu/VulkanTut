@@ -14,7 +14,6 @@
 
 VulkanRenderer::VulkanRenderer(WindowContext &context) : ctx(context) {
 	const auto maxFrameInFlight = context.context.context.MAX_FRAMES_IN_FLIGHT;
-    frames.resize(maxFrameInFlight);
     for (int i = 0; i < maxFrameInFlight; ++i) {
         frames.emplace_back(std::make_unique<VulkanFrame>(context));
     }

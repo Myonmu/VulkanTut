@@ -4,7 +4,7 @@
 #pragma once
 #include <unordered_map>
 #include <memory>
-#include <iostream>
+#include <ranges>
 
 class ObjectNode;
 
@@ -20,8 +20,12 @@ public:
     }
 
     virtual ~ObjectNode() {
-        if(parent != nullptr) {
-            parent->detachChild(this);
+        for (auto &uptr: children_map | std::views::values) {
+            uptr->parent = nullptr;
+        }
+        children_map.clear();
+        if (parent != nullptr) {
+            parent->children_map.erase(this);
         }
     };
 

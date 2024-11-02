@@ -31,7 +31,7 @@ public :
         glfwInit();
         context = std::make_unique<VulkanAppContext>("VulkanApp", appSetup);
         setup();
-        mainLoop();
+        //mainLoop();
     }
 
     ~TriangleApp() {
@@ -46,14 +46,14 @@ private:
 
     void setup() {
         auto &deviceCtx = *context->deviceContexts[0];
-
-        shaders.emplace_back(FileUtility::ReadSpv("../shaders/vert.spv"), VK_SHADER_STAGE_VERTEX_BIT);
-        shaders.emplace_back(FileUtility::ReadSpv("../shaders/frag.spv"), VK_SHADER_STAGE_FRAGMENT_BIT);
+        auto f = FileUtility::ReadSpv("./shaders/vert.spv");
+        shaders.emplace_back(f, VK_SHADER_STAGE_VERTEX_BIT);
+        shaders.emplace_back(FileUtility::ReadSpv("./shaders/frag.spv"), VK_SHADER_STAGE_FRAGMENT_BIT);
 
         auto &material = deviceCtx.createObject<Material>(deviceCtx, shaders, deviceCtx.get_renderPass_at(0));
         auto &materialInstance = material.createInstance();
 
-        auto const &tex = deviceCtx.createObject<UnifiedTexture2D>(deviceCtx, "../textures/texture.jpg");
+        auto const &tex = deviceCtx.createObject<UnifiedTexture2D>(deviceCtx, "./textures/texture.jpg");
         auto const &sampler = deviceCtx.createObject<TextureSampler>(deviceCtx,
                                                                      TextureAddressMode::REPEAT,
                                                                      TextureFilterMode::LINEAR,
@@ -64,8 +64,10 @@ private:
                                                                      VK_FALSE);
 
         materialInstance.setCombinedImageSampler(1, tex, sampler);
+        return;
         materialInstance.updateDescriptorSet(0, 0);
 
+        return;
         mainPass = new RenderPassRecorder(deviceCtx.get_renderPass_at(0));
         mainPass->enqueueCommand<BindPipeline>(material.get_pipeline(), VK_PIPELINE_BIND_POINT_GRAPHICS);
         mainPass->enqueueCommand<SetViewport>();

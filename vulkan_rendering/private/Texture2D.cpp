@@ -4,12 +4,17 @@
 
 #include "Texture2D.h"
 #define STB_IMAGE_IMPLEMENTATION
+#include <format>
 #include <stb_image.h>
+#include <stdexcept>
 
 Texture2D::Texture2D() = default;
 
 Texture2D::Texture2D(const char *path) {
     pixels = stbi_load(path, &width, &height, &channels, STBI_rgb_alpha);
+    if (width == 0) {
+        throw std::runtime_error(std::format("texture loaded from {} has 0 width", path));
+    }
 }
 
 Texture2D::~Texture2D() {
