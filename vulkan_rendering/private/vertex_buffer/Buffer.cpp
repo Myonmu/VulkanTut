@@ -6,13 +6,13 @@
 
 #include <VulkanAppContext.h>
 
-#include "CopyBuffer.h"
+#include "CBC_Misc.h"
 #include "DeviceContext.h"
 #include "FrameInfo.h"
 
 
 Buffer::Buffer(DeviceContext &context, VkDeviceSize size, VkBufferUsageFlags usage,
-               VmaMemoryUsage memUsage) : VulkanResource(context) {
+               VmaMemoryUsage memUsage, VmaAllocationCreateFlags flags) : VulkanResource(context) {
     this->size = size;
     VkBufferCreateInfo bufferInfo{};
     bufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
@@ -22,7 +22,7 @@ Buffer::Buffer(DeviceContext &context, VkDeviceSize size, VkBufferUsageFlags usa
 
     VmaAllocationCreateInfo allocationInfo{};
     allocationInfo.usage = memUsage;
-    allocationInfo.flags = VMA_ALLOCATION_CREATE_MAPPED_BIT;
+    allocationInfo.flags = flags;
 
     if (vmaCreateBuffer(ctx.get_vma(), &bufferInfo, &allocationInfo,
                         &resource, &vmaAllocation, &vmaAllocationInfo) !=
@@ -70,10 +70,10 @@ uint32_t Buffer::findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags prope
 
 
 // Uploads source data to the buffer (there will be memcpy)
-void Buffer::bindBufferMemory(const void *sourceData) const {
+void Buffer::copyToBufferMemory(const void *sourceData, size_t offset) const {
     void *data;
     vmaMapMemory(ctx.get_vma(), vmaAllocation, &data);
-    memcpy(data, sourceData, size);
+    memcpy(static_cast<char*>(data) + offset, sourceData, size);
     vmaUnmapMemory(ctx.get_vma(), vmaAllocation);
 }
 
@@ -86,7 +86,7 @@ void Buffer::copyBuffer(Buffer &srcBuffer, Buffer &dstBuffer, DeviceContext &ctx
     CommandBuffer cmd{ctx, QueueFamily::QUEUE_FAMILY_GRAPHICS};
     CommandBufferRecorder recorder{};
 
-    recorder.enqueueCommand<CopyBuffer>(srcBuffer, dstBuffer, 0, 0, size);
+    recorder.enqueueCommand<CBC_Misc>(srcBuffer, dstBuffer, 0, 0, size);
     recorder.recordCommandBuffer(cmd, ctx, FrameInfo::DONT_CARE);
 
     cmd.executeImmediate();

@@ -9,12 +9,18 @@
 
 #include "ContextMacros.h"
 #include "DescriptorPoolAllocator.h"
+#include "DescriptorWriter.h"
 #include "ObjectHierarchy.h"
 #include "ShaderReflectionResult.h"
 
 
+class UniformBufferGroup;
+class TextureImage;
+class UnifiedTexture2D;
 class MaterialInstance;
 struct DeviceContext;
+
+//-----------------------------------MATERIAL------------------------------------------
 
 class Material: public ObjectNode {
 
@@ -55,4 +61,38 @@ public:
     friend class MaterialInstance;
 };
 
+
+//-----------------------------------MATERIAL INSTANCE------------------------------------------
+
+
+class MaterialInstance : public ObjectNode {
+    Material &srcMaterial;
+    DeviceContext &ctx;
+    DescriptorWriter descriptorWriter{};
+
+public:
+    explicit MaterialInstance(Material &material);
+
+    ~MaterialInstance() override;
+
+    friend class Material;
+
+    std::map<uint32_t, std::unique_ptr<DescriptorSets> > descriptorSets;
+
+    // TODO: Remove "i"
+    void updateDescriptorSet(uint32_t setId, uint32_t i);
+
+    void setCombinedImageSampler(uint32_t binding, const UnifiedTexture2D &unifiedT2d, const TextureSampler &sampler);
+
+    void setCombinedImageSampler(uint32_t binding, const TextureImage &textureImage, const TextureSampler &sampler,
+                                 const ImageView &imageView);
+
+    // TODO: Remove "i"
+    void setUBO(uint32_t binding, uint32_t i, UniformBufferGroup &ubo);
+
+    DescriptorSets &getDescriptorSet(uint32_t setId) const;
+
+    [[nodiscard]] PipelineLayout& getPipelineLayout() const;
+    [[nodiscard]] VulkanPipeline& getPipeline() const;
+};
 

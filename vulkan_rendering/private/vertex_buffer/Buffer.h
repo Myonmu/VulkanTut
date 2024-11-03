@@ -16,9 +16,10 @@ class CommandPool;
 
 class Buffer: public VulkanResource<VkBuffer, DeviceContext> {
 public:
-    explicit Buffer(DeviceContext& context, VkDeviceSize size, VkBufferUsageFlags usage, VmaMemoryUsage memUsage);
+    explicit Buffer(DeviceContext& context, VkDeviceSize size, VkBufferUsageFlags usage, VmaMemoryUsage memUsage,
+        VmaAllocationCreateFlags flags = VMA_ALLOCATION_CREATE_MAPPED_BIT);
     ~Buffer() override;
-    void bindBufferMemory(const void* sourceData) const;
+    void copyToBufferMemory(const void* sourceData, size_t offset) const;
     static void copyBuffer(Buffer& srcBuffer, Buffer& dstBuffer, DeviceContext& ctx, VkDeviceSize size);
     // this is a reference to a pointer, because mapping buffer memory would set the pointer as well.
     void mapBufferMemory(void*& source) const;

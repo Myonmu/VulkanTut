@@ -40,11 +40,9 @@ set(SOURCES
         public/CommandBufferCmd.h
         private/VulkanAppContext.cpp
         private/vertex_buffer/Vertex.h
-        private/vertex_buffer/VertexBuffer.cpp
         private/vertex_buffer/Vertex.cpp
         private/vertex_buffer/Buffer.cpp
         private/misc/vk_mem_alloc.h
-        private/vertex_buffer/IndexBuffer.cpp
         private/misc/VmaInstance.cpp
         private/uniform_buffer/UniformBufferObject.cpp
         private/descriptor/DescriptorSetLayout.cpp
@@ -54,21 +52,12 @@ set(SOURCES
         private/descriptor/DescriptorSets.cpp
         private/Texture2D.cpp
         private/texture_mapping/TextureImage.cpp
-        public/command_buffer_cmds/BindDescriptorSet.h
+        public/command_buffer_cmds/CBC_Drawing.h
         public/FrameInfo.h
-        public/command_buffer_cmds/BindIndexBuffer.h
-        public/command_buffer_cmds/BindVertexBuffer.h
-        public/command_buffer_cmds/SetScissors.h
-        public/command_buffer_cmds/SetViewport.h
-        public/command_buffer_cmds/DrawIndexed.h
-        public/command_buffer_cmds/BindPipeline.h
         private/drawing/RenderPassRecorder.cpp
         private/drawing/RenderPassRecorder.h
-        public/command_buffer_cmds/EnqueueRenderPass.h
-        public/command_buffer_cmds/CopyBuffer.h
+        public/command_buffer_cmds/CBC_Misc.h
         private/FrameInfo.cpp
-        public/command_buffer_cmds/TransitionImageLayout.h
-        public/command_buffer_cmds/CopyBufferToImage.h
         private/texture_mapping/ImageView.cpp
         private/texture_mapping/ImageView.h
         private/texture_mapping/TextureSampler.cpp
@@ -98,11 +87,15 @@ set(SOURCES
         private/descriptor/DescriptorPoolAllocator.h
         private/descriptor/DescriptorWriter.cpp
         private/descriptor/DescriptorWriter.h
-        private/graphics_pipeline/MaterialInstance.h
-        private/graphics_pipeline/MaterialInstance.cpp
         private/misc/ObjectHierarchy.h
         private/texture_mapping/UnifiedTexture2D.h
         private/texture_mapping/UnifiedTexture2D.cpp
+        private/misc/Mesh.cpp
+        private/misc/Mesh.h
+        private/vertex_buffer/MeshBuffer.cpp
+        private/vertex_buffer/MeshBuffer.h
+        private/misc/Camera.cpp
+        private/misc/Camera.h
 )
 
 # Create static library

@@ -9,21 +9,18 @@
 #include <optional>
 
 #include "AppSetup.h"
-#include "BindDescriptorSet.h"
-#include "BindIndexBuffer.h"
-#include "BindPipeline.h"
-#include "BindVertexBuffer.h"
-#include "DrawIndexed.h"
+#include "CBC_Drawing.h"
+#include "CBC_Misc.h"
 #include "Material.h"
-#include "MaterialInstance.h"
 #include "RenderPassRecorder.h"
-#include "SetScissors.h"
-#include "SetViewport.h"
 #include "Shader.h"
 #include "TextureSampler.h"
 #include "GLFW/glfw3.h"
 #include "VulkanAppContext.h"
 #include "UnifiedTexture2D.h"
+#include "Mesh.h"
+#include "MeshBuffer.h"
+#include "Vertex.h"
 
 class TriangleApp {
 public :
@@ -31,7 +28,7 @@ public :
         glfwInit();
         context = std::make_unique<VulkanAppContext>("VulkanApp", appSetup);
         setup();
-        //mainLoop();
+        mainLoop();
     }
 
     ~TriangleApp() {
@@ -64,21 +61,15 @@ private:
                                                                      VK_FALSE);
 
         materialInstance.setCombinedImageSampler(1, tex, sampler);
-        return;
         materialInstance.updateDescriptorSet(0, 0);
-
-        return;
+        auto& meshBuffer = deviceCtx.createObject<MeshBuffer>(deviceCtx, Vertex::testVerts, Vertex::testIndices);
+        auto& meshRenderer = deviceCtx.createObject<MeshRenderer>(meshBuffer, materialInstance);
         mainPass = new RenderPassRecorder(deviceCtx.get_renderPass_at(0));
-        mainPass->enqueueCommand<BindPipeline>(material.get_pipeline(), VK_PIPELINE_BIND_POINT_GRAPHICS);
         mainPass->enqueueCommand<SetViewport>();
         mainPass->enqueueCommand<SetScissors>();
-        mainPass->enqueueCommand<BindVertexBuffer>();
-        mainPass->enqueueCommand<BindIndexBuffer>();
-        mainPass->enqueueCommand<BindDescriptorSet>(material.get_pipelineLayout(), *materialInstance.descriptorSets[0]);
-        mainPass->enqueueCommand<DrawIndexed>(static_cast<uint32_t>(Vertex::testIndices.size()));
-        //TODO: stub
-        //auto &mainRecorder = context->frameDrawer;
-        //mainRecorder.enqueueCommand<EnqueueRenderPass>(*mainPass);
+        meshRenderer.enqueueDrawCall(*mainPass);
+        auto &mainRecorder = deviceCtx.get_windowContext_at(0).get_renderer();
+        mainRecorder.recorder->enqueueCommand<EnqueueRenderPass>(*mainPass);
     }
 
     void mainLoop() {

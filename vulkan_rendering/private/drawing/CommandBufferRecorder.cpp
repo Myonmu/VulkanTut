@@ -7,9 +7,12 @@
 
 #include "CommandBuffer.h"
 
-CommandBufferRecorder::CommandBufferRecorder() = default;
+CommandBufferRecorder::CommandBufferRecorder(bool isSubRecorder): isSubRecorder(isSubRecorder) {
 
-CommandBufferRecorder::CommandBufferRecorder(const VkCommandBufferUsageFlags flags) : flags(flags) {
+};
+
+CommandBufferRecorder::CommandBufferRecorder(const VkCommandBufferUsageFlags flags, bool isSubRecorder)
+: flags(flags), isSubRecorder(isSubRecorder) {
 }
 
 
@@ -31,7 +34,9 @@ void CommandBufferRecorder::endRecordCommandBuffer(const CommandBuffer &commandB
 
 void CommandBufferRecorder::recordCommandBuffer(const CommandBuffer &commandBuffer, const DeviceContext &context,
                                                 const FrameInfo &frameInfo) const {
-    beginRecordCommandBuffer(commandBuffer);
+    if(!isSubRecorder) {
+        beginRecordCommandBuffer(commandBuffer);
+    }
 
     if (recordFunc != nullptr) {
         recordFunc(commandBuffer, context, frameInfo);
@@ -40,7 +45,10 @@ void CommandBufferRecorder::recordCommandBuffer(const CommandBuffer &commandBuff
             cmd->execute(commandBuffer, context, frameInfo);
         }
     }
-    endRecordCommandBuffer(commandBuffer);
+
+    if(!isSubRecorder) {
+        endRecordCommandBuffer(commandBuffer);
+    }
 }
 
 CommandBufferRecorder::~CommandBufferRecorder() {

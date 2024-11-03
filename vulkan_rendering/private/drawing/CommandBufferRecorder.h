@@ -29,9 +29,11 @@ class CommandBufferRecorder {
 
     RecordFunc recordFunc = nullptr;
 
+    bool isSubRecorder;
+
 public:
-    CommandBufferRecorder();
-    explicit CommandBufferRecorder(VkCommandBufferUsageFlags flags);
+    explicit CommandBufferRecorder(bool isSubRecorder = false);
+    explicit CommandBufferRecorder(VkCommandBufferUsageFlags flags, bool isSubRecorder = false);
 
     // Use this to inject custom recorder (e.g. call raw vulkan api)
     void setRecordFunc(const RecordFunc& f);

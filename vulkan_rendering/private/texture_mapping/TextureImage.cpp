@@ -6,7 +6,7 @@
 
 #include <VulkanAppContext.h>
 
-#include "CopyBufferToImage.h"
+#include "CBC_Misc.h"
 #include "DeviceContext.h"
 #include "FrameInfo.h"
 
@@ -65,7 +65,7 @@ TextureImage::TextureImage(DeviceContext &ctx, Texture2D &t2d) : TextureImage(
     ctx, t2d.getWidth(), t2d.getHeight(), 4, t2d.getFormat(),
     VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT,
     VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT) {
-    stagingBuffer.bindBufferMemory(t2d.pixels);
+    stagingBuffer.copyToBufferMemory(t2d.pixels, 0);
 }
 
 

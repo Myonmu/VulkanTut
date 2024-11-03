@@ -34,6 +34,9 @@ struct Vertex {
          * and then we cannot counter it by swizzle the vertex input data.
          *
          *  Hence, the vertex input attribute description is hard-coded here.
+         *
+         *  Optionally, for further implementation:
+         *  use embedded yaml to determine the intended use of the bindings.
          */
         std::array<VkVertexInputAttributeDescription, 3> attributeDescriptions{};
         attributeDescriptions[0].binding = 0;
