@@ -75,6 +75,7 @@ private:
     void mainLoop() {
         bool anyWindowAlive = false;
         do {
+            anyWindowAlive = false;
             for (auto const &device: context->deviceContexts) {
                 for (auto const &window: device->windowContext) {
                     anyWindowAlive = true;

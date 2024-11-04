@@ -57,6 +57,7 @@ struct DeviceContext : SubContext<VulkanAppContext> {
     [[nodiscard]] QueueFamily getCombinedQueueFamilyRequirements() const;
 
     void createWindow(const char *name, int width, int height, QueueFamily requiredQueueFamilies);
+    void destroyWindow(uint32_t id);
 
     // manually called after all surfaces are created
     void init();

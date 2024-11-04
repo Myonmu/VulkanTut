@@ -93,5 +93,16 @@ void DeviceContext::bindRenderPassToWindow(const uint32_t windowId, const uint32
     get_windowContext_at(windowId).createFrameBuffers(get_renderPass_at(renderPassId));
 }
 
+void DeviceContext::destroyWindow(uint32_t id) {
+    uint32_t i = 0;
+    for (auto const &window: windowContext) {
+        if (window->id == id) {
+            break;
+        }
+        i++;
+    }
+    windowContext.erase(windowContext.begin() + i);
+}
+
 
 CTX_FORWARD_GET_BODY(DeviceContext, VulkanInstance, vulkanInstance)
