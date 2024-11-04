@@ -101,6 +101,9 @@ void DeviceContext::destroyWindow(uint32_t id) {
         }
         i++;
     }
+    /* TODO: could leave holes for future allocation (use array ?), because erase shifts elements forward
+     * This can potentially be inefficient in games like WindowShot where windows are spawned/destroyed frequently
+     */
     windowContext.erase(windowContext.begin() + i);
 }
 

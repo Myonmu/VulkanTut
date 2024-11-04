@@ -46,7 +46,7 @@ struct WindowContext : public SubContext<DeviceContext>{
 
     void resize();
 
-    void closeWindow();
+    void closeWindow() const;
 
     void createFrameBuffers(const RenderPass& renderPass);
 

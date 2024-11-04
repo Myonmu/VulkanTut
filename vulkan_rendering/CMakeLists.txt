@@ -81,8 +81,6 @@ set(SOURCES
         private/graphics_pipeline/Material.h
         private/graphics_pipeline/Shader.cpp
         private/graphics_pipeline/Shader.h
-        private/graphics_pipeline/ShaderReflectionResult.cpp
-        private/graphics_pipeline/ShaderReflectionResult.h
         private/descriptor/DescriptorPoolAllocator.cpp
         private/descriptor/DescriptorPoolAllocator.h
         private/descriptor/DescriptorWriter.cpp

@@ -11,7 +11,7 @@
 #include "DescriptorPoolAllocator.h"
 #include "DescriptorWriter.h"
 #include "ObjectHierarchy.h"
-#include "ShaderReflectionResult.h"
+#include "Shader.h"
 
 
 class UniformBufferGroup;

@@ -44,7 +44,7 @@ void WindowContext::frameBufferResizeCallback(GLFWwindow *window, int width, int
     w->resize();
 }
 
-void WindowContext::closeWindow() {
+void WindowContext::closeWindow() const {
     std::cout << "Closing window" << id << std::endl;
     context.destroyWindow(id);
 }

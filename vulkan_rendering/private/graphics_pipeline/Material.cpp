@@ -9,7 +9,6 @@
 
 #include "DeviceContext.h"
 #include "Shader.h"
-#include "ShaderReflectionResult.h"
 #include "UnifiedTexture2D.h"
 #include "UniformBufferGroup.h"
 
