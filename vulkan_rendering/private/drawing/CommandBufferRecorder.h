@@ -17,7 +17,7 @@ struct VulkanAppContext;
 class CommandBuffer;
 
 class CommandBufferRecorder {
-    static void beginRecordCommandBuffer(const CommandBuffer &commandBuffer);
+    void beginRecordCommandBuffer(const CommandBuffer &commandBuffer) const;
 
     static void endRecordCommandBuffer(const CommandBuffer &commandBuffer);
 

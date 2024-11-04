@@ -7,10 +7,7 @@
 #include <vector>
 #include <VulkanResource.h>
 #include <vulkan/vulkan_core.h>
-
-#include "ImageView.h"
-#include "TextureSampler.h"
-
+#include "DeviceContext.h"
 
 class DescriptorPool;
 class DescriptorSetLayout;
@@ -27,7 +24,7 @@ class DescriptorSets : public VulkanResource<std::vector<VkDescriptorSet>, Devic
     //std::vector<TextureSampler*> samplers{};
     //uint32_t textureResIndex = 0;
 public:
-    explicit DescriptorSets(DeviceContext& ctx, DescriptorPool& pool, DescriptorSetLayout& layout);
+    explicit DescriptorSets(DeviceContext& ctx, DescriptorPool& pool, DescriptorSetLayout& layout, bool allocPerFrame = false);
     ~DescriptorSets() override;
     VkDescriptorSet& operator[](size_t index);
 

@@ -44,7 +44,6 @@ set(SOURCES
         private/vertex_buffer/Buffer.cpp
         private/misc/vk_mem_alloc.h
         private/misc/VmaInstance.cpp
-        private/uniform_buffer/UniformBufferObject.cpp
         private/descriptor/DescriptorSetLayout.cpp
         private/uniform_buffer/UniformBufferGroup.h
         private/uniform_buffer/UniformBufferGroup.cpp
@@ -94,6 +93,10 @@ set(SOURCES
         private/vertex_buffer/MeshBuffer.h
         private/misc/Camera.cpp
         private/misc/Camera.h
+        private/misc/ObjectBehaviour.h
+        private/misc/RenderingContext.cpp
+        private/misc/RenderingContext.h
+        private/misc/Transform.h
 )
 
 # Create static library

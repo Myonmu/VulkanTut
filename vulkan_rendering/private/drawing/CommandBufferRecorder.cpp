@@ -16,10 +16,10 @@ CommandBufferRecorder::CommandBufferRecorder(const VkCommandBufferUsageFlags fla
 }
 
 
-void CommandBufferRecorder::beginRecordCommandBuffer(const CommandBuffer &commandBuffer) {
+void CommandBufferRecorder::beginRecordCommandBuffer(const CommandBuffer &commandBuffer) const {
     VkCommandBufferBeginInfo beginInfo{};
     beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
-    beginInfo.flags = 0;
+    beginInfo.flags = flags;
     beginInfo.pInheritanceInfo = nullptr;
     if (vkBeginCommandBuffer(commandBuffer, &beginInfo) != VK_SUCCESS) {
         throw std::runtime_error("failed to begin recording command buffer..");

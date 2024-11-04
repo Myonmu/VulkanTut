@@ -6,14 +6,34 @@
 #include <memory>
 #include <ranges>
 
+#include "Transform.h"
+#include "ContextMacros.h"
+
 class ObjectNode;
+class SceneObject;
 
 template<class T>
 concept ObjectNodeType = std::derived_from<T, ObjectNode>;
 
+template<class T>
+concept SceneObjectType = std::derived_from<T, SceneObject>;
+
 class ObjectNode {
     ObjectNode *parent;
+    std::vector<ObjectNode *> order;
     std::unordered_map<ObjectNode *, std::unique_ptr<ObjectNode> > children_map; // For ownership
+
+protected:
+    int getChildIndex(const ObjectNode *ptr) const {
+        int i = 0;
+        for (auto &child: order) {
+            if (child == ptr) {
+                return i;
+            }
+            i++;
+        }
+        return -1;
+    }
 
 public:
     explicit ObjectNode(ObjectNode *parent = nullptr) : parent(parent) {
@@ -36,6 +56,7 @@ public:
         child->parent = this;
         T *rawPtr = child.get();
         children_map[rawPtr] = std::move(child); // Manage ownership with map
+        order.push_back(rawPtr);
         return *rawPtr;
     }
 
@@ -45,7 +66,13 @@ public:
         child->parent = this;
         T *rawPtr = child.get();
         children_map[rawPtr] = std::move(child); // Transfer ownership
+        order.push_back(rawPtr);
         return *rawPtr;
+    }
+
+    [[nodiscard]] int getSelfIndex() const {
+        if (parent == nullptr) { return -1; }
+        return parent->getChildIndex(this);
     }
 
     // Detach a specific child and return it as a unique_ptr
@@ -58,9 +85,15 @@ public:
             std::unique_ptr<T> detachedChild = std::unique_ptr<T>(
                 dynamic_cast<T *>(std::move(children_map[p]).release()));
             children_map.erase(p); // Remove ownership
+            order.erase(order.begin() + getChildIndex(p));
             detachedChild->parent = nullptr; // Clear parent pointer
             return detachedChild; // Return ownership
         }
         return nullptr; // Child not found
     }
+};
+
+
+class SceneObject : public ObjectNode {
+    CTX_PROPERTY(Transform, transform)
 };

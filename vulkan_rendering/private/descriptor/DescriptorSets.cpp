@@ -9,17 +9,21 @@
 #include "DeviceContext.h"
 #include <vector>
 
-DescriptorSets::DescriptorSets(DeviceContext &ctx, DescriptorPool& pool, DescriptorSetLayout& layout): VulkanResource(ctx) {
-    auto maxFrameInFlight = ctx.context.MAX_FRAMES_IN_FLIGHT;
+DescriptorSets::DescriptorSets(DeviceContext &ctx, DescriptorPool& pool, DescriptorSetLayout& layout, bool allocPerFrame)
+: VulkanResource(ctx) {
+    uint32_t duplicates = 1;
+    if(allocPerFrame) {
+        duplicates = ctx.context.MAX_FRAMES_IN_FLIGHT;
+    }
     std::vector<VkDescriptorSetLayout> layouts;
-    for (uint32_t i = 0; i < maxFrameInFlight; i++) {
+    for (uint32_t i = 0; i < duplicates; i++) {
         layouts.push_back(layout);
     }
-    resource.resize(maxFrameInFlight);
+    resource.resize(duplicates);
     VkDescriptorSetAllocateInfo allocInfo = {};
     allocInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
     allocInfo.descriptorPool = pool;
-    allocInfo.descriptorSetCount = static_cast<uint32_t>(maxFrameInFlight);
+    allocInfo.descriptorSetCount = duplicates;
     allocInfo.pSetLayouts = layouts.data();
     const auto result = vkAllocateDescriptorSets(ctx.getLogicalDevice(), &allocInfo, resource.data());
     if (result == VK_ERROR_OUT_OF_POOL_MEMORY || result == VK_ERROR_FRAGMENTED_POOL) {
@@ -55,7 +59,6 @@ void DescriptorSets::configureDescriptorSets(const RenderObject& obj) {
             } else if (binding.descriptorType == VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER) {
                 VkDescriptorImageInfo imageInfo{};
                 imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-                //TODO: STUB
                 imageInfo.imageView = images[textureResIndex]->getRaw();
                 imageInfo.sampler = samplers[textureResIndex]->getRaw();
                 textureResIndex += 1;

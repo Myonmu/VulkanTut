@@ -8,12 +8,12 @@
 
 
 struct DescriptorSetLayoutBinding {
-    uint32_t setId{};
-    uint32_t binding{};
+    uint32_t setId{0};
+    uint32_t binding{0};
     std::string name{};
     uint32_t descriptorCount{1};
     VkDescriptorType type{};
-    VkPipelineStageFlags stageFlags{};
+    VkPipelineStageFlags stageFlags{ VK_PIPELINE_STAGE_VERTEX_SHADER_BIT | VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT };
     VkSampler *pImmutableSamplers{nullptr};
 
     bool operator==(const DescriptorSetLayoutBinding &other) const {
