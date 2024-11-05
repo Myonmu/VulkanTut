@@ -8,6 +8,7 @@
 
 class Component;
 class Entity;
+class Script;
 
 template<typename T>
 concept EntityType = std::derived_from<T, Entity>;
@@ -29,21 +30,25 @@ public:
 };
 
 class Entity {
+    World& world;
     flecs::entity entity;
 
 public:
-    explicit Entity(const World &world, const char* name = nullptr):
+    friend class Component;
+    friend class Script;
+
+    explicit Entity(World &world, const char* name = nullptr): world(world),
         entity( name != nullptr ? world.world.entity(name) : world.world.entity()){};
 
     template<ComponentType T>
-    const T *getComponent() {
-        return entity.get<T>();
+    T *getComponent() {
+        return entity.get_mut<T>();
     }
 
     template<ComponentType T, typename... Args>
-    const T *addComponent(Args &&... args) {
+    T *addComponent(Args &&... args) {
         auto &e = entity.emplace<T>(*this, std::forward<Args>(args)...);
-        return entity.get<T>();
+        return entity.get_mut<T>();
     }
 
 
@@ -58,8 +63,17 @@ public:
 class Component {
 protected:
     Entity &parent;
-
 public:
     explicit Component(Entity &entity): parent(entity) {
+    }
+};
+
+class Script : public Component {
+protected:
+    static ecs_entity_t ScriptType;
+public:
+    Script(Entity &entity): Component(entity) {
+        if(!ScriptType) ScriptType = ecs_new(entity.world.getRaw());
+        entity.world.getRaw().entity()
     }
 };

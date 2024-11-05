@@ -66,7 +66,7 @@ private:
         materialInstance.updateDescriptorSet(0, 0);
 
         auto &meshBuffer = deviceCtx.createObject<MeshBuffer>(deviceCtx, Vertex::testVerts, Vertex::testIndices);
-        auto entt = ecs.createEntityWithTransform();
+        auto entt = ecs.createEntityWithTransform("Some Object");
         entt.addComponent<MeshRenderer>(meshBuffer, materialInstance);
         mainPass = std::make_unique<RenderPassRecorder>(deviceCtx.get_renderPass_at(0));
         const auto &mainRecorder = deviceCtx.get_windowContext_at(0).get_renderer();
@@ -74,23 +74,32 @@ private:
 
         auto camera = ecs.createEntityWithTransform("Camera");
         camera.addComponent<Camera>();
+        const auto trans = camera.getComponent<Transform>();
 
+        trans->translation = glm::vec3(2, 2, 2);
+        trans->lookAt(glm::vec3(0, 0, 0));
+
+        enginePipeline.addLoop([this] { return playerLoop(); });
         enginePipeline.addLoop([this] { return prepareRenderLoop(); });
         enginePipeline.addLoop([this] { return renderLoop(); });
+    }
+
+    bool playerLoop() {
+        return true;
     }
 
     bool prepareRenderLoop() {
         mainPass->clear();
         mainPass->enqueueCommand<SetViewport>();
         mainPass->enqueueCommand<SetScissors>();
-        ecs.getRaw().system<Transform, Camera>().kind(flecs::OnStore).each(
-            [this](Transform &t, Camera &cam) {
-            }
-        );
         ecs.getRaw().system<MeshRenderer>("RenderMesh").kind(flecs::OnStore).each(
             [this](MeshRenderer &renderer) {
                 renderer.enqueueDrawCall(*mainPass);
             });
+        ecs.getRaw().system<Transform, Camera>("RenderCamera").kind(flecs::OnStore).each(
+            [this](Transform &t, Camera &cam) {
+            }
+        );
         if (const auto result = ecs.getRaw().progress(); !result) {
             fmt::println("Failed to progress ECS");
             return false;

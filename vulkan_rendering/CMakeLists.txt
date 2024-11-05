@@ -95,7 +95,6 @@ set(SOURCES
         private/vertex_buffer/MeshBuffer.h
         private/components/Camera.cpp
         private/components/Camera.h
-        private/misc/ObjectBehaviour.h
         private/misc/RenderingContext.cpp
         private/misc/RenderingContext.h
         private/Components/Transform.h

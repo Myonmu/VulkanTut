@@ -14,6 +14,8 @@
 
 
 struct Transform: public Component{
+    Transform* parentTransform{};
+
     glm::vec3 translation{};
     glm::vec3 scale{1, 1, 1};
     glm::quat rotation{};
@@ -34,5 +36,9 @@ struct Transform: public Component{
 
     [[nodiscard]] glm::mat4x4 getModelMatrix() const {
         return getTranslateMatrix() * getRotationMatrix() * getScaleMatrix();
+    }
+
+    void lookAt(glm::vec3 pos) {
+        rotation = glm::quatLookAt(pos - translation, glm::vec3(0,0,1));
     }
 };
