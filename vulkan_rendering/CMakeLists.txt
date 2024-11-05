@@ -117,6 +117,7 @@ include_directories(${CMAKE_SOURCE_DIR}/libs/stb)
 include_directories(${CMAKE_SOURCE_DIR}/libs/SPIRV-Cross)
 include_directories(${CMAKE_SOURCE_DIR}/libs/rapidyaml)
 include_directories(${CMAKE_SOURCE_DIR}/libs/shaderc)
+include_directories(${CMAKE_SOURCE_DIR}/libs/flecs)
 
 # TODO: move to lower-level module
 include_directories(${CMAKE_SOURCE_DIR}/libs/fmt)

@@ -40,8 +40,9 @@ public:
     }
 
     virtual ~ObjectNode() {
-        for (auto &uptr: children_map | std::views::values) {
-            uptr->parent = nullptr;
+        for (auto it = order.rbegin(); it != order.rend(); ++it) {
+            (*it)->parent = nullptr;
+            children_map.erase(*it);
         }
         children_map.clear();
         if (parent != nullptr) {
