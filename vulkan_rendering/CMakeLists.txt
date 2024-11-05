@@ -14,6 +14,8 @@ set(INCLUDE_DIRS
         ${CMAKE_CURRENT_SOURCE_DIR}/private/texture_mapping
         ${CMAKE_CURRENT_SOURCE_DIR}/private/descriptor
         ${CMAKE_CURRENT_SOURCE_DIR}/public
+        ${CMAKE_CURRENT_SOURCE_DIR}/private/vma
+        ${CMAKE_CURRENT_SOURCE_DIR}/private/components
         ${CMAKE_CURRENT_SOURCE_DIR}/public/command_buffer_cmds
 )
 
@@ -42,8 +44,8 @@ set(SOURCES
         private/vertex_buffer/Vertex.h
         private/vertex_buffer/Vertex.cpp
         private/vertex_buffer/Buffer.cpp
-        private/misc/vk_mem_alloc.h
-        private/misc/VmaInstance.cpp
+        private/vma/vk_mem_alloc.h
+        private/vma/VmaInstance.cpp
         private/descriptor/DescriptorSetLayout.cpp
         private/uniform_buffer/UniformBufferGroup.h
         private/uniform_buffer/UniformBufferGroup.cpp
@@ -87,16 +89,16 @@ set(SOURCES
         private/misc/ObjectHierarchy.h
         private/texture_mapping/UnifiedTexture2D.h
         private/texture_mapping/UnifiedTexture2D.cpp
-        private/misc/Mesh.cpp
-        private/misc/Mesh.h
+        private/components/Mesh.cpp
+        private/components/Mesh.h
         private/vertex_buffer/MeshBuffer.cpp
         private/vertex_buffer/MeshBuffer.h
-        private/misc/Camera.cpp
-        private/misc/Camera.h
+        private/components/Camera.cpp
+        private/components/Camera.h
         private/misc/ObjectBehaviour.h
         private/misc/RenderingContext.cpp
         private/misc/RenderingContext.h
-        private/misc/Transform.h
+        private/Components/Transform.h
         private/misc/EnginePipeline.h
         private/misc/Ecs.cpp
         private/misc/Ecs.h

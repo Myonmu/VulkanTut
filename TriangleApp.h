@@ -6,8 +6,6 @@
 
 #include <FileUtility.h>
 #include <vector>
-#include <optional>
-
 #include "AppSetup.h"
 #include "CBC_Drawing.h"
 #include "CBC_Misc.h"
@@ -24,6 +22,8 @@
 #include "flecs.h"
 #include <fmt/core.h>
 
+#include "Camera.h"
+#include "Ecs.h"
 #include "EnginePipeline.h"
 
 class TriangleApp {
@@ -38,10 +38,10 @@ public :
 private:
     AppSetup appSetup{};
     std::unique_ptr<VulkanAppContext> context;
-    flecs::world ecs{};
+    World ecs{};
     std::vector<Shader> shaders;
     std::unique_ptr<RenderPassRecorder> mainPass;
-    EnginePipeline enginePipeline {};
+    EnginePipeline enginePipeline{};
 
     void setup() {
         auto &deviceCtx = *context->deviceContexts[0];
@@ -66,25 +66,32 @@ private:
         materialInstance.updateDescriptorSet(0, 0);
 
         auto &meshBuffer = deviceCtx.createObject<MeshBuffer>(deviceCtx, Vertex::testVerts, Vertex::testIndices);
-        const auto e = ecs.entity();
-        e.emplace<MeshRenderer>(meshBuffer, materialInstance);
+        auto entt = ecs.createEntityWithTransform();
+        entt.addComponent<MeshRenderer>(meshBuffer, materialInstance);
         mainPass = std::make_unique<RenderPassRecorder>(deviceCtx.get_renderPass_at(0));
         const auto &mainRecorder = deviceCtx.get_windowContext_at(0).get_renderer();
         mainRecorder.recorder->enqueueCommand<EnqueueRenderPass>(*mainPass);
 
-        enginePipeline.addLoop(std::bind(&TriangleApp::prepareRenderLoop, this));
-        enginePipeline.addLoop(std::bind(&TriangleApp::renderLoop, this));
+        auto camera = ecs.createEntityWithTransform("Camera");
+        camera.addComponent<Camera>();
+
+        enginePipeline.addLoop([this] { return prepareRenderLoop(); });
+        enginePipeline.addLoop([this] { return renderLoop(); });
     }
 
     bool prepareRenderLoop() {
         mainPass->clear();
         mainPass->enqueueCommand<SetViewport>();
         mainPass->enqueueCommand<SetScissors>();
-        ecs.system<MeshRenderer>("RenderMesh").kind(flecs::OnStore).each(
+        ecs.getRaw().system<Transform, Camera>().kind(flecs::OnStore).each(
+            [this](Transform &t, Camera &cam) {
+            }
+        );
+        ecs.getRaw().system<MeshRenderer>("RenderMesh").kind(flecs::OnStore).each(
             [this](MeshRenderer &renderer) {
                 renderer.enqueueDrawCall(*mainPass);
             });
-        if (const auto result = ecs.progress(); !result) {
+        if (const auto result = ecs.getRaw().progress(); !result) {
             fmt::println("Failed to progress ECS");
             return false;
         }
@@ -103,6 +110,7 @@ private:
     }
 
     void mainLoop() {
-        while (enginePipeline.mainLoop()){}
+        while (enginePipeline.mainLoop()) {
+        }
     }
 };

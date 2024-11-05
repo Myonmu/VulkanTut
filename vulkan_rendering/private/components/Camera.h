@@ -5,15 +5,18 @@
 #pragma once
 #include <glm/mat4x4.hpp>
 
+#include "Ecs.h"
 #include "ObjectHierarchy.h"
 
 //TODO: Support ortho camera
-class Camera: public SceneObject {
+class Camera: public Component {
 public:
     float fov = 45.0f;  // Field of view in degrees
     float aspectRatio = 16.0f / 9.0f;  // Aspect ratio (width/height)
     float nearPlane = 0.1f;  // Near clipping plane
     float farPlane = 100.0f;  // Far clipping plane
+
+    explicit Camera(Entity& e): Component(e) {}
 
     [[nodiscard]] glm::mat4x4 getViewMatrix() const ;
 

@@ -4,17 +4,22 @@
 
 #include "Ecs.h"
 
-Entity::Entity(const World &world): entity(world.world.entity()) {
+#include "Transform.h"
+
+Entity World::createEntity(const char* name) const {
+    return Entity(*this, name);
+}
+
+Entity World::createEntityWithTransform(const char *name) const {
+    Entity entity(*this, name);
+    entity.addComponent<Transform>();
+    return entity;
 }
 
 
-template<ComponentType T>
-const T *Entity::getComponent() {
-    return entity.get<T>();
-}
 
-template<ComponentType T>
-const T *Entity::addComponent() {
-    
-}
+
+
+
+
 

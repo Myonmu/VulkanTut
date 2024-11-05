@@ -4,16 +4,17 @@
 
 #pragma once
 
+#include "Ecs.h"
 #include "Material.h"
 #include "MeshBuffer.h"
 #include "RenderPassRecorder.h"
 
 
-class MeshRenderer {
+class MeshRenderer: public Component{
     const MeshBuffer& meshBuffer;
     const MaterialInstance& materialInstance;
     CommandBufferRecorder recorder{true};
 public:
-    MeshRenderer(const MeshBuffer& meshBuffer, const MaterialInstance& materialInstance);
+    MeshRenderer(Entity& e, const MeshBuffer& meshBuffer, const MaterialInstance& materialInstance);
     void enqueueDrawCall(RenderPassRecorder& renderPassRecorder);
 };

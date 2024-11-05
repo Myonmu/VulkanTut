@@ -6,9 +6,15 @@
 #endif
 #include "Camera.h"
 
+#include <stdexcept>
+
 glm::mat4x4 Camera::getViewMatrix() const {
-    glm::mat4 rotationMatrix = get_transform().getRotationMatrix();
-    glm::mat4 translationMatrix = glm::translate(glm::mat4(1.0f), -get_transform().translation);
+    const auto transform = parent.getComponent<Transform>();
+    if(transform == nullptr) {
+        throw std::runtime_error("Camera::getViewMatrix(): transform is null");
+    }
+    glm::mat4 rotationMatrix = transform->getRotationMatrix();
+    glm::mat4 translationMatrix = glm::translate(glm::mat4(1.0f), -transform->translation);
     return rotationMatrix * translationMatrix;
 }
 

@@ -7,15 +7,15 @@
 #include "CBC_Drawing.h"
 #include "CBC_Misc.h"
 
-MeshRenderer::MeshRenderer(const MeshBuffer &meshBuffer, const MaterialInstance &materialInstance)
-    : meshBuffer(meshBuffer),
+MeshRenderer::MeshRenderer(Entity &e, const MeshBuffer &meshBuffer, const MaterialInstance &materialInstance)
+    : Component(e),
+      meshBuffer(meshBuffer),
       materialInstance(materialInstance) {
-
     // TODO: same pipeline could be batched
     recorder.enqueueCommand<BindPipeline>(materialInstance.getPipeline(), VK_PIPELINE_BIND_POINT_GRAPHICS);
 
     recorder.enqueueCommand<BindMeshBuffer>(meshBuffer);
-    for(auto& [setId, set] : materialInstance.descriptorSets) {
+    for (auto &[setId, set]: materialInstance.descriptorSets) {
         recorder.enqueueCommand<CBC_Drawing>(materialInstance.getPipelineLayout(), *set, setId);
     }
     recorder.enqueueCommand<DrawIndexed>(meshBuffer.getIndicesCount());
@@ -24,4 +24,3 @@ MeshRenderer::MeshRenderer(const MeshBuffer &meshBuffer, const MaterialInstance 
 void MeshRenderer::enqueueDrawCall(RenderPassRecorder &renderPassRecorder) {
     renderPassRecorder.enqueueCommand<EnqueueRecorder>(recorder);
 }
-
