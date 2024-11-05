@@ -97,6 +97,9 @@ set(SOURCES
         private/misc/RenderingContext.cpp
         private/misc/RenderingContext.h
         private/misc/Transform.h
+        private/misc/EnginePipeline.h
+        private/misc/Ecs.cpp
+        private/misc/Ecs.h
 )
 
 # Create static library
@@ -125,6 +128,7 @@ include_directories(${CMAKE_SOURCE_DIR}/libs/fmt)
 
 # Link GLFW, Vulkan, and GLM with the library
 target_link_libraries(Vk glfw Vulkan::Vulkan glm)
+target_link_libraries(Vk flecs::flecs_static)
 
 # Add include directories to target
 target_include_directories(Vk

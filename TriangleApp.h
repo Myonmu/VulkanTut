@@ -21,6 +21,10 @@
 #include "Mesh.h"
 #include "MeshBuffer.h"
 #include "Vertex.h"
+#include "flecs.h"
+#include <fmt/core.h>
+
+#include "EnginePipeline.h"
 
 class TriangleApp {
 public :
@@ -31,15 +35,13 @@ public :
         mainLoop();
     }
 
-    ~TriangleApp() {
-        delete mainPass;
-    }
-
 private:
     AppSetup appSetup{};
     std::unique_ptr<VulkanAppContext> context;
+    flecs::world ecs{};
     std::vector<Shader> shaders;
-    RenderPassRecorder *mainPass = nullptr;
+    std::unique_ptr<RenderPassRecorder> mainPass;
+    EnginePipeline enginePipeline {};
 
     void setup() {
         auto &deviceCtx = *context->deviceContexts[0];
@@ -62,26 +64,45 @@ private:
 
         materialInstance.setCombinedImageSampler(1, tex, sampler);
         materialInstance.updateDescriptorSet(0, 0);
-        auto& meshBuffer = deviceCtx.createObject<MeshBuffer>(deviceCtx, Vertex::testVerts, Vertex::testIndices);
-        auto& meshRenderer = deviceCtx.createObject<MeshRenderer>(meshBuffer, materialInstance);
-        mainPass = new RenderPassRecorder(deviceCtx.get_renderPass_at(0));
+
+        auto &meshBuffer = deviceCtx.createObject<MeshBuffer>(deviceCtx, Vertex::testVerts, Vertex::testIndices);
+        const auto e = ecs.entity();
+        e.emplace<MeshRenderer>(meshBuffer, materialInstance);
+        mainPass = std::make_unique<RenderPassRecorder>(deviceCtx.get_renderPass_at(0));
+        const auto &mainRecorder = deviceCtx.get_windowContext_at(0).get_renderer();
+        mainRecorder.recorder->enqueueCommand<EnqueueRenderPass>(*mainPass);
+
+        enginePipeline.addLoop(std::bind(&TriangleApp::prepareRenderLoop, this));
+        enginePipeline.addLoop(std::bind(&TriangleApp::renderLoop, this));
+    }
+
+    bool prepareRenderLoop() {
+        mainPass->clear();
         mainPass->enqueueCommand<SetViewport>();
         mainPass->enqueueCommand<SetScissors>();
-        meshRenderer.enqueueDrawCall(*mainPass);
-        auto &mainRecorder = deviceCtx.get_windowContext_at(0).get_renderer();
-        mainRecorder.recorder->enqueueCommand<EnqueueRenderPass>(*mainPass);
+        ecs.system<MeshRenderer>("RenderMesh").kind(flecs::OnStore).each(
+            [this](MeshRenderer &renderer) {
+                renderer.enqueueDrawCall(*mainPass);
+            });
+        if (const auto result = ecs.progress(); !result) {
+            fmt::println("Failed to progress ECS");
+            return false;
+        }
+        return true;
+    }
+
+    bool renderLoop() {
+        bool anyWindowAlive = false;
+        for (auto const &device: context->deviceContexts) {
+            for (auto const &window: device->windowContext) {
+                anyWindowAlive = true;
+                window->get_renderer().drawFrame();
+            }
+        }
+        return anyWindowAlive;
     }
 
     void mainLoop() {
-        bool anyWindowAlive = false;
-        do {
-            anyWindowAlive = false;
-            for (auto const &device: context->deviceContexts) {
-                for (auto const &window: device->windowContext) {
-                    anyWindowAlive = true;
-                    window->get_renderer().drawFrame();
-                }
-            }
-        } while (anyWindowAlive);
+        while (enginePipeline.mainLoop()){}
     }
 };

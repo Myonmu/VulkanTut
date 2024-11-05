@@ -19,7 +19,7 @@ struct FrameInfo;
  */
 class RenderPassRecorder {
     RenderPass &renderPass;
-    std::vector<CommandBufferCmd *> commands;
+    std::vector<std::unique_ptr<CommandBufferCmd>> commands;
 
 public:
     explicit RenderPassRecorder(RenderPass &renderPass);
@@ -29,10 +29,12 @@ public:
     void recordRenderPass(const CommandBuffer &commandBuffer, const DeviceContext &context,
                           const FrameInfo &frameInfo) const;
 
+    void clear();
+
     template<typename T, typename... Args>
     void enqueueCommand(Args&&... args) {
         static_assert(std::is_base_of_v<CommandBufferCmd, T>, "T must be a CommandBufferCmd");
-        commands.push_back(new T(std::forward<Args>(args)...));
+        commands.emplace_back(std::make_unique<T>(std::forward<Args>(args)...));
     }
 };
 

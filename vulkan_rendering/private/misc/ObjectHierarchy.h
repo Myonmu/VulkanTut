@@ -19,6 +19,7 @@ template<class T>
 concept SceneObjectType = std::derived_from<T, SceneObject>;
 
 class ObjectNode {
+
     ObjectNode *parent;
     std::vector<ObjectNode *> order;
     std::unordered_map<ObjectNode *, std::unique_ptr<ObjectNode> > children_map; // For ownership
@@ -48,7 +49,7 @@ public:
         if (parent != nullptr) {
             parent->children_map.erase(this);
         }
-    };
+    }
 
     // Template function to create and add a child of derived type T
     template<ObjectNodeType T, typename... Args>
@@ -93,7 +94,6 @@ public:
         return nullptr; // Child not found
     }
 };
-
 
 class SceneObject : public ObjectNode {
     CTX_PROPERTY(Transform, transform)

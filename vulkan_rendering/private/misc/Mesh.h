@@ -9,11 +9,11 @@
 #include "RenderPassRecorder.h"
 
 
-class MeshRenderer: public ObjectNode {
-    MeshBuffer& meshBuffer;
-    MaterialInstance& materialInstance;
+class MeshRenderer {
+    const MeshBuffer& meshBuffer;
+    const MaterialInstance& materialInstance;
     CommandBufferRecorder recorder{true};
 public:
-    MeshRenderer(MeshBuffer& meshBuffer, MaterialInstance& materialInstance);
+    MeshRenderer(const MeshBuffer& meshBuffer, const MaterialInstance& materialInstance);
     void enqueueDrawCall(RenderPassRecorder& renderPassRecorder);
 };

@@ -26,7 +26,7 @@ public:
                  const FrameInfo &frameInfo) override {
         vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
                                 pipelineLayout,
-                                setId, 1, &descriptorSets[frameInfo.currentFrameIndex],
+                                setId, 1, &descriptorSets[descriptorSets.getRaw().size() <= frameInfo.currentFrameIndex ? 0 : frameInfo.currentFrameIndex],
                                 0, nullptr);
     }
 };
@@ -34,9 +34,9 @@ public:
 
 
 class BindMeshBuffer : public CommandBufferCmd {
-    MeshBuffer &meshBuffer;
+    const MeshBuffer &meshBuffer;
 public:
-    explicit BindMeshBuffer(MeshBuffer &meshBuffer): meshBuffer(meshBuffer) {
+    explicit BindMeshBuffer(const MeshBuffer &meshBuffer): meshBuffer(meshBuffer) {
     }
     void execute(const CommandBuffer &commandBuffer,
                  const DeviceContext &context,

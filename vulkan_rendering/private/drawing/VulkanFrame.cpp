@@ -74,7 +74,7 @@ void VulkanFrame::drawFrame(uint32_t currentFrameIndex) {
     submitInfo.signalSemaphoreCount = 1;
     submitInfo.pSignalSemaphores = signalSemaphores;
 
-    if (const auto queue = context.context.getCommonQueueContext(QueueFamily::QUEUE_FAMILY_GRAPHICS).get_queue();
+    if (const auto& queue = context.context.getCommonQueueContext(QueueFamily::QUEUE_FAMILY_GRAPHICS).get_queue();
         vkQueueSubmit(queue, 1, &submitInfo, inFlightFence) != VK_SUCCESS) {
         throw std::runtime_error("failed to submit draw command buffer");
     }
@@ -90,7 +90,7 @@ void VulkanFrame::drawFrame(uint32_t currentFrameIndex) {
     presentInfo.pImageIndices = &imageIndex;
     presentInfo.pResults = nullptr;
 
-    auto presentQueue = context.context.getPresentQueueContext(context.get_surface()).get_queue();
+    auto& presentQueue = context.context.getPresentQueueContext(context.get_surface()).get_queue();
     result = vkQueuePresentKHR(presentQueue, &presentInfo);
     if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR || frameBufferResized) {
         frameBufferResized = false;

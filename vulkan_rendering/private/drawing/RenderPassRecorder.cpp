@@ -14,11 +14,7 @@
 RenderPassRecorder::RenderPassRecorder(RenderPass &renderPass) : renderPass(renderPass) {
 }
 
-RenderPassRecorder::~RenderPassRecorder() {
-    for (const auto &cmd: commands) {
-        delete cmd;
-    }
-}
+RenderPassRecorder::~RenderPassRecorder() = default;
 
 
 void RenderPassRecorder::recordRenderPass(const CommandBuffer &commandBuffer, const DeviceContext &context,
@@ -44,3 +40,8 @@ void RenderPassRecorder::recordRenderPass(const CommandBuffer &commandBuffer, co
 
     vkCmdEndRenderPass(commandBuffer);
 }
+
+void RenderPassRecorder::clear() {
+    commands.clear();
+}
+

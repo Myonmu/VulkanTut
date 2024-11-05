@@ -13,6 +13,8 @@ add_subdirectory(libs/glfw)
 add_subdirectory(libs/glm)
 add_subdirectory(libs/SPIRV-Cross)
 add_subdirectory(vulkan_rendering)
+add_subdirectory(libs/flecs)
+add_subdirectory(libs/fmt)
 
 # Application executable
 add_executable(VulkanTut
@@ -30,6 +32,7 @@ target_link_libraries(VulkanTut
         spirv-cross-core
         spirv-cross-util
         spirv-cross-glsl
+        fmt::fmt
 )
 
 # Include directories for the app
