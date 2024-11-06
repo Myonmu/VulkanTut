@@ -14,7 +14,7 @@
 #include "Shader.h"
 
 
-class UniformBufferGroup;
+class PerFrameBufferGroup;
 class TextureImage;
 class UnifiedTexture2D;
 class MaterialInstance;
@@ -88,7 +88,7 @@ public:
                                  const ImageView &imageView);
 
     // TODO: Remove "i"
-    void setUBO(uint32_t binding, uint32_t i, UniformBufferGroup &ubo);
+    void setUBO(uint32_t binding, uint32_t i, PerFrameBufferGroup &ubo);
 
     DescriptorSets &getDescriptorSet(uint32_t setId) const;
 

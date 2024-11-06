@@ -25,6 +25,7 @@
 #include "Camera.h"
 #include "Ecs.h"
 #include "EnginePipeline.h"
+#include "scripts/MeshRotate.h"
 
 class TriangleApp {
 public :
@@ -68,6 +69,8 @@ private:
         auto &meshBuffer = deviceCtx.createObject<MeshBuffer>(deviceCtx, Vertex::testVerts, Vertex::testIndices);
         auto entt = ecs.createEntityWithTransform("Some Object");
         entt.addComponent<MeshRenderer>(meshBuffer, materialInstance);
+        entt.addComponent<MeshRotate>();
+
         mainPass = std::make_unique<RenderPassRecorder>(deviceCtx.get_renderPass_at(0));
         const auto &mainRecorder = deviceCtx.get_windowContext_at(0).get_renderer();
         mainRecorder.recorder->enqueueCommand<EnqueueRenderPass>(*mainPass);
@@ -85,6 +88,10 @@ private:
     }
 
     bool playerLoop() {
+        ecs.getRaw().system<Script>("ScriptUpdate").kind(flecs::OnUpdate).each(
+            [](Script &s) {
+                s.update();
+            });
         return true;
     }
 

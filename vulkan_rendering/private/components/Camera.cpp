@@ -9,7 +9,7 @@
 #include <stdexcept>
 
 glm::mat4x4 Camera::getViewMatrix() const {
-    const auto transform = parent.getComponent<Transform>();
+    const auto transform = parent->getComponent<Transform>();
     if(transform == nullptr) {
         throw std::runtime_error("Camera::getViewMatrix(): transform is null");
     }

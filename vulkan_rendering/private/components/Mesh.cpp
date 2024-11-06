@@ -7,7 +7,7 @@
 #include "CBC_Drawing.h"
 #include "CBC_Misc.h"
 
-MeshRenderer::MeshRenderer(Entity &e, const MeshBuffer &meshBuffer, const MaterialInstance &materialInstance)
+MeshRenderer::MeshRenderer(const Entity* e, const MeshBuffer &meshBuffer, const MaterialInstance &materialInstance)
     : Component(e),
       meshBuffer(meshBuffer),
       materialInstance(materialInstance) {

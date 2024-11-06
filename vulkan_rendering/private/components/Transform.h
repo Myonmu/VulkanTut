@@ -20,7 +20,8 @@ struct Transform: public Component{
     glm::vec3 scale{1, 1, 1};
     glm::quat rotation{};
 
-    explicit Transform(Entity& e) : Component(e){}
+    explicit Transform(const Entity* e) : Component(e){}
+    ~Transform() override = default;
 
     [[nodiscard]] glm::mat4x4 getTranslateMatrix() const {
         return glm::translate(glm::mat4x4(1), translation);

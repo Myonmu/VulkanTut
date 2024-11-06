@@ -30,25 +30,27 @@ public:
 };
 
 class Entity {
-    World& world;
+    const World* world;
     flecs::entity entity;
 
 public:
     friend class Component;
     friend class Script;
 
-    explicit Entity(World &world, const char* name = nullptr): world(world),
-        entity( name != nullptr ? world.world.entity(name) : world.world.entity()){};
+    explicit Entity(const World* world, const char* name = nullptr): world(world),
+        entity( name != nullptr ? world->world.entity(name) : world->world.entity()){};
 
     template<ComponentType T>
-    T *getComponent() {
+    T *getComponent() const{
         return entity.get_mut<T>();
     }
 
     template<ComponentType T, typename... Args>
     T *addComponent(Args &&... args) {
-        auto &e = entity.emplace<T>(*this, std::forward<Args>(args)...);
-        return entity.get_mut<T>();
+        const auto &e = entity.emplace<T>(this, std::forward<Args>(args)...);
+        auto ptr = entity.get_mut<T>();
+        ptr->init(this, e);
+        return ptr;
     }
 
 
@@ -62,18 +64,21 @@ public:
 
 class Component {
 protected:
-    Entity &parent;
+    const Entity* parent;
+    friend class Entity;
 public:
-    explicit Component(Entity &entity): parent(entity) {
+    virtual void init(const Entity* parent, const flecs::entity& e) {}
+    virtual ~Component() = default;
+    explicit Component(const Entity* entity): parent(entity) {
     }
 };
 
 class Script : public Component {
-protected:
-    static ecs_entity_t ScriptType;
 public:
-    Script(Entity &entity): Component(entity) {
-        if(!ScriptType) ScriptType = ecs_new(entity.world.getRaw());
-        entity.world.getRaw().entity()
+    static Script ScriptType;
+    void init(const Entity* parent, const flecs::entity &e) override {
     }
+    using Component::Component;
+    ~Script() override = default;
+    virtual void update(){};
 };

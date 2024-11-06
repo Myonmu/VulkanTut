@@ -10,7 +10,7 @@
 #include "DeviceContext.h"
 #include "Shader.h"
 #include "UnifiedTexture2D.h"
-#include "UniformBufferGroup.h"
+#include "PerFrameBufferGroup.h"
 
 Material::Material(DeviceContext& ctx, std::vector<Shader>& shaders, RenderPass& renderPass):
 ctx(ctx)
@@ -74,7 +74,7 @@ void MaterialInstance::setCombinedImageSampler(const uint32_t binding, const Tex
                                 VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER);
 }
 
-void MaterialInstance::setUBO(uint32_t binding, uint32_t i, UniformBufferGroup &ubo) {
+void MaterialInstance::setUBO(uint32_t binding, uint32_t i, PerFrameBufferGroup &ubo) {
     auto &buffer = ubo[i];
     descriptorWriter.writeBuffer(binding, buffer, sizeof(UniformBufferObject), 0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER);
 }

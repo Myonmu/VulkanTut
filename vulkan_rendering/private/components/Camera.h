@@ -16,8 +16,8 @@ public:
     float nearPlane = 0.1f;  // Near clipping plane
     float farPlane = 100.0f;  // Far clipping plane
 
-    explicit Camera(Entity& e): Component(e) {}
-
+    explicit Camera(const Entity* e): Component(e) {}
+    ~Camera() override = default;
     [[nodiscard]] glm::mat4x4 getViewMatrix() const ;
 
     [[nodiscard]] glm::mat4x4 getProjectionMatrix() const ;

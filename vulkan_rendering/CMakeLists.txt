@@ -47,8 +47,8 @@ set(SOURCES
         private/vma/vk_mem_alloc.h
         private/vma/VmaInstance.cpp
         private/descriptor/DescriptorSetLayout.cpp
-        private/uniform_buffer/UniformBufferGroup.h
-        private/uniform_buffer/UniformBufferGroup.cpp
+        private/uniform_buffer/PerFrameBufferGroup.h
+        private/uniform_buffer/PerFrameBufferGroup.cpp
         private/descriptor/DescriptorPool.cpp
         private/descriptor/DescriptorSets.cpp
         private/Texture2D.cpp

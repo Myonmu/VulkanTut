@@ -10,14 +10,14 @@
 
 struct VulkanAppContext;
 
-class UniformBufferGroup {
-    std::vector<Buffer*> uniformBuffers;
-    std::vector<void*> uniformBuffersData;
+class PerFrameBufferGroup {
+    std::vector<std::unique_ptr<Buffer>> buffers;
+    std::vector<void*> data;
     DeviceContext& ctx;
 public:
-    explicit UniformBufferGroup(DeviceContext& ctx);
+    explicit PerFrameBufferGroup(DeviceContext& ctx, VkDeviceSize bufferSize);
     Buffer& operator[](size_t index) const;
-    ~UniformBufferGroup();
+    ~PerFrameBufferGroup();
     void CopyMemoryToBuffer(const uint32_t& slot,const void* data, const size_t& size) const;
 };
 

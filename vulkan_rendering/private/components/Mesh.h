@@ -15,6 +15,7 @@ class MeshRenderer: public Component{
     const MaterialInstance& materialInstance;
     CommandBufferRecorder recorder{true};
 public:
-    MeshRenderer(Entity& e, const MeshBuffer& meshBuffer, const MaterialInstance& materialInstance);
+    MeshRenderer(const Entity* e, const MeshBuffer& meshBuffer, const MaterialInstance& materialInstance);
+    ~MeshRenderer() override = default;
     void enqueueDrawCall(RenderPassRecorder& renderPassRecorder);
 };
