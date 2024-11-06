@@ -11,6 +11,7 @@
 #define GLM_ENABLE_EXPERIMENTAL
 #include "DeviceContext.h"
 #include "FrameInfo.h"
+#include "RenderingContext.h"
 #include "glm/gtx/quaternion.hpp"
 
 VulkanFrame::VulkanFrame(WindowContext &context): context(context),
@@ -37,7 +38,10 @@ void VulkanFrame::signalResize() {
 }
 
 //TODO: Could this be modular?
-void VulkanFrame::drawFrame(uint32_t currentFrameIndex) {
+void VulkanFrame::drawFrame(uint32_t currentFrameIndex, RenderingContext& renderingCtx) {
+
+
+
     const auto &device = context.getLogicalDevice();
     const auto &swapChain = context.get_swapChain();
     vkWaitForFences(device, 1, &inFlightFence, VK_TRUE, UINT64_MAX);
@@ -45,19 +49,23 @@ void VulkanFrame::drawFrame(uint32_t currentFrameIndex) {
     // Acquire image from swap chain
     auto result = vkAcquireNextImageKHR(device, swapChain, UINT64_MAX, imageAvailableSemaphore, VK_NULL_HANDLE,
                                         &imageIndex);
+
+    frameInfo.imageIndex = imageIndex;
+    frameInfo.windowId = context.get_windowId();
+    frameInfo.currentFrameIndex = currentFrameIndex;
+
     if (result == VK_ERROR_OUT_OF_DATE_KHR) {
         context.resize();
         return;
     } else if (result != VK_SUCCESS && result != VK_SUBOPTIMAL_KHR) {
         throw std::runtime_error("failed to acquire swap chain image");
     }
-    updateUniformBuffer(currentFrameIndex);
+    renderingCtx.prepareFrame(frameInfo);
+    //updateUniformBuffer(currentFrameIndex);
     vkResetFences(device, 1, &inFlightFence);
     // record command buffer
     vkResetCommandBuffer(commandBuffer, 0);
-    frameInfo.imageIndex = imageIndex;
-    frameInfo.windowId = context.get_windowId();
-    frameInfo.currentFrameIndex = currentFrameIndex;
+
     context.get_renderer().recordCommandBuffer(commandBuffer, context.context, frameInfo);
     // Submit command buffer
     VkSubmitInfo submitInfo{};

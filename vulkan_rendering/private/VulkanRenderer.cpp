@@ -35,13 +35,21 @@ void VulkanRenderer::recordCommandBuffer(const CommandBuffer &command_buffer, co
 }
 
 
-void VulkanRenderer::drawFrame() {
+void VulkanRenderer::drawFrame(RenderingContext& renderingCtx) {
     if (!glfwWindowShouldClose(ctx.get_window())) {
         glfwPollEvents();
-        frames[currentFrame]->drawFrame(currentFrame);
+        frames[currentFrame]->drawFrame(currentFrame, renderingCtx);
         currentFrame = (currentFrame + 1) % ctx.context.context.MAX_FRAMES_IN_FLIGHT;
     }else {
         vkDeviceWaitIdle(ctx.getLogicalDevice());
         ctx.closeWindow();
     }
+}
+
+FrameInfo VulkanRenderer::getCurrentFrameInfo() const {
+    return {
+        .windowId = ctx.get_windowId(),
+        .imageIndex = 0, // this is obtained when acquiring image, thus this 0 value is garbage
+        .currentFrameIndex = currentFrame
+    };
 }

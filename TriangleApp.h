@@ -23,6 +23,7 @@
 #include <fmt/core.h>
 #include "Camera.h"
 #include "EnginePipeline.h"
+#include "RenderingContext.h"
 
 class TriangleApp {
 public :
@@ -43,6 +44,7 @@ private:
     std::vector<Shader> shaders;
     std::unique_ptr<RenderPassRecorder> mainPass;
     EnginePipeline enginePipeline{};
+    std::unique_ptr<RenderingContext> mainContext;
 
     void setup() {
         auto &deviceCtx = *context->deviceContexts[0];
@@ -64,7 +66,7 @@ private:
                                                                      VK_FALSE);
 
         materialInstance.setCombinedImageSampler(1, tex, sampler);
-        materialInstance.updateDescriptorSet(0, 0);
+        materialInstance.updateDescriptorSet(1, 0);
 
         auto &meshBuffer = deviceCtx.createObject<MeshBuffer>(deviceCtx, Vertex::testVerts, Vertex::testIndices);
         auto& entt = ecs.entity("Some Object")
@@ -73,8 +75,8 @@ private:
 
 
         mainPass = std::make_unique<RenderPassRecorder>(deviceCtx.get_renderPass_at(0));
-        const auto &mainRecorder = deviceCtx.get_windowContext_at(0).get_renderer();
-        mainRecorder.recorder->enqueueCommand<EnqueueRenderPass>(*mainPass);
+        auto &mainRenderer = deviceCtx.get_windowContext_at(0).get_renderer();
+        mainRenderer.recorder->enqueueCommand<EnqueueRenderPass>(*mainPass);
 
         auto& camera = ecs.entity("Camera")
                 .set(Position{glm::vec3(2, 2, 2)})
@@ -83,6 +85,9 @@ private:
                 .emplace<Camera>();
 
         Transform::lookAt(*camera.get_mut<Position>(), *camera.get_mut<Rotation>(), glm::vec3(0, 0, 0));
+
+        mainContext = std::make_unique<RenderingContext>(deviceCtx);
+        mainContext->renderer = &mainRenderer;
 
         enginePipeline.addLoop([this] { return playerLoop(); });
         enginePipeline.addLoop([this] { return prepareRenderLoop(); });
@@ -108,10 +113,13 @@ private:
         mainPass->enqueueCommand<SetScissors>();
         ecs.system<MeshRenderer>("RenderMesh").kind(flecs::OnStore).each(
             [this](MeshRenderer &renderer) {
-                renderer.enqueueDrawCall(*mainPass);
+                renderer.enqueueDrawCall(*mainContext, *mainPass);
             });
-        ecs.system<Rotation, Camera>("RenderCamera").kind(flecs::OnStore).each(
-            [this](Rotation &t, Camera &cam) {
+        ecs.system<Rotation, Position, Camera>("RenderCamera").kind(flecs::OnStore).each(
+            [this](Rotation &t, Position &p, Camera &cam) {
+                auto& perSceneData = mainContext->perSceneData;
+                perSceneData.projection = cam.getProjectionMatrix();
+                perSceneData.view = Camera::getViewMatrix(p, t);
             }
         );
         if (const auto result = ecs.progress(); !result) {
@@ -126,7 +134,7 @@ private:
         for (auto const &device: context->deviceContexts) {
             for (auto const &window: device->windowContext) {
                 anyWindowAlive = true;
-                window->get_renderer().drawFrame();
+                window->get_renderer().drawFrame(*mainContext);
             }
         }
         return anyWindowAlive;

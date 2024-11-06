@@ -37,10 +37,10 @@ class Shader {
     spirv_cross::ShaderResources resources;
     void analyzeBinding(const spirv_cross::Compiler& compiler, const spirv_cross::Resource& resource, VkDescriptorType type);
 public:
-    explicit Shader(std::vector<uint32_t> code, VkShaderStageFlagBits stage);
+    explicit Shader(std::vector<uint32_t> code, VkShaderStageFlags stage);
     ~Shader();
 
-    VkShaderStageFlagBits stage;
+    VkShaderStageFlags stage;
     const std::vector<uint32_t> code;
     ShaderReflectionResult reflectionResult{};
     static ShaderReflectionResult getMergedBindings(std::vector<Shader> shaders);

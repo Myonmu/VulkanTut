@@ -72,7 +72,6 @@ std::map<VkDescriptorType, uint32_t> ShaderReflectionResult::getCountByType() {
     return result;
 }
 
-
 void Shader::analyzeBinding(const spirv_cross::Compiler &compiler,
                             const spirv_cross::Resource &resource,
                             const VkDescriptorType type) {
@@ -82,11 +81,11 @@ void Shader::analyzeBinding(const spirv_cross::Compiler &compiler,
     reflectionResult.addBinding({
         set, binding, resource.name,t.array.empty() ? 1 : t.array.back(),
         type,
-        static_cast<VkShaderStageFlags>(stage), nullptr
+        stage, nullptr
     });
 }
 
-Shader::Shader(std::vector<uint32_t> code, const VkShaderStageFlagBits stage): stage(stage), code(code) {
+Shader::Shader(std::vector<uint32_t> code, const VkShaderStageFlags stage): stage(stage), code(code) {
     // TODO: Shader sanity check, make sure shader declarations conform to engine resource allocation strategy
     // TODO: Currently only considering GLSL
 

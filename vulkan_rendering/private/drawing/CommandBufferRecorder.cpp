@@ -60,3 +60,7 @@ CommandBufferRecorder::~CommandBufferRecorder() {
 void CommandBufferRecorder::setRecordFunc(const RecordFunc &f) {
     recordFunc = f;
 }
+
+void CommandBufferRecorder::clear() {
+    commands.clear();
+}

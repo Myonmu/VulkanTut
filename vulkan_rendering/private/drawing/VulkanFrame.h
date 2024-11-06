@@ -10,6 +10,7 @@
 #include "FrameInfo.h"
 
 
+struct RenderingContext;
 struct WindowContext;
 class CommandBuffer;
 
@@ -18,7 +19,7 @@ public:
     explicit VulkanFrame(WindowContext& context);
     ~VulkanFrame();
 
-    void drawFrame(uint32_t currentFrameIndex);
+    void drawFrame(uint32_t currentFrameIndex, RenderingContext& renderingCtx);
 
     //TODO: Per-object rather than per-frame
     void updateUniformBuffer(uint32_t currentFrame);

@@ -12,13 +12,13 @@
 #include "FrameInfo.h"
 #include "MeshBuffer.h"
 
-class CBC_Drawing final : public CommandBufferCmd {
+class BindDescriptorSet final : public CommandBufferCmd {
     PipelineLayout &pipelineLayout;
     DescriptorSets &descriptorSets;
     uint32_t setId;
 
 public:
-    CBC_Drawing(PipelineLayout &layout, DescriptorSets &sets, uint32_t setId)
+    BindDescriptorSet(PipelineLayout &layout, DescriptorSets &sets, uint32_t setId)
     : pipelineLayout(layout), descriptorSets(sets), setId(setId) {
     }
 

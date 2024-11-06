@@ -46,5 +46,7 @@ public:
         static_assert(std::is_base_of_v<CommandBufferCmd, T>, "T must be a CommandBufferCmd");
         commands.push_back(new T(std::forward<Args>(args)...));
     }
+
+    void clear();
 };
 

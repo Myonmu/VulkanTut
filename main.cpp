@@ -7,11 +7,11 @@
 int main() {
     TriangleApp app;
 
-    try{
+    //try{
         app.Run();
-    }catch (const std::exception& e){
-        std::cerr << e.what() <<std::endl;
-        return EXIT_FAILURE;
-    }
-    return EXIT_SUCCESS;
+    //}catch (const std::exception& e){
+        //std::cerr << e.what() <<std::endl;
+   //     return EXIT_FAILURE;
+    //}
+    //return EXIT_SUCCESS;
 }

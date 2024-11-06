@@ -21,9 +21,8 @@ public:
     ~Buffer() override;
     void copyToBufferMemory(const void* sourceData, size_t offset) const;
     static void copyBuffer(Buffer& srcBuffer, Buffer& dstBuffer, DeviceContext& ctx, VkDeviceSize size);
-    // this is a reference to a pointer, because mapping buffer memory would set the pointer as well.
-    void mapBufferMemory(void*& source) const;
 protected:
+    VmaAllocationCreateFlags flags;
     VkDeviceSize size{};
     VkDeviceMemory bufferMemory{};
     VmaAllocation vmaAllocation{};

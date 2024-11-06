@@ -4,7 +4,6 @@
 #include "Material.h"
 #include <DescriptorSetLayout.h>
 #include <PipelineLayout.h>
-#include <set>
 #include <UniformBufferObject.h>
 
 #include "DeviceContext.h"
@@ -46,6 +45,7 @@ MaterialInstance &Material::createInstance() {
 
 MaterialInstance::MaterialInstance(Material &material) : srcMaterial(material), ctx(material.ctx) {
     for (auto &[id, layout]: material.descriptorSetLayouts) {
+        if(id == 0) continue;
         auto result = material.descriptorAllocator->allocate(*layout);
         descriptorSets.emplace(id, std::move(result));
     }

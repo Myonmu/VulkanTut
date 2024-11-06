@@ -13,7 +13,7 @@ struct DescriptorSetLayoutBinding {
     std::string name{};
     uint32_t descriptorCount{1};
     VkDescriptorType type{};
-    VkPipelineStageFlags stageFlags{ VK_PIPELINE_STAGE_VERTEX_SHADER_BIT | VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT };
+    VkShaderStageFlags stageFlags{ VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT };
     VkSampler *pImmutableSamplers{nullptr};
 
     bool operator==(const DescriptorSetLayoutBinding &other) const {
@@ -31,7 +31,7 @@ struct DescriptorSetLayoutBinding {
         b.binding = binding;
         b.descriptorCount = descriptorCount;
         b.descriptorType = type;
-        b.stageFlags = stageFlags;
+        b.stageFlags = setId == 0 ? VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT : stageFlags;
         b.pImmutableSamplers = pImmutableSamplers;
         return b;
     }

@@ -12,7 +12,8 @@
 
 
 Buffer::Buffer(DeviceContext &context, VkDeviceSize size, VkBufferUsageFlags usage,
-               VmaMemoryUsage memUsage, VmaAllocationCreateFlags flags) : VulkanResource(context) {
+               VmaMemoryUsage memUsage, VmaAllocationCreateFlags flags)
+    : VulkanResource(context), flags(flags) {
     this->size = size;
     VkBufferCreateInfo bufferInfo{};
     bufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
@@ -71,15 +72,14 @@ uint32_t Buffer::findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags prope
 
 // Uploads source data to the buffer (there will be memcpy)
 void Buffer::copyToBufferMemory(const void *sourceData, size_t offset) const {
-    void *data;
-    vmaMapMemory(ctx.get_vma(), vmaAllocation, &data);
-    memcpy(static_cast<char*>(data) + offset, sourceData, size);
-    vmaUnmapMemory(ctx.get_vma(), vmaAllocation);
-}
-
-// Projects buffer memory (the source param will be filled with buffer memory position)
-void Buffer::mapBufferMemory(void *&source) const {
-    vkMapMemory(ctx.getLogicalDevice(), bufferMemory, 0, size, 0, &source);
+    if (flags & VMA_ALLOCATION_CREATE_MAPPED_BIT) {
+        memcpy(static_cast<char *>(vmaAllocationInfo.pMappedData) + offset, sourceData, size);
+    } else {
+        void *data;
+        vmaMapMemory(ctx.get_vma(), vmaAllocation, &data);
+        memcpy(static_cast<char *>(data) + offset, sourceData, size);
+        vmaUnmapMemory(ctx.get_vma(), vmaAllocation);
+    }
 }
 
 void Buffer::copyBuffer(Buffer &srcBuffer, Buffer &dstBuffer, DeviceContext &ctx, VkDeviceSize size) {

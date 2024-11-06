@@ -12,11 +12,11 @@ class Shader;
 struct DeviceContext;
 
 class ShaderModule : public VulkanResource<VkShaderModule, DeviceContext>{
-    VkShaderStageFlagBits stageFlags;
+    VkShaderStageFlags stageFlags;
     const char* entryPoint = "main";
 public:
-    ShaderModule(const std::string& shaderPath, DeviceContext& context, VkShaderStageFlagBits stageFlags);
-    ShaderModule(const std::vector<uint32_t>& code ,DeviceContext& context, VkShaderStageFlagBits stageFlags);
+    ShaderModule(const std::string& shaderPath, DeviceContext& context, VkShaderStageFlags stageFlags);
+    ShaderModule(const std::vector<uint32_t>& code ,DeviceContext& context, VkShaderStageFlags stageFlags);
     ShaderModule(const Shader& shader, DeviceContext& context);
     ~ShaderModule() override;
 

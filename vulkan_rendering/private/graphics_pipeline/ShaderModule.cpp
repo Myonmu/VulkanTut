@@ -11,7 +11,7 @@
 
 
 ShaderModule::ShaderModule(const std::vector<uint32_t> &code, DeviceContext &context,
-                           const VkShaderStageFlagBits stageFlags): VulkanResource(context), stageFlags(stageFlags) {
+                           const VkShaderStageFlags stageFlags): VulkanResource(context), stageFlags(stageFlags) {
     VkShaderModuleCreateInfo createInfo{};
     createInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
     createInfo.codeSize = code.size()*(sizeof(uint32_t)/sizeof(char));
@@ -26,7 +26,7 @@ ShaderModule::ShaderModule(const std::vector<uint32_t> &code, DeviceContext &con
 }
 
 ShaderModule::ShaderModule(const std::string &shaderPath, DeviceContext &context,
-                           const VkShaderStageFlagBits stageFlags) : ShaderModule(
+                           const VkShaderStageFlags stageFlags) : ShaderModule(
     FileUtility::ReadSpv(shaderPath), context, stageFlags) {
 }
 
@@ -42,7 +42,7 @@ ShaderModule::~ShaderModule() {
 VkPipelineShaderStageCreateInfo ShaderModule::getShaderStageCreateInfo() const {
     VkPipelineShaderStageCreateInfo createInfo{};
     createInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
-    createInfo.stage = stageFlags;
+    createInfo.stage = static_cast<VkShaderStageFlagBits>(stageFlags);
     createInfo.module = resource;
     createInfo.pName = entryPoint;
     return createInfo;

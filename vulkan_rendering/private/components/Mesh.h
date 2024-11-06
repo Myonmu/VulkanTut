@@ -17,5 +17,5 @@ class MeshRenderer{
 public:
     MeshRenderer(const MeshBuffer& meshBuffer, const MaterialInstance& materialInstance);
     ~MeshRenderer()  = default;
-    void enqueueDrawCall(RenderPassRecorder& renderPassRecorder);
+    void enqueueDrawCall(RenderingContext& ctx, RenderPassRecorder& renderPassRecorder);
 };
