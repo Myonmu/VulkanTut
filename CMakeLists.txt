@@ -21,7 +21,6 @@ add_executable(VulkanTut
         main.cpp
         TriangleApp.h
         AppSetup.h
-        scripts/MeshRotate.h
 )
 
 # Link dependencies

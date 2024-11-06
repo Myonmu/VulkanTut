@@ -5,16 +5,11 @@
 #define GLM_ENABLE_EXPERIMENTAL
 #endif
 #include "Camera.h"
+#include <Transform.h>
 
-#include <stdexcept>
-
-glm::mat4x4 Camera::getViewMatrix() const {
-    const auto transform = parent->getComponent<Transform>();
-    if(transform == nullptr) {
-        throw std::runtime_error("Camera::getViewMatrix(): transform is null");
-    }
-    glm::mat4 rotationMatrix = transform->getRotationMatrix();
-    glm::mat4 translationMatrix = glm::translate(glm::mat4(1.0f), -transform->translation);
+glm::mat4x4 Camera::getViewMatrix(const Position &position, const Rotation &rotation) {
+    const glm::mat4 rotationMatrix = rotation.getRotationMatrix();
+    const glm::mat4 translationMatrix = glm::translate(glm::mat4(1.0f), -position.translation);
     return rotationMatrix * translationMatrix;
 }
 

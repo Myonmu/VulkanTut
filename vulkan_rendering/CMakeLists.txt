@@ -99,8 +99,6 @@ set(SOURCES
         private/misc/RenderingContext.h
         private/Components/Transform.h
         private/misc/EnginePipeline.h
-        private/misc/Ecs.cpp
-        private/misc/Ecs.h
 )
 
 # Create static library

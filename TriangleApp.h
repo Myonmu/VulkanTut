@@ -3,7 +3,8 @@
 //
 #pragma once
 
-
+#include <flecs.h>
+#include <chrono>
 #include <FileUtility.h>
 #include <vector>
 #include "AppSetup.h"
@@ -19,13 +20,9 @@
 #include "Mesh.h"
 #include "MeshBuffer.h"
 #include "Vertex.h"
-#include "flecs.h"
 #include <fmt/core.h>
-
 #include "Camera.h"
-#include "Ecs.h"
 #include "EnginePipeline.h"
-#include "scripts/MeshRotate.h"
 
 class TriangleApp {
 public :
@@ -37,9 +34,12 @@ public :
     }
 
 private:
+    struct MeshRotate {
+    };
+
     AppSetup appSetup{};
     std::unique_ptr<VulkanAppContext> context;
-    World ecs{};
+    flecs::world ecs{};
     std::vector<Shader> shaders;
     std::unique_ptr<RenderPassRecorder> mainPass;
     EnginePipeline enginePipeline{};
@@ -67,20 +67,22 @@ private:
         materialInstance.updateDescriptorSet(0, 0);
 
         auto &meshBuffer = deviceCtx.createObject<MeshBuffer>(deviceCtx, Vertex::testVerts, Vertex::testIndices);
-        auto entt = ecs.createEntityWithTransform("Some Object");
-        entt.addComponent<MeshRenderer>(meshBuffer, materialInstance);
-        entt.addComponent<MeshRotate>();
+        auto& entt = ecs.entity("Some Object")
+                .emplace<MeshRenderer>(meshBuffer, materialInstance)
+                .add<MeshRotate>().add<Position>().add<Rotation>().add<Scale>();
+
 
         mainPass = std::make_unique<RenderPassRecorder>(deviceCtx.get_renderPass_at(0));
         const auto &mainRecorder = deviceCtx.get_windowContext_at(0).get_renderer();
         mainRecorder.recorder->enqueueCommand<EnqueueRenderPass>(*mainPass);
 
-        auto camera = ecs.createEntityWithTransform("Camera");
-        camera.addComponent<Camera>();
-        const auto trans = camera.getComponent<Transform>();
+        auto& camera = ecs.entity("Camera")
+                .set(Position{glm::vec3(2, 2, 2)})
+                .emplace<Rotation>()
+                .emplace<Scale>()
+                .emplace<Camera>();
 
-        trans->translation = glm::vec3(2, 2, 2);
-        trans->lookAt(glm::vec3(0, 0, 0));
+        Transform::lookAt(*camera.get_mut<Position>(), *camera.get_mut<Rotation>(), glm::vec3(0, 0, 0));
 
         enginePipeline.addLoop([this] { return playerLoop(); });
         enginePipeline.addLoop([this] { return prepareRenderLoop(); });
@@ -88,9 +90,14 @@ private:
     }
 
     bool playerLoop() {
-        ecs.getRaw().system<Script>("ScriptUpdate").kind(flecs::OnUpdate).each(
-            [](Script &s) {
-                s.update();
+        ecs.system<Rotation>("ScriptUpdate").with<MeshRotate>().kind(flecs::OnUpdate).each(
+            [](Rotation& rot) {
+                static auto startTime = std::chrono::high_resolution_clock::now();
+                auto currentTime = std::chrono::high_resolution_clock::now();
+                auto time = std::chrono::duration<float>(currentTime - startTime).count();
+                auto euler = glm::vec3{0.0f, 0, glm::radians(90.0f) * time};
+                auto result = glm::quat(euler) * rot.rotation;
+                rot.rotation = result;
             });
         return true;
     }
@@ -99,15 +106,15 @@ private:
         mainPass->clear();
         mainPass->enqueueCommand<SetViewport>();
         mainPass->enqueueCommand<SetScissors>();
-        ecs.getRaw().system<MeshRenderer>("RenderMesh").kind(flecs::OnStore).each(
+        ecs.system<MeshRenderer>("RenderMesh").kind(flecs::OnStore).each(
             [this](MeshRenderer &renderer) {
                 renderer.enqueueDrawCall(*mainPass);
             });
-        ecs.getRaw().system<Transform, Camera>("RenderCamera").kind(flecs::OnStore).each(
-            [this](Transform &t, Camera &cam) {
+        ecs.system<Rotation, Camera>("RenderCamera").kind(flecs::OnStore).each(
+            [this](Rotation &t, Camera &cam) {
             }
         );
-        if (const auto result = ecs.getRaw().progress(); !result) {
+        if (const auto result = ecs.progress(); !result) {
             fmt::println("Failed to progress ECS");
             return false;
         }
