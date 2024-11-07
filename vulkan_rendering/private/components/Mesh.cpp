@@ -7,12 +7,27 @@
 #include "CBC_Misc.h"
 #include "RenderingContext.h"
 
-MeshRenderer::MeshRenderer( const MeshBuffer &meshBuffer, const MaterialInstance &materialInstance)
-    : meshBuffer(meshBuffer),
-      materialInstance(materialInstance) {
+void PerObjectBuffer::updatePerObjectBuffer(
+    const FrameInfo &frameInfo,
+    const Position &pos,
+    const Rotation &rot,
+    const Scale &scale) const {
+    auto const &buffer = (*bufferGroup)[frameInfo.currentFrameIndex];
+    const UniformBufferObject ubo{
+        .model = Transform::getModelMatrix(pos, rot, scale)
+    };
+    buffer.copyToBufferMemory(&ubo, 0);
 }
 
-void MeshRenderer::enqueueDrawCall(RenderingContext& ctx, RenderPassRecorder &renderPassRecorder) {
+MeshRenderer::MeshRenderer(DeviceContext& ctx,const MeshBuffer &meshBuffer, const MaterialInstance &materialInstance)
+    : meshBuffer(meshBuffer),
+      materialInstance(materialInstance) {
+    perObjectBuffer = std::make_unique<PerObjectBuffer>(ctx);
+}
+
+void MeshRenderer::enqueueDrawCall(RenderingContext &ctx, RenderPassRecorder &renderPassRecorder) {
+    auto frameInfo = ctx.renderer->getCurrentFrameInfo();
+
     recorder.clear();
 
     // TODO: same pipeline could be batched
@@ -20,15 +35,21 @@ void MeshRenderer::enqueueDrawCall(RenderingContext& ctx, RenderPassRecorder &re
 
     recorder.enqueueCommand<BindMeshBuffer>(meshBuffer);
 
-    auto frameInfo = ctx.renderer->getCurrentFrameInfo();
-
     recorder.enqueueCommand<BindDescriptorSet>(materialInstance.getPipelineLayout(),
-        *ctx.perFrameSets[frameInfo.currentFrameIndex], 0);
+                                               *ctx.perFrameSets[frameInfo.currentFrameIndex], 0);
 
     for (auto &[setId, set]: materialInstance.descriptorSets) {
-        if(setId == 0 )continue; // 0 is reserved for global set
+        if (setId <= 0)continue; // 0 is reserved for global set
         recorder.enqueueCommand<BindDescriptorSet>(materialInstance.getPipelineLayout(), *set, setId);
     }
     recorder.enqueueCommand<DrawIndexed>(meshBuffer.getIndicesCount());
     renderPassRecorder.enqueueCommand<EnqueueRecorder>(recorder);
+}
+
+void MeshRenderer::updatePerObjectDescriptorSet(RenderingContext &ctx) {
+    auto frameInfo = ctx.renderer->getCurrentFrameInfo();
+    auto const& buffer = (*perObjectBuffer->bufferGroup)[frameInfo.currentFrameIndex];
+    DescriptorWriter writer{};
+    writer.writeBuffer(0, buffer, sizeof(UniformBufferObject), 0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER);
+    writer.updateSet(ctx.getLogicalDevice(), materialInstance.getDescriptorSet(1));
 }

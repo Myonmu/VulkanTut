@@ -38,6 +38,7 @@ private:
     struct MeshRotate {
     };
 
+    uint64_t frameCounter = 0;
     AppSetup appSetup{};
     std::unique_ptr<VulkanAppContext> context;
     flecs::world ecs{};
@@ -65,12 +66,12 @@ private:
                                                                      VK_BORDER_COLOR_INT_OPAQUE_BLACK,
                                                                      VK_FALSE);
 
-        materialInstance.setCombinedImageSampler(1, tex, sampler);
-        materialInstance.updateDescriptorSet(1, 0);
+        materialInstance.setCombinedImageSampler(0, tex, sampler);
+        materialInstance.updateDescriptorSet(2);
 
         auto &meshBuffer = deviceCtx.createObject<MeshBuffer>(deviceCtx, Vertex::testVerts, Vertex::testIndices);
-        auto& entt = ecs.entity("Some Object")
-                .emplace<MeshRenderer>(meshBuffer, materialInstance)
+        auto &entt = ecs.entity("Some Object")
+                .emplace<MeshRenderer>(deviceCtx, meshBuffer, materialInstance)
                 .add<MeshRotate>().add<Position>().add<Rotation>().add<Scale>();
 
 
@@ -78,7 +79,7 @@ private:
         auto &mainRenderer = deviceCtx.get_windowContext_at(0).get_renderer();
         mainRenderer.recorder->enqueueCommand<EnqueueRenderPass>(*mainPass);
 
-        auto& camera = ecs.entity("Camera")
+        auto &camera = ecs.entity("Camera")
                 .set(Position{glm::vec3(2, 2, 2)})
                 .emplace<Rotation>()
                 .emplace<Scale>()
@@ -89,14 +90,15 @@ private:
         mainContext = std::make_unique<RenderingContext>(deviceCtx);
         mainContext->renderer = &mainRenderer;
 
+        mainContext->f = [this](){return prepareRenderLoop();};
+
         enginePipeline.addLoop([this] { return playerLoop(); });
-        enginePipeline.addLoop([this] { return prepareRenderLoop(); });
         enginePipeline.addLoop([this] { return renderLoop(); });
     }
 
     bool playerLoop() {
         ecs.system<Rotation>("ScriptUpdate").with<MeshRotate>().kind(flecs::OnUpdate).each(
-            [](Rotation& rot) {
+            [](Rotation &rot) {
                 static auto startTime = std::chrono::high_resolution_clock::now();
                 auto currentTime = std::chrono::high_resolution_clock::now();
                 auto time = std::chrono::duration<float>(currentTime - startTime).count();
@@ -108,6 +110,13 @@ private:
     }
 
     bool prepareRenderLoop() {
+        ecs.system<Position, Rotation, Scale, MeshRenderer>("UpdatePerObjectUBO").kind(flecs::PreStore).each(
+            [this](Position &p, Rotation &r, Scale &s, MeshRenderer &renderer) {
+                renderer.get_perObjectBuffer().updatePerObjectBuffer(mainContext->renderer->getCurrentFrameInfo(), p, r, s);
+                renderer.updatePerObjectDescriptorSet(*mainContext);
+            }
+        );
+
         mainPass->clear();
         mainPass->enqueueCommand<SetViewport>();
         mainPass->enqueueCommand<SetScissors>();
@@ -117,7 +126,7 @@ private:
             });
         ecs.system<Rotation, Position, Camera>("RenderCamera").kind(flecs::OnStore).each(
             [this](Rotation &t, Position &p, Camera &cam) {
-                auto& perSceneData = mainContext->perSceneData;
+                auto &perSceneData = mainContext->perSceneData;
                 perSceneData.projection = cam.getProjectionMatrix();
                 perSceneData.view = Camera::getViewMatrix(p, t);
             }
@@ -141,7 +150,9 @@ private:
     }
 
     void mainLoop() {
-        while (enginePipeline.mainLoop()) {
+        while (enginePipeline.mainLoop() && frameCounter < 1) {
+            frameCounter ++;
         }
+        vkDeviceWaitIdle(context->deviceContexts[0]->getLogicalDevice());
     }
 };

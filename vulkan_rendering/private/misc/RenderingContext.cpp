@@ -20,7 +20,7 @@ std::vector<DescriptorAllocator::PoolSizeRatio> PerSceneRenderingData::poolSizes
 
 RenderingContext::RenderingContext(DeviceContext& ctx)
     : SubContext(ctx){
-    perSceneDescriptorLayout = std::make_unique<DescriptorSetLayout>(ctx, PerSceneRenderingData::bindings);
+    perSceneDescriptorLayout = std::make_unique<DescriptorSetLayout>(ctx, 0,  PerSceneRenderingData::bindings);
     descriptorAllocator = std::make_unique<DescriptorAllocator>(ctx);
     descriptorAllocator->init(1000, PerSceneRenderingData::poolSizes);
     perSceneUbo = std::make_unique<PerFrameBufferGroup>(ctx, sizeof(PerSceneRenderingData));
@@ -38,11 +38,11 @@ void RenderingContext::prepareFrame(const FrameInfo &frameInfo) {
     auto& buffer = (*perSceneUbo)[frameInfo.currentFrameIndex];
     writer.writeBuffer(0, buffer,
         sizeof(perSceneData), 0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER);
-    writer.updateSet(context.get_logicalDevice(), (perFrameSet)[0]); //the 0 index is due to a legacy design
+    writer.updateSet(context.get_logicalDevice(),perFrameSet);
+
+    f();
 }
 
 LogicalDevice &RenderingContext::getLogicalDevice() const {
     return context.get_logicalDevice();
 }
-
-

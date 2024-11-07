@@ -40,8 +40,6 @@ void VulkanFrame::signalResize() {
 //TODO: Could this be modular?
 void VulkanFrame::drawFrame(uint32_t currentFrameIndex, RenderingContext& renderingCtx) {
 
-
-
     const auto &device = context.getLogicalDevice();
     const auto &swapChain = context.get_swapChain();
     vkWaitForFences(device, 1, &inFlightFence, VK_TRUE, UINT64_MAX);
@@ -60,11 +58,13 @@ void VulkanFrame::drawFrame(uint32_t currentFrameIndex, RenderingContext& render
     } else if (result != VK_SUCCESS && result != VK_SUBOPTIMAL_KHR) {
         throw std::runtime_error("failed to acquire swap chain image");
     }
-    renderingCtx.prepareFrame(frameInfo);
+
     //updateUniformBuffer(currentFrameIndex);
     vkResetFences(device, 1, &inFlightFence);
     // record command buffer
     vkResetCommandBuffer(commandBuffer, 0);
+
+    renderingCtx.prepareFrame(frameInfo);
 
     context.get_renderer().recordCommandBuffer(commandBuffer, context.context, frameInfo);
     // Submit command buffer
@@ -106,28 +106,6 @@ void VulkanFrame::drawFrame(uint32_t currentFrameIndex, RenderingContext& render
     } else if (result != VK_SUCCESS) {
         throw std::runtime_error("failed to present swap chain image");
     }
-}
-
-void VulkanFrame::updateUniformBuffer(uint32_t currentFrame) {
-    static auto startTime = std::chrono::high_resolution_clock::now();
-    auto currentTime = std::chrono::high_resolution_clock::now();
-    auto time = std::chrono::duration<float, std::chrono::seconds::period>(currentTime - startTime).count();
-    UniformBufferObject ubo{};
-    ubo.model = glm::rotate(glm::mat4(1.0f), time * glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
-    //ubo.view = glm::lookAt(glm::vec3(2.0f, 2, 2), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
-    //ubo.projection = glm::perspective(glm::radians(45.0f),
-                                      //context.get_swapChain().swapChainExtent.width / (float) context.get_swapChain().
-                                      //swapChainExtent.height, 0.1f, 10.0f);
-    /*
-     *GLM was originally designed for OpenGL,
-     *where the Y coordinate of the clip coordinates is inverted.
-     *The easiest way to compensate for that is to
-     *flip the sign on the scaling factor of the Y axis in the projection matrix.
-     *If you don't do this, then the image will be rendered upside down.
-     */
-    ubo.projection[1][1] *= -1;
-
-    //context.uniformBufferGroup.CopyMemoryToBuffer(currentFrame, &ubo, sizeof(ubo));
 }
 
 

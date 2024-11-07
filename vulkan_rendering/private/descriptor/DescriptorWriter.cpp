@@ -5,9 +5,10 @@
 #include "DescriptorWriter.h"
 
 #include <Buffer.h>
-
-#include "ImageView.h"
-#include "TextureSampler.h"
+#include <DescriptorSet.h>
+#include <DescriptorSetLayout.h>
+#include <include/fmt/core.h>
+#include <TextureSampler.h>
 
 void DescriptorWriter::writeImage(uint32_t binding,
                                   const ImageView &image,
@@ -33,7 +34,7 @@ void DescriptorWriter::writeImage(uint32_t binding,
 
 void DescriptorWriter::writeBuffer(uint32_t binding, const Buffer &buffer, size_t size, size_t offset,
                                    VkDescriptorType type) {
-    VkDescriptorBufferInfo &info = bufferInfos.emplace_back(VkDescriptorBufferInfo{
+    VkDescriptorBufferInfo const &info = bufferInfos.emplace_back(VkDescriptorBufferInfo{
         .buffer = buffer,
         .offset = offset,
         .range = size
@@ -56,11 +57,16 @@ void DescriptorWriter::clear() {
     bufferInfos.clear();
 }
 
-void DescriptorWriter::updateSet(VkDevice device, VkDescriptorSet set) {
+void DescriptorWriter::updateSet(LogicalDevice& device, DescriptorSet& set) {
+    fmt::println("---------------UPDATE DESCRIPTOR SET {} -----------------", set.layout.setId );
+
     for (VkWriteDescriptorSet &write: writes) {
         write.dstSet = set;
+        fmt::println("binding {} ({}) cnt {}", write.dstBinding, write.descriptorType, write.descriptorCount);
     }
 
     vkUpdateDescriptorSets(device, static_cast<uint32_t>(writes.size()), writes.data(),
                            0, nullptr);
+
+    fmt::println("^^^^^^^^^^^^^^^^ END OF UPDATE CALL FOR SET {} ^^^^^^^^^^^^^^^^^^", set.layout.setId);
 }

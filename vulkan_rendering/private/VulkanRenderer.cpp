@@ -53,3 +53,7 @@ FrameInfo VulkanRenderer::getCurrentFrameInfo() const {
         .currentFrameIndex = currentFrame
     };
 }
+
+VulkanFrame& VulkanRenderer::getCurrentFrame() const {
+    return *frames[currentFrame];
+}

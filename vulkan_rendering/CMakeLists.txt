@@ -50,7 +50,7 @@ set(SOURCES
         private/uniform_buffer/PerFrameBufferGroup.h
         private/uniform_buffer/PerFrameBufferGroup.cpp
         private/descriptor/DescriptorPool.cpp
-        private/descriptor/DescriptorSets.cpp
+        private/descriptor/DescriptorSet.cpp
         private/Texture2D.cpp
         private/texture_mapping/TextureImage.cpp
         public/command_buffer_cmds/CBC_Drawing.h

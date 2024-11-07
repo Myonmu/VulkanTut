@@ -3,7 +3,6 @@
 //
 
 #include <VulkanAppContext.h>
-#include "LogicalDevice.h"
 #include "DeviceContext.h"
 
 VulkanAppContext::VulkanAppContext(const char *appName, VulkanSetupProcedure &setupProcedure)

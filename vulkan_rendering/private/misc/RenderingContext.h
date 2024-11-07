@@ -20,7 +20,7 @@ struct RenderingContext: public SubContext<DeviceContext> {
     PerSceneRenderingData perSceneData{};
     CommandBufferRecorder recorder{0, false};
     std::unique_ptr<PerFrameBufferGroup> perSceneUbo;
-    std::vector<std::unique_ptr<DescriptorSets>> perFrameSets;
+    std::vector<std::unique_ptr<DescriptorSet>> perFrameSets;
 
     VulkanRenderer* renderer;
 
@@ -28,6 +28,8 @@ struct RenderingContext: public SubContext<DeviceContext> {
     std::unique_ptr<DescriptorSetLayout> perSceneDescriptorLayout;
     std::unique_ptr<DescriptorAllocator> descriptorAllocator;
     void prepareFrame(const FrameInfo& frameInfo);
+
+    std::function<bool()> f;
 
     LogicalDevice &getLogicalDevice() const override;
 };

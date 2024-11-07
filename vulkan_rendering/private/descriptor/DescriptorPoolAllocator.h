@@ -4,7 +4,7 @@
 
 #pragma once
 #include <DescriptorPool.h>
-#include <DescriptorSets.h>
+#include <DescriptorSet.h>
 #include <unordered_set>
 
 class DescriptorAllocator {
@@ -21,7 +21,7 @@ public:
     void init(uint32_t initialSets, std::vector<PoolSizeRatio>& poolRatios);
     void clear();
     void destroy();
-    std::unique_ptr<DescriptorSets> allocate(DescriptorSetLayout &layout, void* pNext = nullptr);
+    std::unique_ptr<DescriptorSet> allocate(DescriptorSetLayout &layout, void* pNext = nullptr);
     [[nodiscard]] bool isCompatible(const DescriptorSetLayout& layout) const;
 private:
     const float growth = 2;

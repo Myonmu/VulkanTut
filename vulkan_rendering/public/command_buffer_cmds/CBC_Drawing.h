@@ -3,7 +3,7 @@
 //
 
 #pragma once
-#include <DescriptorSets.h>
+#include <DescriptorSet.h>
 #include <PipelineLayout.h>
 #include <VulkanPipeline.h>
 #include <vulkan/vulkan_core.h>
@@ -14,11 +14,11 @@
 
 class BindDescriptorSet final : public CommandBufferCmd {
     PipelineLayout &pipelineLayout;
-    DescriptorSets &descriptorSets;
+    DescriptorSet &descriptorSets;
     uint32_t setId;
 
 public:
-    BindDescriptorSet(PipelineLayout &layout, DescriptorSets &sets, uint32_t setId)
+    BindDescriptorSet(PipelineLayout &layout, DescriptorSet &sets, uint32_t setId)
     : pipelineLayout(layout), descriptorSets(sets), setId(setId) {
     }
 
@@ -26,7 +26,7 @@ public:
                  const FrameInfo &frameInfo) override {
         vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
                                 pipelineLayout,
-                                setId, 1, &descriptorSets[descriptorSets.getRaw().size() <= frameInfo.currentFrameIndex ? 0 : frameInfo.currentFrameIndex],
+                                setId, 1, descriptorSets,
                                 0, nullptr);
     }
 };

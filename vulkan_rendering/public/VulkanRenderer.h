@@ -25,6 +25,8 @@ public:
     std::unique_ptr<CommandBufferRecorder> recorder;
 
     FrameInfo getCurrentFrameInfo() const;
+
+    VulkanFrame& getCurrentFrame() const;
 private:
     WindowContext& ctx;
     std::vector<std::unique_ptr<VulkanFrame>> frames;

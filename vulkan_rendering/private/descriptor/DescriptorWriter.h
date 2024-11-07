@@ -7,6 +7,8 @@
 #include <vector>
 #include "vulkan/vulkan_core.h"
 
+class LogicalDevice;
+class DescriptorSet;
 class Buffer;
 class TextureSampler;
 class ImageView;
@@ -20,5 +22,5 @@ struct  DescriptorWriter {
     void writeBuffer(uint32_t binding,const Buffer& buffer,size_t size, size_t offset,VkDescriptorType type);
 
     void clear();
-    void updateSet(VkDevice device, VkDescriptorSet set);
+    void updateSet(LogicalDevice& device, DescriptorSet& set);
 };

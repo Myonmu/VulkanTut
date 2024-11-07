@@ -28,7 +28,7 @@ ctx(ctx)
 
     std::vector<VkDescriptorSetLayout> vkLayouts;
     for(auto& [set, layouts] : combinedReflectionResult.descriptorSets) {
-        descriptorSetLayouts[set] = std::make_unique<DescriptorSetLayout>(ctx, layouts);
+        descriptorSetLayouts[set] = std::make_unique<DescriptorSetLayout>(ctx, set, layouts);
         vkLayouts.push_back(descriptorSetLayouts[set]->getRaw());
     }
     pipelineLayout = std::make_unique<PipelineLayout>(ctx, vkLayouts);
@@ -53,13 +53,13 @@ MaterialInstance::MaterialInstance(Material &material) : srcMaterial(material), 
 
 MaterialInstance::~MaterialInstance() = default;
 
-DescriptorSets &MaterialInstance::getDescriptorSet(const uint32_t setId) const {
+DescriptorSet &MaterialInstance::getDescriptorSet(const uint32_t setId) const {
     return *descriptorSets.at(setId);
 }
 
 
-void MaterialInstance::updateDescriptorSet(uint32_t setId, uint32_t i) {
-    descriptorWriter.updateSet(ctx.getLogicalDevice(), getDescriptorSet(setId)[i]);
+void MaterialInstance::updateDescriptorSet(uint32_t setId) {
+    descriptorWriter.updateSet(ctx.getLogicalDevice(), getDescriptorSet(setId));
 }
 
 void MaterialInstance::setCombinedImageSampler(uint32_t binding, const UnifiedTexture2D &unifiedT2d,

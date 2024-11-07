@@ -8,8 +8,8 @@
 #include <VulkanAppContext.h>
 #include "DeviceContext.h"
 
-DescriptorSetLayout::DescriptorSetLayout(DeviceContext &ctx, const std::vector<DescriptorSetLayoutBinding> &bindings)
-    : VulkanResource(ctx) {
+DescriptorSetLayout::DescriptorSetLayout(DeviceContext &ctx, uint32_t setId, const std::vector<DescriptorSetLayoutBinding> &bindings)
+    : VulkanResource(ctx), setId(setId) {
     layoutBindings.resize(bindings.size());
     for (int i = 0; i < layoutBindings.size(); ++i) {
         layoutBindings[i] = bindings[i].asVkDescriptorSetLayoutBinding();
@@ -30,8 +30,8 @@ DescriptorSetLayout::DescriptorSetLayout(DeviceContext &ctx, const std::vector<D
     }
 }
 
-DescriptorSetLayout::DescriptorSetLayout(DeviceContext& ctx, const std::map<uint32_t, DescriptorSetLayoutBinding> &bindings)
-: VulkanResource(ctx) {
+DescriptorSetLayout::DescriptorSetLayout(DeviceContext& ctx, uint32_t setId, const std::map<uint32_t, DescriptorSetLayoutBinding> &bindings)
+: VulkanResource(ctx) , setId(setId){
     for (const auto &snd: bindings | std::views::values) {
         layoutBindings.push_back(snd.asVkDescriptorSetLayoutBinding());
     }

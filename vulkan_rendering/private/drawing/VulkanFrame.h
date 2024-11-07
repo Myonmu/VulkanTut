@@ -21,9 +21,6 @@ public:
 
     void drawFrame(uint32_t currentFrameIndex, RenderingContext& renderingCtx);
 
-    //TODO: Per-object rather than per-frame
-    void updateUniformBuffer(uint32_t currentFrame);
-
     void signalResize();
 private:
     WindowContext& context;

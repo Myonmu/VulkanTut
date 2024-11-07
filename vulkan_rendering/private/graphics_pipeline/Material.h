@@ -3,7 +3,7 @@
 //
 
 #pragma once
-#include <DescriptorSets.h>
+#include <DescriptorSet.h>
 #include <map>
 #include <VulkanPipeline.h>
 
@@ -77,10 +77,9 @@ public:
 
     friend class Material;
 
-    std::map<uint32_t, std::unique_ptr<DescriptorSets> > descriptorSets;
+    std::map<uint32_t, std::unique_ptr<DescriptorSet> > descriptorSets;
 
-    // TODO: Remove "i"
-    void updateDescriptorSet(uint32_t setId, uint32_t i);
+    void updateDescriptorSet(uint32_t setId);
 
     void setCombinedImageSampler(uint32_t binding, const UnifiedTexture2D &unifiedT2d, const TextureSampler &sampler);
 
@@ -90,7 +89,7 @@ public:
     // TODO: Remove "i"
     void setUBO(uint32_t binding, uint32_t i, PerFrameBufferGroup &ubo);
 
-    DescriptorSets &getDescriptorSet(uint32_t setId) const;
+    DescriptorSet &getDescriptorSet(uint32_t setId) const;
 
     [[nodiscard]] PipelineLayout& getPipelineLayout() const;
     [[nodiscard]] VulkanPipeline& getPipeline() const;
