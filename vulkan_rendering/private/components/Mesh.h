@@ -3,9 +3,6 @@
 //
 
 #pragma once
-
-#include <UniformBufferObject.h>
-
 #include "Material.h"
 #include "MeshBuffer.h"
 #include "PerFrameBufferGroup.h"
@@ -14,7 +11,7 @@
 struct PerObjectBuffer : public ObjectNode {
     std::unique_ptr<PerFrameBufferGroup> bufferGroup;
     explicit PerObjectBuffer(DeviceContext& ctx) {
-        bufferGroup = std::make_unique<PerFrameBufferGroup>(ctx, sizeof(UniformBufferObject));
+        bufferGroup = std::make_unique<PerFrameBufferGroup>(ctx, sizeof(PerObjectRenderingData));
     };
     void updatePerObjectBuffer(const FrameInfo& frameInfo, const Position& pos, const Rotation& rot, const Scale& scale) const;
 };

@@ -7,12 +7,18 @@
 #include <CommandBufferRecorder.h>
 #include <vulkan/vulkan_core.h>
 
+#include "DescriptorPoolAllocator.h"
 #include "FrameInfo.h"
 
 
 struct RenderingContext;
 struct WindowContext;
 class CommandBuffer;
+
+struct PerFrameResources {
+    std::unique_ptr<DescriptorAllocator> frameDescriptorAllocator;
+    
+};
 
 class VulkanFrame {
 public:

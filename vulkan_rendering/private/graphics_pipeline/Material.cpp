@@ -4,7 +4,6 @@
 #include "Material.h"
 #include <DescriptorSetLayout.h>
 #include <PipelineLayout.h>
-#include <UniformBufferObject.h>
 
 #include "DeviceContext.h"
 #include "Shader.h"
@@ -72,11 +71,6 @@ void MaterialInstance::setCombinedImageSampler(const uint32_t binding, const Tex
                                                const TextureSampler &sampler, const ImageView &imageView) {
     descriptorWriter.writeImage(binding, imageView, sampler, textureImage.getCurrentLayout(),
                                 VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER);
-}
-
-void MaterialInstance::setUBO(uint32_t binding, uint32_t i, PerFrameBufferGroup &ubo) {
-    auto &buffer = ubo[i];
-    descriptorWriter.writeBuffer(binding, buffer, sizeof(UniformBufferObject), 0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER);
 }
 
 PipelineLayout &MaterialInstance::getPipelineLayout() const {

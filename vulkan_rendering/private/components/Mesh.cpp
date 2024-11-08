@@ -13,7 +13,7 @@ void PerObjectBuffer::updatePerObjectBuffer(
     const Rotation &rot,
     const Scale &scale) const {
     auto const &buffer = (*bufferGroup)[frameInfo.currentFrameIndex];
-    const UniformBufferObject ubo{
+    const PerObjectRenderingData ubo{
         .model = Transform::getModelMatrix(pos, rot, scale)
     };
     buffer.copyToBufferMemory(&ubo, 0);
@@ -50,6 +50,6 @@ void MeshRenderer::updatePerObjectDescriptorSet(RenderingContext &ctx) {
     auto frameInfo = ctx.renderer->getCurrentFrameInfo();
     auto const& buffer = (*perObjectBuffer->bufferGroup)[frameInfo.currentFrameIndex];
     DescriptorWriter writer{};
-    writer.writeBuffer(0, buffer, sizeof(UniformBufferObject), 0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER);
+    writer.writeBuffer(0, buffer, sizeof(PerObjectRenderingData), 0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER);
     writer.updateSet(ctx.getLogicalDevice(), materialInstance.getDescriptorSet(1));
 }

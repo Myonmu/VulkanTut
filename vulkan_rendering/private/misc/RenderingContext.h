@@ -12,6 +12,7 @@
 struct PerSceneRenderingData {
     glm::mat4 view;
     glm::mat4 projection;
+
     static std::map<uint32_t, DescriptorSetLayoutBinding> bindings;
     static std::vector<DescriptorAllocator::PoolSizeRatio> poolSizes;
 };

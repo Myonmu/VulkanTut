@@ -82,7 +82,15 @@ Descriptor related concepts was rather tricky (for us) to understand.
 
 Like Pipelines, *Descriptor Set Layout* act as the mold for *Descriptor Set*. *Descriptor Pool* is where descriptor sets are allocated from. 
 
-Yet, a descriptor pool isn't tied to a descriptor set layout... An analogy would be, Descriptor Set Layouts are product blueprints, Descriptor Pools are raw material reserves, and Descriptor Sets are assembled products. Descriptor Pools only care about how many different types of bindings do we have, and doesn't care about the binding's position.
+Yet, a descriptor pool isn't tied to a descriptor set layout... 
+
+Here is a not-so-accurate analogy: Imagine you bought a box of lego (Millennium Falcon, let's say), and you are starting to assemble it:
+
+- `Descriptor`s are your individual lego blocks. They are categorized by rough shapes (DescriptorType). *Note that in Vulkan you don't manipulate a descriptor directly*.
+- `Descriptor Pool` is a set of boxes or plastic bags that contain the blocks, sorted by type. You can imagine it as the whole lego set you bought, but taken out the instructions.
+- Let's say that the instruction manual is divided into different *chapters* that tells you how to assemble a specific part of the Millennium Falcon, and each chapter is further split into a page of *materials list* and *instructions*.
+- `Descriptor Set Layout` is precisely the *material list*, telling you what you will be needing later in the chapter. Funny enough, the material list sometimes only tells you the criteria of the material you should be using, rather than the precise block. For example, it could say that you need a 2x2 block, period. and you could fetch a block of any height as long as it has a 2x2 base, and it would actually fit on the final model. Furthermore, the material list uses a symbol to identify each piece of material and only uses that symbol later in the instructions (because the writer doesn't know which block you will be picking).
+- 
 
 *For example: A shader requires 1 UBO at `layout(set=0,binding=0)`, and 1 combined image sampler at `layout(set=0,binding=1)`. The pool used to allocate the descriptor set for this shader can also be used to allocate a shader with 1 UBO at `layout(set=0,binding=7)` and 1 combined image sampler at `layout(set=0,binding=13)`, because the pool only sees that they both require 1 UBO and 1 combined image sampler.*
 

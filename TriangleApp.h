@@ -24,6 +24,7 @@
 #include "Camera.h"
 #include "EnginePipeline.h"
 #include "RenderingContext.h"
+#include "fmt/color.h"
 
 class TriangleApp {
 public :
@@ -150,7 +151,11 @@ private:
     }
 
     void mainLoop() {
-        while (enginePipeline.mainLoop() && frameCounter < 1) {
+        auto shouldExit = false;
+        while (!shouldExit) {
+            fmt::print(fg(fmt::color::crimson) | fmt::emphasis::bold, "vvvvvv FRAME {}\n", frameCounter);
+            shouldExit =  !enginePipeline.mainLoop() || frameCounter > 0;
+            fmt::print(fg(fmt::color::aqua) | fmt::emphasis::bold,"^^^^^^ END FRAME {}\n", frameCounter);
             frameCounter ++;
         }
         vkDeviceWaitIdle(context->deviceContexts[0]->getLogicalDevice());

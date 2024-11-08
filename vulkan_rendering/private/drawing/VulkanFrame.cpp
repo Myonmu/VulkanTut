@@ -3,16 +3,12 @@
 //
 
 #include "VulkanFrame.h"
-
-#include <chrono>
-#include <UniformBufferObject.h>
-
 #include "CommandBuffer.h"
 #define GLM_ENABLE_EXPERIMENTAL
 #include "DeviceContext.h"
 #include "FrameInfo.h"
 #include "RenderingContext.h"
-#include "glm/gtx/quaternion.hpp"
+#include "include/fmt/args.h"
 
 VulkanFrame::VulkanFrame(WindowContext &context): context(context),
                                                   commandBuffer(context.context, QueueFamily::QUEUE_FAMILY_GRAPHICS) {
@@ -66,7 +62,9 @@ void VulkanFrame::drawFrame(uint32_t currentFrameIndex, RenderingContext& render
 
     renderingCtx.prepareFrame(frameInfo);
 
+    fmt::println("   - - - Start recording main command buffer");
     context.get_renderer().recordCommandBuffer(commandBuffer, context.context, frameInfo);
+    fmt::println("   - - - Finish recording main command buffer");
     // Submit command buffer
     VkSubmitInfo submitInfo{};
     submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;

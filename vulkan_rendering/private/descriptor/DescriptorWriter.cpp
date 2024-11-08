@@ -58,15 +58,15 @@ void DescriptorWriter::clear() {
 }
 
 void DescriptorWriter::updateSet(LogicalDevice& device, DescriptorSet& set) {
-    fmt::println("---------------UPDATE DESCRIPTOR SET {} -----------------", set.layout.setId );
+    fmt::println("------- UPDATE DESCRIPTOR SET {} ---------", set.layout.setId);
 
     for (VkWriteDescriptorSet &write: writes) {
         write.dstSet = set;
-        fmt::println("binding {} ({}) cnt {}", write.dstBinding, write.descriptorType, write.descriptorCount);
+        fmt::println("binding {} ({}) cnt {}", write.dstBinding, static_cast<uint32_t>(write.descriptorType), write.descriptorCount);
     }
 
     vkUpdateDescriptorSets(device, static_cast<uint32_t>(writes.size()), writes.data(),
                            0, nullptr);
 
-    fmt::println("^^^^^^^^^^^^^^^^ END OF UPDATE CALL FOR SET {} ^^^^^^^^^^^^^^^^^^", set.layout.setId);
+    fmt::println("^^^^^^ END OF UPDATE CALL FOR SET {} ^^^^^^", set.layout.setId);
 }

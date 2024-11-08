@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 3.27)
 project(VulkanTut)
 
 set(CMAKE_CXX_STANDARD 23)
+
 # Vulkan and GLFW setup
 find_package(Vulkan REQUIRED)
 set(GLFW_BUILD_DOCS OFF CACHE BOOL "" FORCE)

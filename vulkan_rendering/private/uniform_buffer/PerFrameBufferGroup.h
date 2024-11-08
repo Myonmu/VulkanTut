@@ -6,9 +6,19 @@
 
 #include <Buffer.h>
 #include <vector>
+#include <glm/mat4x4.hpp>
 
 
 struct VulkanAppContext;
+
+// Remember alignment requirements!
+// https://registry.khronos.org/vulkan/specs/1.3-extensions/html/vkspec.html#interfaces-alignment-requirements
+
+struct PerObjectRenderingData {
+    glm::mat4 model;
+
+
+};
 
 class PerFrameBufferGroup {
     std::vector<std::unique_ptr<Buffer>> buffers;

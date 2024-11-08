@@ -3,8 +3,6 @@
 //
 
 #include "PerFrameBufferGroup.h"
-
-#include <UniformBufferObject.h>
 #include <VulkanAppContext.h>
 
 #include "DeviceContext.h"

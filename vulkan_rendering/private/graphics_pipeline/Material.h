@@ -81,13 +81,10 @@ public:
 
     void updateDescriptorSet(uint32_t setId);
 
-    void setCombinedImageSampler(uint32_t binding, const UnifiedTexture2D &unifiedT2d, const TextureSampler &sampler);
+    void setCombinedImageSampler(uint32_t binding, const UnifiedTexture2D &unifiedT2d, const TextureSampler &sampler) ;
 
     void setCombinedImageSampler(uint32_t binding, const TextureImage &textureImage, const TextureSampler &sampler,
                                  const ImageView &imageView);
-
-    // TODO: Remove "i"
-    void setUBO(uint32_t binding, uint32_t i, PerFrameBufferGroup &ubo);
 
     DescriptorSet &getDescriptorSet(uint32_t setId) const;
 
