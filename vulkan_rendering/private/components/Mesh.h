@@ -5,27 +5,17 @@
 #pragma once
 #include "Material.h"
 #include "MeshBuffer.h"
-#include "PerFrameBufferGroup.h"
+#include "RenderingContext.h"
 #include "RenderPassRecorder.h"
-
-struct PerObjectBuffer : public ObjectNode {
-    std::unique_ptr<PerFrameBufferGroup> bufferGroup;
-    explicit PerObjectBuffer(DeviceContext& ctx) {
-        bufferGroup = std::make_unique<PerFrameBufferGroup>(ctx, sizeof(PerObjectRenderingData));
-    };
-    void updatePerObjectBuffer(const FrameInfo& frameInfo, const Position& pos, const Rotation& rot, const Scale& scale) const;
-};
 
 class MeshRenderer{
 
     const MeshBuffer& meshBuffer;
     const MaterialInstance& materialInstance;
     CommandBufferRecorder recorder{true};
-    CTX_PROPERTY(PerObjectBuffer, perObjectBuffer);
 public:
-
+    PerObjectVertexPushConstants vertexPushConstants;
     MeshRenderer(DeviceContext& ctx, const MeshBuffer& meshBuffer, const MaterialInstance& materialInstance);
     ~MeshRenderer()  = default;
     void enqueueDrawCall(RenderingContext& ctx, RenderPassRecorder& renderPassRecorder);
-    void updatePerObjectDescriptorSet(RenderingContext& ctx);
 };

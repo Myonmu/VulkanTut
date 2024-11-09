@@ -50,9 +50,9 @@ private:
 
     void setup() {
         auto &deviceCtx = *context->deviceContexts[0];
-        auto f = FileUtility::ReadSpv("./shaders/vert.spv");
+        auto f = FileUtility::ReadSpv("./shaders/shader.vert.spv");
         shaders.emplace_back(f, VK_SHADER_STAGE_VERTEX_BIT);
-        shaders.emplace_back(FileUtility::ReadSpv("./shaders/frag.spv"), VK_SHADER_STAGE_FRAGMENT_BIT);
+        shaders.emplace_back(FileUtility::ReadSpv("./shaders/shader.frag.spv"), VK_SHADER_STAGE_FRAGMENT_BIT);
 
         auto &material = deviceCtx.createObject<Material>(deviceCtx, shaders, deviceCtx.get_renderPass_at(0));
         auto &materialInstance = material.createInstance();
@@ -68,7 +68,7 @@ private:
                                                                      VK_FALSE);
 
         materialInstance.setCombinedImageSampler(0, tex, sampler);
-        materialInstance.updateDescriptorSet(2);
+        materialInstance.updateDescriptorSet(1);
 
         auto &meshBuffer = deviceCtx.createObject<MeshBuffer>(deviceCtx, Vertex::testVerts, Vertex::testIndices);
         auto &entt = ecs.entity("Some Object")
@@ -80,18 +80,19 @@ private:
         auto &mainRenderer = deviceCtx.get_windowContext_at(0).get_renderer();
         mainRenderer.recorder->enqueueCommand<EnqueueRenderPass>(*mainPass);
 
+        auto& swapchain = deviceCtx.get_windowContext_at(0).get_swapChain();
         auto &camera = ecs.entity("Camera")
                 .set(Position{glm::vec3(2, 2, 2)})
                 .emplace<Rotation>()
                 .emplace<Scale>()
-                .emplace<Camera>();
+                .emplace<Camera>(&swapchain);
 
         Transform::lookAt(*camera.get_mut<Position>(), *camera.get_mut<Rotation>(), glm::vec3(0, 0, 0));
 
         mainContext = std::make_unique<RenderingContext>(deviceCtx);
         mainContext->renderer = &mainRenderer;
 
-        mainContext->f = [this](){return prepareRenderLoop();};
+        mainContext->f = [this]() { return prepareRenderLoop(); };
 
         enginePipeline.addLoop([this] { return playerLoop(); });
         enginePipeline.addLoop([this] { return renderLoop(); });
@@ -104,7 +105,7 @@ private:
                 auto currentTime = std::chrono::high_resolution_clock::now();
                 auto time = std::chrono::duration<float>(currentTime - startTime).count();
                 auto euler = glm::vec3{0.0f, 0, glm::radians(90.0f) * time};
-                auto result = glm::quat(euler) * rot.rotation;
+                auto result = glm::quat(euler);
                 rot.rotation = result;
             });
         return true;
@@ -113,8 +114,8 @@ private:
     bool prepareRenderLoop() {
         ecs.system<Position, Rotation, Scale, MeshRenderer>("UpdatePerObjectUBO").kind(flecs::PreStore).each(
             [this](Position &p, Rotation &r, Scale &s, MeshRenderer &renderer) {
-                renderer.get_perObjectBuffer().updatePerObjectBuffer(mainContext->renderer->getCurrentFrameInfo(), p, r, s);
-                renderer.updatePerObjectDescriptorSet(*mainContext);
+                const auto modelMatrix = Transform::getModelMatrix(p, r, s);
+                renderer.vertexPushConstants.model = modelMatrix;
             }
         );
 
@@ -154,9 +155,9 @@ private:
         auto shouldExit = false;
         while (!shouldExit) {
             fmt::print(fg(fmt::color::crimson) | fmt::emphasis::bold, "vvvvvv FRAME {}\n", frameCounter);
-            shouldExit =  !enginePipeline.mainLoop() || frameCounter > 0;
-            fmt::print(fg(fmt::color::aqua) | fmt::emphasis::bold,"^^^^^^ END FRAME {}\n", frameCounter);
-            frameCounter ++;
+            shouldExit = !enginePipeline.mainLoop();
+            fmt::print(fg(fmt::color::aqua) | fmt::emphasis::bold, "^^^^^^ END FRAME {}\n", frameCounter);
+            frameCounter++;
         }
         vkDeviceWaitIdle(context->deviceContexts[0]->getLogicalDevice());
     }

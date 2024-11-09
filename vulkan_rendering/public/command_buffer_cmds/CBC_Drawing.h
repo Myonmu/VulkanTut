@@ -98,3 +98,20 @@ public:
         vkCmdSetViewport(commandBuffer, 0, 1, &viewport);
     }
 };
+
+class PushConstants final: public CommandBufferCmd {
+    PipelineLayout& pipelineLayout;
+    VkShaderStageFlags stage{};
+    uint32_t size;
+    uint32_t offset;
+    void* data;
+public:
+
+    PushConstants(PipelineLayout& pipelineLayout, VkShaderStageFlags stage, uint32_t size, uint32_t offset, void* data):
+    CommandBufferCmd(),
+    pipelineLayout(pipelineLayout), data(data), size(size), offset(offset), stage(stage) {}
+
+    void execute(const CommandBuffer &commandBuffer, const DeviceContext &context, const FrameInfo &frameInfo) override {
+        vkCmdPushConstants(commandBuffer, pipelineLayout, stage, offset, size, data);
+    }
+};

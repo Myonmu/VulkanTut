@@ -17,7 +17,6 @@ class CommandBuffer;
 
 struct PerFrameResources {
     std::unique_ptr<DescriptorAllocator> frameDescriptorAllocator;
-    
 };
 
 class VulkanFrame {

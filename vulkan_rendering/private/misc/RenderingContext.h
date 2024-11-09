@@ -17,6 +17,15 @@ struct PerSceneRenderingData {
     static std::vector<DescriptorAllocator::PoolSizeRatio> poolSizes;
 };
 
+
+struct PerObjectVertexPushConstants {
+    glm::mat4 model;
+
+    // Used by pipeline layout
+    static VkPushConstantRange getPushConstantsRange();
+};
+
+
 struct RenderingContext: public SubContext<DeviceContext> {
     PerSceneRenderingData perSceneData{};
     CommandBufferRecorder recorder{0, false};

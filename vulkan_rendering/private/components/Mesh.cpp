@@ -7,22 +7,9 @@
 #include "CBC_Misc.h"
 #include "RenderingContext.h"
 
-void PerObjectBuffer::updatePerObjectBuffer(
-    const FrameInfo &frameInfo,
-    const Position &pos,
-    const Rotation &rot,
-    const Scale &scale) const {
-    auto const &buffer = (*bufferGroup)[frameInfo.currentFrameIndex];
-    const PerObjectRenderingData ubo{
-        .model = Transform::getModelMatrix(pos, rot, scale)
-    };
-    buffer.copyToBufferMemory(&ubo, 0);
-}
-
-MeshRenderer::MeshRenderer(DeviceContext& ctx,const MeshBuffer &meshBuffer, const MaterialInstance &materialInstance)
+MeshRenderer::MeshRenderer(DeviceContext &ctx, const MeshBuffer &meshBuffer, const MaterialInstance &materialInstance)
     : meshBuffer(meshBuffer),
       materialInstance(materialInstance) {
-    perObjectBuffer = std::make_unique<PerObjectBuffer>(ctx);
 }
 
 void MeshRenderer::enqueueDrawCall(RenderingContext &ctx, RenderPassRecorder &renderPassRecorder) {
@@ -42,14 +29,10 @@ void MeshRenderer::enqueueDrawCall(RenderingContext &ctx, RenderPassRecorder &re
         if (setId <= 0)continue; // 0 is reserved for global set
         recorder.enqueueCommand<BindDescriptorSet>(materialInstance.getPipelineLayout(), *set, setId);
     }
+    recorder.enqueueCommand<PushConstants>(materialInstance.getPipelineLayout(),
+                                           VK_SHADER_STAGE_VERTEX_BIT,
+                                           sizeof(PerObjectVertexPushConstants), 0,
+                                           &vertexPushConstants);
     recorder.enqueueCommand<DrawIndexed>(meshBuffer.getIndicesCount());
     renderPassRecorder.enqueueCommand<EnqueueRecorder>(recorder);
-}
-
-void MeshRenderer::updatePerObjectDescriptorSet(RenderingContext &ctx) {
-    auto frameInfo = ctx.renderer->getCurrentFrameInfo();
-    auto const& buffer = (*perObjectBuffer->bufferGroup)[frameInfo.currentFrameIndex];
-    DescriptorWriter writer{};
-    writer.writeBuffer(0, buffer, sizeof(PerObjectRenderingData), 0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER);
-    writer.updateSet(ctx.getLogicalDevice(), materialInstance.getDescriptorSet(1));
 }

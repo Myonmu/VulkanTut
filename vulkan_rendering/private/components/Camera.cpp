@@ -13,7 +13,10 @@ glm::mat4x4 Camera::getViewMatrix(const Position &position, const Rotation &rota
     return rotationMatrix * translationMatrix;
 }
 
-glm::mat4x4 Camera::getProjectionMatrix() const {
+glm::mat4x4 Camera::getProjectionMatrix(){
+    if(output != nullptr) {
+        aspectRatio = output->swapChainExtent.width / static_cast<float>(output->swapChainExtent.height);
+    }
     auto projection = glm::perspective(glm::radians(fov), aspectRatio, nearPlane, farPlane);
     projection[1][1] *= -1;
     return projection;

@@ -18,6 +18,14 @@ std::vector<DescriptorAllocator::PoolSizeRatio> PerSceneRenderingData::poolSizes
     {.type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER , .ratio = 2}
 };
 
+VkPushConstantRange PerObjectVertexPushConstants::getPushConstantsRange() {
+    return {
+        .stageFlags = VK_SHADER_STAGE_VERTEX_BIT,
+        .offset = 0,
+        .size = sizeof(PerObjectVertexPushConstants),
+    };
+}
+
 RenderingContext::RenderingContext(DeviceContext& ctx)
     : SubContext(ctx){
     perSceneDescriptorLayout = std::make_unique<DescriptorSetLayout>(ctx, 0,  PerSceneRenderingData::bindings);

@@ -19,7 +19,7 @@ struct Position {
 };
 
 struct Rotation {
-    glm::quat rotation{0.0f,0,0,1};
+    glm::quat rotation{1.0f,0,0,0};
 
     [[nodiscard]] glm::mat4x4 getRotationMatrix() const {
         return glm::toMat4(rotation);
@@ -41,6 +41,10 @@ struct Transform {
     }
 
     static void lookAt(Position& p, Rotation& r, const glm::vec3 pos) {
-        r.rotation = glm::quatLookAt(pos - p.translation, glm::vec3(0, 0, 1));
+        r.rotation = glm::toQuat(
+            glm::lookAt(p.translation,
+                pos,
+                glm::vec3(0.0f, 0.0f, 1.0f))
+                );
     }
 };
