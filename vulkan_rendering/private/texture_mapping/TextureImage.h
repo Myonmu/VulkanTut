@@ -15,11 +15,12 @@ struct DeviceContext;
  */
 class TextureImage: public VulkanResource<VkImage, DeviceContext>, public ObjectNode {
 public:
-    TextureImage(DeviceContext& ctx, Texture2D& t2d);
+    TextureImage(DeviceContext& ctx, Texture2D& t2d, bool requiresBuffer = true);
 
     TextureImage(DeviceContext &ctx, const int &width, const int &height, const int &channels,
                  VkFormat textureFormat,
-                 VkImageTiling tiling, VkImageUsageFlags usage, VkMemoryPropertyFlags memoryProperties);
+                 VkImageTiling tiling, VkImageUsageFlags usage,
+                 VkMemoryPropertyFlags memoryProperties, bool requiresBuffer = true);
 
     [[nodiscard]] uint32_t findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties) const;
 
@@ -35,7 +36,7 @@ private:
     int width, height, channels;
     VkFormat format;
     VkDeviceSize imageSize;
-    Buffer stagingBuffer;
+    std::unique_ptr<Buffer> stagingBuffer;
     VkDeviceMemory textureImageMemory{};
 };
 

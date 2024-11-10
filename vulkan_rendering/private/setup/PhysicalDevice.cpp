@@ -53,7 +53,7 @@ int PhysicalDevice::rateDeviceSuitability(VkPhysicalDevice device, DeviceContext
         return 0;
     }
 
-    for (const auto& element: context.windowContext) {
+    for (const auto &element: context.windowContext) {
         SwapChain::SwapChainSupportDetails swapChainSupport = SwapChain::querySwapChainSupport(
             device, element->get_surface());
         if (swapChainSupport.formats.empty() || swapChainSupport.presentModes.empty()) {
@@ -108,4 +108,20 @@ uint32_t PhysicalDevice::getApiVersion() const {
     VkPhysicalDeviceProperties properties;
     vkGetPhysicalDeviceProperties(resource, &properties);
     return properties.apiVersion;
+}
+
+VkFormat PhysicalDevice::findSupportedImageFormat(const std::vector<VkFormat> &candidates,
+                                                  VkImageTiling tiling,
+                                                  VkFormatFeatureFlags features) const {
+    for (VkFormat format: candidates) {
+        VkFormatProperties props;
+        vkGetPhysicalDeviceFormatProperties(ctx.get_physicalDevice(), format, &props);
+
+        if (tiling == VK_IMAGE_TILING_LINEAR && (props.linearTilingFeatures & features) == features) {
+            return format;
+        } else if (tiling == VK_IMAGE_TILING_OPTIMAL && (props.optimalTilingFeatures & features) == features) {
+            return format;
+        }
+    }
+    throw std::runtime_error("failed to find supported format!");
 }

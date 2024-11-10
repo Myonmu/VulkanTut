@@ -12,18 +12,21 @@
 
 void FrameBuffers::createFrameBuffers(const RenderPass& renderPass) {
     auto& swapChain = ctx.get_swapChain();
-    const auto swapChainSize = swapChain.getSize();
+    auto& colorAttachment = ctx.get_colorAttachment();
+    const auto swapChainSize = colorAttachment.getSize();
     resource.resize(swapChainSize);
     for (size_t i = 0; i < swapChainSize; i++) {
-        VkImageView attachments[] = {
-            swapChain.swapChainImageViews[i]->getRaw()
+        auto& color = colorAttachment.get_imageView_at(i);
+        auto& depth = ctx.get_depthAttachment();
+        std::array<VkImageView,2> attachments = {
+            color, depth
         };
 
         VkFramebufferCreateInfo framebufferInfo{};
         framebufferInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
         framebufferInfo.renderPass = renderPass;
-        framebufferInfo.attachmentCount = 1;
-        framebufferInfo.pAttachments = attachments;
+        framebufferInfo.attachmentCount = static_cast<uint32_t>(attachments.size());
+        framebufferInfo.pAttachments = attachments.data();
         framebufferInfo.width = swapChain.swapChainExtent.width;
         framebufferInfo.height = swapChain.swapChainExtent.height;
         framebufferInfo.layers = 1;

@@ -26,17 +26,14 @@ public:
     explicit SwapChain(WindowContext& context);
     ~SwapChain() override;
     static SwapChainSupportDetails querySwapChainSupport(VkPhysicalDevice device, VkSurfaceKHR surface);
-    [[nodiscard]] size_t getSize() const;
     VkExtent2D swapChainExtent{};
     VkFormat swapChainImageFormat {};
-    std::vector<ImageView *> swapChainImageViews;
     void recreate();
+    friend class ColorAttachment;
 private:
-    std::vector<VkImage> swapChainImages;
-
+    uint32_t imageCount;
     void createSwapChain(WindowContext& context);
     static VkSurfaceFormatKHR chooseSwapSurfaceFormat(const std::vector<VkSurfaceFormatKHR>& availableFormats);
     static VkPresentModeKHR chooseSwapPresentMode(const std::vector<VkPresentModeKHR>& availablePresentModes);
     static VkExtent2D chooseSwapExtend(const VkSurfaceCapabilitiesKHR& capabilities, WindowContext& context);
-    void createImageViews();
 };

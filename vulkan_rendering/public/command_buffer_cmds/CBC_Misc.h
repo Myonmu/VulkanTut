@@ -45,8 +45,8 @@ class CopyBufferToImage final : public CommandBufferCmd {
     uint32_t width, height;
 
 public:
-    CopyBufferToImage(const Buffer &buffer, const TextureImage &image, uint32_t width, uint32_t height) : image(image),
-        buffer(buffer), width(width), height(height) {
+    CopyBufferToImage(const Buffer &buffer, const TextureImage &image, uint32_t width, uint32_t height)
+    : image(image), buffer(buffer), width(width), height(height) {
     }
 
     void execute(const CommandBuffer &commandBuffer, const DeviceContext &context,

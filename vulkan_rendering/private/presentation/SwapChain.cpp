@@ -73,7 +73,7 @@ void SwapChain::createSwapChain(WindowContext& context){
     VkPresentModeKHR presentMode = chooseSwapPresentMode(swapChainSupport.presentModes);
     VkExtent2D extent = chooseSwapExtend(swapChainSupport.capabilities, context);
 
-    uint32_t imageCount = swapChainSupport.capabilities.minImageCount + 1;
+    imageCount = swapChainSupport.capabilities.minImageCount + 1;
 
     if (swapChainSupport.capabilities.maxImageCount > 0 && imageCount > swapChainSupport.capabilities.maxImageCount) {
         imageCount = swapChainSupport.capabilities.maxImageCount;
@@ -116,45 +116,22 @@ void SwapChain::createSwapChain(WindowContext& context){
         throw std::runtime_error("failed to create swap chain");
     }
 
-    vkGetSwapchainImagesKHR(ctx.getLogicalDevice(), resource, &imageCount, nullptr);
-    swapChainImages.resize(imageCount);
-    vkGetSwapchainImagesKHR(ctx.getLogicalDevice(), resource, &imageCount, swapChainImages.data());
-
     swapChainImageFormat = surfaceFormat.format;
     swapChainExtent = extent;
 
     delete queueFamilyIndices;
 }
 
-void SwapChain::createImageViews(){
-    swapChainImageViews.resize(swapChainImages.size());
-    for (size_t i = 0; i < swapChainImages.size(); i++) {
-        swapChainImageViews[i] = new ImageView(ctx.context, swapChainImages[i], swapChainImageFormat);
-    }
-}
-
 SwapChain::~SwapChain() {
-    for (const auto imageView : swapChainImageViews) {
-        delete imageView;
-    }
     vkDestroySwapchainKHR(ctx.getLogicalDevice(), resource, nullptr);
 }
 
 SwapChain::SwapChain(WindowContext &context): VulkanResource(context) {
     createSwapChain(context);
-    createImageViews();
 }
 
 void SwapChain::recreate() {
-    for (const auto imageView : swapChainImageViews) {
-        delete imageView;
-    }
     vkDestroySwapchainKHR(ctx.getLogicalDevice(), resource, nullptr);
     createSwapChain(ctx);
-    createImageViews();
 }
 
-
-size_t SwapChain::getSize() const {
-    return swapChainImageViews.size();
-}

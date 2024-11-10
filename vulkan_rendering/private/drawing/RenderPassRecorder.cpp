@@ -29,9 +29,15 @@ void RenderPassRecorder::recordRenderPass(const CommandBuffer &commandBuffer, co
     renderPassInfo.renderArea.offset = {0, 0};
     renderPassInfo.renderArea.extent = swapChain.swapChainExtent;
 
-    VkClearValue clearColor = {{{0.0f, 0.0f, 0.0f, 1.0f}}};
-    renderPassInfo.clearValueCount = 1;
-    renderPassInfo.pClearValues = &clearColor;
+
+    // TODO: Move clear values to ColorAttachment and DepthAttachment classes
+    std::array<VkClearValue, 2> clearValues{};
+    clearValues[0].color = {{0.0f, 0.0f, 0.0f, 1.0f}};
+    clearValues[1].depthStencil = {1.0f, 0};
+
+
+    renderPassInfo.clearValueCount = clearValues.size();
+    renderPassInfo.pClearValues = clearValues.data();
 
     vkCmdBeginRenderPass(commandBuffer, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
     for (const auto &cmd: commands) {

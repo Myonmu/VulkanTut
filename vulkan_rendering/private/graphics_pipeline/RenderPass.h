@@ -12,7 +12,7 @@
 struct DeviceContext;
 class RenderPass : public VulkanResource<VkRenderPass, DeviceContext>{
 public:
-    explicit RenderPass(DeviceContext& context, VkFormat format);
+    explicit RenderPass(DeviceContext& context, VkFormat colorAttachmentFormat, VkFormat depthAttachmentFormat);
     ~RenderPass() override;
 };
 

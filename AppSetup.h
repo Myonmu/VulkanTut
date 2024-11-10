@@ -20,8 +20,9 @@ public:
     }
 
     void createRenderPasses(DeviceContext &deviceContext) override {
-        auto format = deviceContext.get_windowContext_at(0).get_swapChain().swapChainImageFormat;
-        const auto passId = deviceContext.create_renderPass(format);
+        auto colorFormat = deviceContext.get_windowContext_at(0).get_colorAttachment().get_format();
+        auto depthFormat = deviceContext.get_windowContext_at(0).get_depthAttachment().get_format();
+        const auto passId = deviceContext.create_renderPass(colorFormat, depthFormat);
         deviceContext.bindRenderPassToWindow(0,passId);
     }
 };

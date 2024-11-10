@@ -15,17 +15,21 @@ TextureImage::TextureImage(DeviceContext &ctx,
                            VkFormat textureFormat,
                            VkImageTiling tiling,
                            VkImageUsageFlags usage,
-                           VkMemoryPropertyFlags memoryProperties
+                           VkMemoryPropertyFlags memoryProperties,
+                           bool requiresBuffer
 ): VulkanResource(ctx),
    width(width),
    height(height), channels(channels), format(textureFormat),
-   imageSize(width * height * channels),
-   stagingBuffer(ctx,
-                 imageSize,
-                 VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
-                 VMA_MEMORY_USAGE_CPU_ONLY
-                 //VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT
-   ) {
+   imageSize(width * height * channels) {
+    if (requiresBuffer) {
+        stagingBuffer = std::make_unique<Buffer>(
+            ctx,
+            imageSize,
+            VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
+            VMA_MEMORY_USAGE_CPU_ONLY
+            //VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT
+        );
+    }
     VkImageCreateInfo imageInfo = {};
     imageInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
     imageInfo.imageType = VK_IMAGE_TYPE_2D;
@@ -61,11 +65,11 @@ TextureImage::TextureImage(DeviceContext &ctx,
     vkBindImageMemory(ctx.getLogicalDevice(), resource, textureImageMemory, 0);
 }
 
-TextureImage::TextureImage(DeviceContext &ctx, Texture2D &t2d) : TextureImage(
+TextureImage::TextureImage(DeviceContext &ctx, Texture2D &t2d, bool requiresBuffer) : TextureImage(
     ctx, t2d.getWidth(), t2d.getHeight(), 4, t2d.getFormat(),
     VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT,
-    VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT) {
-    stagingBuffer.copyToBufferMemory(t2d.pixels, 0);
+    VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, requiresBuffer) {
+    if (requiresBuffer) stagingBuffer->copyToBufferMemory(t2d.pixels, 0);
 }
 
 
@@ -85,7 +89,7 @@ void TextureImage::stage() {
     CommandBuffer cmd{ctx, QueueFamily::QUEUE_FAMILY_GRAPHICS};
     CommandBufferRecorder recorder{};
 
-    recorder.enqueueCommand<CopyBufferToImage>(stagingBuffer, *this,
+    recorder.enqueueCommand<CopyBufferToImage>(*stagingBuffer, *this,
                                                static_cast<uint32_t>(width),
                                                static_cast<uint32_t>(height)
     );

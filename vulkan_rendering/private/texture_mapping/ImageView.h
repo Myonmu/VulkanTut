@@ -12,7 +12,7 @@ struct DeviceContext;
 
 class ImageView : public VulkanResource<VkImageView, DeviceContext>{
 public:
-    ImageView(DeviceContext& ctx, const VkImage &image, VkFormat format);
+    ImageView(DeviceContext& ctx, const VkImage &image, VkFormat format, VkImageAspectFlags aspectFlags);
     ~ImageView() override;
 };
 

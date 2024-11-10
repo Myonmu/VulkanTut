@@ -99,6 +99,10 @@ set(SOURCES
         private/misc/RenderingContext.h
         private/Components/Transform.h
         private/misc/EnginePipeline.h
+        private/presentation/DepthAttachment.cpp
+        private/presentation/DepthAttachment.h
+        private/presentation/ColorAttachment.cpp
+        private/presentation/ColorAttachment.h
 )
 
 # Create static library

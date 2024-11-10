@@ -20,6 +20,8 @@ WindowContext::WindowContext(DeviceContext &ctx, const char *name, int width, in
 
 void WindowContext::init() {
     swapChain = std::make_unique<SwapChain>(*this);
+    colorAttachment = std::make_unique<ColorAttachment>(*this);
+    depthAttachment = std::make_unique<DepthAttachment>(*this);
 }
 
 void WindowContext::createFrameBuffers(const RenderPass& renderPass) {
@@ -37,6 +39,8 @@ void WindowContext::resize() {
     }*/
     vkDeviceWaitIdle(getLogicalDevice());
     swapChain->recreate();
+    colorAttachment->recreate();
+    depthAttachment->recreate();
     frameBuffers->recreate();
 }
 
