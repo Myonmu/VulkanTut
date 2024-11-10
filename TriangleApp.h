@@ -14,7 +14,6 @@
 #include "RenderPassRecorder.h"
 #include "Shader.h"
 #include "TextureSampler.h"
-#include "GLFW/glfw3.h"
 #include "VulkanAppContext.h"
 #include "UnifiedTexture2D.h"
 #include "Mesh.h"
@@ -25,14 +24,16 @@
 #include "EnginePipeline.h"
 #include "RenderingContext.h"
 #include "fmt/color.h"
+#include "libs/SDL/include/SDL3/SDL_init.h"
 
 class TriangleApp {
 public :
     void Run() {
-        glfwInit();
+        SDL_Init(SDL_INIT_VIDEO);
         context = std::make_unique<VulkanAppContext>("VulkanApp", appSetup);
         setup();
         mainLoop();
+        SDL_Quit();
     }
 
 private:

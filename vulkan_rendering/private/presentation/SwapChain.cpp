@@ -10,7 +10,6 @@
 #include "DeviceContext.h"
 #include "QueueFamilyIndices.h"
 #include "WindowContext.h"
-#include "GLFW/glfw3.h"
 
 SwapChain::SwapChainSupportDetails SwapChain::querySwapChainSupport(VkPhysicalDevice device, VkSurfaceKHR surface){
     SwapChainSupportDetails details;
@@ -51,7 +50,7 @@ VkExtent2D SwapChain::chooseSwapExtend(const VkSurfaceCapabilitiesKHR& capabilit
         return capabilities.currentExtent;
     } else {
         int width, height;
-        glfwGetFramebufferSize(context.get_window(), &width, &height);
+        SDL_GetWindowSize(context.get_window(), &width, &height);
 
         VkExtent2D actualExtent = {
                 static_cast<uint32_t>(width),

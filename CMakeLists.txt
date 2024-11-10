@@ -10,7 +10,7 @@ set(GLFW_BUILD_TESTS OFF CACHE BOOL "" FORCE)
 set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
 
 # Add subdirectories
-add_subdirectory(libs/glfw)
+add_subdirectory(libs/SDL)
 add_subdirectory(libs/glm)
 add_subdirectory(libs/SPIRV-Cross)
 add_subdirectory(vulkan_rendering)
@@ -27,7 +27,7 @@ add_executable(VulkanTut
 # Link dependencies
 target_link_libraries(VulkanTut
         Vk # This is your core module
-        glfw
+        SDL3::SDL3-static
         Vulkan::Vulkan
         glm
         spirv-cross-core

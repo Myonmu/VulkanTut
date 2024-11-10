@@ -25,7 +25,7 @@ struct WindowContext : public SubContext<DeviceContext>{
     int width;
     int height;
     QueueFamily requiredQueueFamilies;
-    CTX_PROPERTY(GlfwWindow, window)
+    CTX_PROPERTY(SdlWindow, window)
 
     CTX_PROPERTY(VulkanSurface, surface)
     // requires device
@@ -38,7 +38,7 @@ struct WindowContext : public SubContext<DeviceContext>{
     CTX_FORWARD_GET_DECL(VulkanInstance, vulkanInstance)
     CTX_FORWARD_GET_DECL(PhysicalDevice, physicalDevice)
 
-    static void frameBufferResizeCallback(GLFWwindow *window, int width, int height);
+    //static void frameBufferResizeCallback(GLFWwindow *window, int width, int height);
 
     ~WindowContext() override;
 

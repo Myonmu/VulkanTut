@@ -4,7 +4,6 @@
 #define VMA_IMPLEMENTATION
 #define VMA_VULKAN_VERSION 1003000
 #include "VmaInstance.h"
-
 #include "DeviceContext.h"
 #include "vk_mem_alloc.h"
 

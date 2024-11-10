@@ -11,7 +11,7 @@ WindowContext::~WindowContext() = default;
 
 WindowContext::WindowContext(DeviceContext &ctx, const char *name, int width, int height, QueueFamily requiredQueueFamilies)
     : SubContext(ctx), name(name), width(width), height(height), requiredQueueFamilies(requiredQueueFamilies) {
-    window = std::make_unique<GlfwWindow>(*this, width, height, name, &frameBufferResizeCallback);
+    window = std::make_unique<SdlWindow>(*this, width, height, name);
     surface = std::make_unique<VulkanSurface>(*this);
     if (ctx.isLogicalDeviceCreated()) {
         init();
@@ -29,20 +29,23 @@ void WindowContext::createFrameBuffers(const RenderPass& renderPass) {
 }
 
 void WindowContext::resize() {
-    glfwGetFramebufferSize(get_window(), &width, &height);
+    SDL_GetWindowSize(get_window(), &width, &height);
+    /*
     while (width == 0 || height == 0) {
-        glfwGetFramebufferSize(get_window(), &width, &height);
+        SDL_GetWindowSize(get_window(), &width, &height);
         glfwWaitEvents();
-    }
+    }*/
     vkDeviceWaitIdle(getLogicalDevice());
     swapChain->recreate();
     frameBuffers->recreate();
 }
 
+/*
 void WindowContext::frameBufferResizeCallback(GLFWwindow *window, int width, int height) {
     auto* w = static_cast<WindowContext *>(glfwGetWindowUserPointer(window));
     w->resize();
 }
+*/
 
 void WindowContext::closeWindow() const {
     std::cout << "Closing window" << id << std::endl;

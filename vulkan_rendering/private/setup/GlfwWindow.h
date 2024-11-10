@@ -5,22 +5,19 @@
 #pragma once
 
 
-#include "GLFW/glfw3.h"
-
+#include <SDL3/SDL_video.h>
 
 struct WindowContext;
 
-class GlfwWindow {
+class SdlWindow {
 public:
-    GlfwWindow(WindowContext &context, int w, int h, const char *appName, GLFWframebuffersizefun resizeFun);
+    SdlWindow(WindowContext &context, int w, int h, const char *appName);
 
-    ~GlfwWindow();
-    operator GLFWwindow*() const {return window;}
-
-    void notifyResize();
+    ~SdlWindow();
+    operator SDL_Window*() const {return window;}
 private:
     const WindowContext& ctx;
-    GLFWwindow* window;
+    SDL_Window* window;
 };
 
 

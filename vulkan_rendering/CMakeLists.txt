@@ -113,7 +113,7 @@ set(GLFW_BUILD_TESTS OFF CACHE BOOL "" FORCE)
 set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
 
 # Include GLFW and GLM
-include_directories(${CMAKE_SOURCE_DIR}/libs/glfw/include)
+include_directories(${CMAKE_SOURCE_DIR}/libs/SDL/include)
 include_directories(${CMAKE_SOURCE_DIR}/libs/glm/include)
 include_directories(${CMAKE_SOURCE_DIR}/libs/stb)
 include_directories(${CMAKE_SOURCE_DIR}/libs/SPIRV-Cross)
@@ -126,7 +126,7 @@ include_directories(${CMAKE_SOURCE_DIR}/libs/fmt)
 
 
 # Link GLFW, Vulkan, and GLM with the library
-target_link_libraries(Vk glfw Vulkan::Vulkan glm)
+target_link_libraries(Vk SDL3::SDL3-static Vulkan::Vulkan glm)
 target_link_libraries(Vk flecs::flecs_static)
 
 # Add include directories to target

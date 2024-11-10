@@ -3,16 +3,17 @@
 //
 
 #include "VulkanInstance.h"
-#include <GLFW/glfw3.h>
 #include <vulkan/vulkan_core.h>
 #include <stdexcept>
 #include "ValidationLayers.h"
 #include "VulkanAppContext.h"
+#include <SDL3/SDL_vulkan.h>
 
 [[nodiscard]] std::vector<const char *> VulkanInstance::getRequiredExtensions(const VulkanAppContext& context) {
     uint32_t glfwExtensionCount = 0;
-    const char **glfwExtensions = glfwGetRequiredInstanceExtensions(&glfwExtensionCount);
-    std::vector extensions(glfwExtensions, glfwExtensions + glfwExtensionCount);
+    SDL_Vulkan_LoadLibrary(nullptr);
+    char const *const*sdlExtensions = SDL_Vulkan_GetInstanceExtensions(&glfwExtensionCount);
+    std::vector extensions(sdlExtensions, sdlExtensions + glfwExtensionCount);
     // ReSharper disable once CppDFAConstantConditions
     if (context.enableValidationLayers) {
         extensions.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);

@@ -7,23 +7,16 @@
 
 #include "WindowContext.h"
 
-GlfwWindow::GlfwWindow(WindowContext& context, int w, int h, const char *appName, const GLFWframebuffersizefun resizeFun)
-    :ctx(context){
+SdlWindow::SdlWindow(WindowContext &context, int w, int h, const char *appName)
+    : ctx(context) {
     std::cout << "INIT GLFW WINDOW" << std::endl;
-    glfwInit();
-    glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
-    glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
-    window = glfwCreateWindow(w, h, appName, nullptr, nullptr);
-    glfwSetWindowUserPointer(window, &context);
-    glfwSetFramebufferSizeCallback(window, resizeFun);
+    window = SDL_CreateWindow(
+        appName,
+        w, h,
+        SDL_WINDOW_VULKAN | SDL_WINDOW_RESIZABLE
+    );
 }
 
-GlfwWindow::~GlfwWindow() {
-    glfwDestroyWindow(window);
-    glfwTerminate();
+SdlWindow::~SdlWindow() {
+    SDL_DestroyWindow(window);
 }
-
-void GlfwWindow::notifyResize() {
-
-}
-
