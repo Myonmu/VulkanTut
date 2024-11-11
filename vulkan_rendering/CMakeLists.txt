@@ -103,6 +103,7 @@ set(SOURCES
         private/presentation/DepthAttachment.h
         private/presentation/ColorAttachment.cpp
         private/presentation/ColorAttachment.h
+        private/misc/tiny_obj_loader.h
 )
 
 # Create static library

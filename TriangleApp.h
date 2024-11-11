@@ -40,6 +40,9 @@ private:
     struct MeshRotate {
     };
 
+    struct MainCamera {
+    };
+
     uint64_t frameCounter = 0;
     AppSetup appSetup{};
     std::unique_ptr<VulkanAppContext> context;
@@ -81,12 +84,14 @@ private:
         auto &mainRenderer = deviceCtx.get_windowContext_at(0).get_renderer();
         mainRenderer.recorder->enqueueCommand<EnqueueRenderPass>(*mainPass);
 
-        auto& swapchain = deviceCtx.get_windowContext_at(0).get_swapChain();
+        auto &swapchain = deviceCtx.get_windowContext_at(0).get_swapChain();
         auto &camera = ecs.entity("Camera")
                 .set(Position{glm::vec3(2, 2, 2)})
                 .emplace<Rotation>()
                 .emplace<Scale>()
-                .emplace<Camera>(&swapchain);
+                .set(Velocity{glm::vec3(0.0f, 0, 0)})
+                .emplace<Camera>(&swapchain)
+                .add<MainCamera>();
 
         Transform::lookAt(*camera.get_mut<Position>(), *camera.get_mut<Rotation>(), glm::vec3(0, 0, 0));
 
@@ -95,11 +100,74 @@ private:
 
         mainContext->f = [this]() { return prepareRenderLoop(); };
 
+        enginePipeline.addLoop([this] { return eventLoop(); });
         enginePipeline.addLoop([this] { return playerLoop(); });
         enginePipeline.addLoop([this] { return renderLoop(); });
     }
 
+    bool eventLoop() {
+        //event processing
+        SDL_Event e;
+        while (SDL_PollEvent(&e)) {
+            // custom event handling
+            // TODO: Find a way to refactor this (EventSystem, subscription based)
+            // flycam
+            ecs.system<Velocity>("Flycam-KB").with<MainCamera>().each([e](Velocity &v) {
+                if (e.type == SDL_EVENT_KEY_DOWN || e.type == SDL_EVENT_KEY_UP) {
+                    switch (e.key.key) {
+                        case SDLK_W: v.velocity.z = e.key.down ? 1.0f : 0.0f;
+                            break;
+                        case SDLK_S: v.velocity.z = e.key.down ? -1.0f : 0.0f;
+                            break;
+                        case SDLK_A: v.velocity.x = e.key.down ? -1.0f : 0.0f;
+                            break;
+                        case SDLK_D: v.velocity.x = e.key.down ? 1.0f : 0.0f;
+                            break;
+                    }
+                }
+            });
+
+            ecs.system<Rotation>("Flycam-Mouse").with<MainCamera>().each([e](Rotation &rot) {
+                switch (e.type) {
+                    case SDL_EVENT_KEY_DOWN:
+                        break;
+                    case SDL_EVENT_KEY_UP:
+                        break;
+                }
+            });
+
+            // window events
+            auto windowId = e.window.windowID;
+            try {
+                auto &windowCtx = context->deviceContexts[0]->getWindowContextFromSdlId(windowId);
+                switch (e.type) {
+                    case SDL_EVENT_WINDOW_CLOSE_REQUESTED:
+                        windowCtx.closeWindow();
+                        break;
+                    case SDL_EVENT_WINDOW_RESIZED:
+                        windowCtx.resize();
+                        break;
+                    case SDL_EVENT_WINDOW_MINIMIZED:
+                        windowCtx.get_renderer().isPaused = true;
+                        break;
+                    case SDL_EVENT_WINDOW_RESTORED:
+                        windowCtx.get_renderer().isPaused = false;
+                        break;
+                    default: continue;
+                }
+            } catch (std::runtime_error const &ex) {
+                continue;
+            }
+        }
+        return true;
+    }
+
     bool playerLoop() {
+        ecs.system<Velocity, Position, Rotation>("VelocityUpdate").kind(flecs::OnUpdate).each(
+            [this](Velocity &v, Position &p, Rotation &rot) {
+                glm::mat4 rotMat = rot.getRotationMatrix();
+                p.translation += glm::vec3(rotMat * glm::vec4(v.velocity * ecs.delta_time(), 0.f));
+            });
         ecs.system<Rotation>("ScriptUpdate").with<MeshRotate>().kind(flecs::OnUpdate).each(
             [](Rotation &rot) {
                 static auto startTime = std::chrono::high_resolution_clock::now();
@@ -114,7 +182,7 @@ private:
 
     bool prepareRenderLoop() {
         ecs.system<Position, Rotation, Scale, MeshRenderer>("UpdatePerObjectUBO").kind(flecs::PreStore).each(
-            [this](Position &p, Rotation &r, Scale &s, MeshRenderer &renderer) {
+            [](Position &p, Rotation &r, Scale &s, MeshRenderer &renderer) {
                 const auto modelMatrix = Transform::getModelMatrix(p, r, s);
                 renderer.vertexPushConstants.model = modelMatrix;
             }

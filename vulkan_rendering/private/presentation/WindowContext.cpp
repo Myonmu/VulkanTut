@@ -52,6 +52,7 @@ void WindowContext::frameBufferResizeCallback(GLFWwindow *window, int width, int
 */
 
 void WindowContext::closeWindow() const {
+    vkDeviceWaitIdle(getLogicalDevice());
     std::cout << "Closing window" << id << std::endl;
     context.destroyWindow(id);
 }

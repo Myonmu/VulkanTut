@@ -15,6 +15,8 @@ public:
 
     ~SdlWindow();
     operator SDL_Window*() const {return window;}
+
+    SDL_WindowID get_SdlWindowId() const ;
 private:
     const WindowContext& ctx;
     SDL_Window* window;

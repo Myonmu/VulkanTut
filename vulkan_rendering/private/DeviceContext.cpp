@@ -107,5 +107,12 @@ void DeviceContext::destroyWindow(uint32_t id) {
     windowContext.erase(windowContext.begin() + i);
 }
 
+WindowContext& DeviceContext::getWindowContextFromSdlId(const SDL_WindowID& window_id) {
+    for (auto &window: windowContext) {
+        if(window->window->get_SdlWindowId() == window_id) return *window;
+    }
+    throw std::runtime_error("Window context not found");
+}
+
 
 CTX_FORWARD_GET_BODY(DeviceContext, VulkanInstance, vulkanInstance)

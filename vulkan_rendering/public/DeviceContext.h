@@ -75,6 +75,8 @@ struct DeviceContext : SubContext<VulkanAppContext> {
         return get_sceneRoot().createChildObject<T>(std::forward<Args>(args)...);
     }
 
+    WindowContext& getWindowContextFromSdlId(const SDL_WindowID& window_id);
+
 private:
     // fills a QueueFamilyIndices object with present queue info.
     void queryPresentQueues(QueueFamilyIndices &queueFamilyIndices, VkPhysicalDevice physicalDevice,

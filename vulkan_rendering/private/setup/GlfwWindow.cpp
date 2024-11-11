@@ -20,3 +20,7 @@ SdlWindow::SdlWindow(WindowContext &context, int w, int h, const char *appName)
 SdlWindow::~SdlWindow() {
     SDL_DestroyWindow(window);
 }
+
+SDL_WindowID SdlWindow::get_SdlWindowId() const {
+    return SDL_GetWindowID(window);
+}

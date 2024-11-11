@@ -27,8 +27,10 @@ public:
     FrameInfo getCurrentFrameInfo() const;
 
     VulkanFrame& getCurrentFrame() const;
-private:
+
     bool isPaused { false };
+private:
+
     WindowContext& ctx;
     std::vector<std::unique_ptr<VulkanFrame>> frames;
     uint32_t currentFrame = 0;

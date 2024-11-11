@@ -8,9 +8,9 @@
 #include <Transform.h>
 
 glm::mat4x4 Camera::getViewMatrix(const Position &position, const Rotation &rotation) {
-    const glm::mat4 rotationMatrix = rotation.getRotationMatrix();
-    const glm::mat4 translationMatrix = glm::translate(glm::mat4(1.0f), -position.translation);
-    return rotationMatrix * translationMatrix;
+    glm::mat4 cameraTranslation = glm::translate(glm::mat4(1.f), position.translation);
+    glm::mat4 cameraRotation = rotation.getRotationMatrix();
+    return glm::inverse(cameraTranslation * cameraRotation);
 }
 
 glm::mat4x4 Camera::getProjectionMatrix(){
