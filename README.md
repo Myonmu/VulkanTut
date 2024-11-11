@@ -14,6 +14,12 @@ We also use Vulkan Guide as supplementary reference.
 
 A homebrew OOP version (more specifically, custom RAII wrapers from scratch), is potentially not optimal compared to the official RAII but should allow us to understand better the inner workings of the API. 
 
+Moreover, the repo goes slightly beyond the tutorials by also implementing:
+
+- Player loop updates driven by ECS
+- Shader reflection
+- Multi-window support
+
 ## Topics
 
 ### Vulkan Initialization and Surfaces
@@ -82,15 +88,7 @@ Descriptor related concepts was rather tricky (for us) to understand.
 
 Like Pipelines, *Descriptor Set Layout* act as the mold for *Descriptor Set*. *Descriptor Pool* is where descriptor sets are allocated from. 
 
-Yet, a descriptor pool isn't tied to a descriptor set layout... 
-
-Here is a not-so-accurate analogy: Imagine you bought a box of lego (Millennium Falcon, let's say), and you are starting to assemble it:
-
-- `Descriptor`s are your individual lego blocks. They are categorized by rough shapes (DescriptorType). *Note that in Vulkan you don't manipulate a descriptor directly*.
-- `Descriptor Pool` is a set of boxes or plastic bags that contain the blocks, sorted by type. You can imagine it as the whole lego set you bought, but taken out the instructions.
-- Let's say that the instruction manual is divided into different *chapters* that tells you how to assemble a specific part of the Millennium Falcon, and each chapter is further split into a page of *materials list* and *instructions*.
-- `Descriptor Set Layout` is precisely the *material list*, telling you what you will be needing later in the chapter. Funny enough, the material list sometimes only tells you the criteria of the material you should be using, rather than the precise block. For example, it could say that you need a 2x2 block, period. and you could fetch a block of any height as long as it has a 2x2 base, and it would actually fit on the final model. Furthermore, the material list uses a symbol to identify each piece of material and only uses that symbol later in the instructions (because the writer doesn't know which block you will be picking).
-- 
+Yet, a descriptor pool isn't tied to a descriptor set layout... different descriptor sets with different layouts can be allocated from the same descriptor pool. This is, as if you are baking cakes - you can pick the same ingredients (flour, sugar, yeast...) from your cupboard and use them to bake different types of cakes (or breads), *as long as you can find the required ingredients in the cupboard*. In this case, your cupboard is the descriptor pool, and the material list of your recipe acts as Descriptor Set Layout.
 
 *For example: A shader requires 1 UBO at `layout(set=0,binding=0)`, and 1 combined image sampler at `layout(set=0,binding=1)`. The pool used to allocate the descriptor set for this shader can also be used to allocate a shader with 1 UBO at `layout(set=0,binding=7)` and 1 combined image sampler at `layout(set=0,binding=13)`, because the pool only sees that they both require 1 UBO and 1 combined image sampler.*
 
@@ -183,6 +181,6 @@ Despite the lack of source code evidence, we could make an analogy between the U
 
 Though, it isn't always true that between *Shader Asset* and *Descriptor Set Layout/Pipeline Layout* is a one-to-one relationship. The only thing that can be directly created from shader code is *Shader Modules*. 
 
-Different shaders can have the same *Descriptor Set Layout* if they have the same layout declarations (we don't care the variable names except for vertex input), and *Pipeline Layout* can be shared if they have
+Different shaders can have the same *Descriptor Set Layout* if they have the same layout declarations (we don't care the variable names except for vertex input), and *Pipeline Layout* can be shared if they only differ in the data we provide (the content of the descriptor sets or push constants). This means shader code that only differ in method implementation, can use the same pipeline layout.
 
-Now recall that binding pipeline and binding descriptor sets are two distinct function calls: `vkCmdBindPipeline` and `vkCmdBindDescriptorSets`. Moreover, descriptor sets are bound to *pipeline layout* rather than pipeline (we bind them according to descriptor set layout, and the descriptor set layout is stored in pipeline layout).  
+Now recall that binding pipeline and binding descriptor sets are two distinct function calls: `vkCmdBindPipeline` and `vkCmdBindDescriptorSets`. Moreover, descriptor sets are bound to *pipeline layout* rather than pipeline (we bind them according to descriptor set layout, and the descriptor set layout is stored in pipeline layout). This further enhances that `VkPipeline` should be shared, because you could bind a pipeline, and then issue different pipelines with different draw calls   

@@ -10,7 +10,6 @@
 class SwapChain;
 class RenderPass;
 class PipelineLayout;
-class PipelineContext;
 
 // Per-object rendering pipeline
 class VulkanPipeline : public VulkanResource<VkPipeline, DeviceContext> {

@@ -33,14 +33,16 @@ RenderingContext::RenderingContext(DeviceContext& ctx)
     descriptorAllocator->init(1000, PerSceneRenderingData::poolSizes);
     perSceneUbo = std::make_unique<PerFrameBufferGroup>(ctx, sizeof(PerSceneRenderingData));
     auto framesInFlight = ctx.context.MAX_FRAMES_IN_FLIGHT;
-    for(int i = 0 ; i < framesInFlight; ++i) {
+    auto windowCount = ctx.windowContext.size(); //TODO: This may change during runtime (especially when increasing)
+    for(int i = 0 ; i < framesInFlight * windowCount; ++i) {
         perFrameSets.emplace_back(descriptorAllocator->allocate(*perSceneDescriptorLayout));
     }
 }
 
 
 void RenderingContext::prepareFrame(const FrameInfo &frameInfo) {
-    auto& perFrameSet = *perFrameSets[frameInfo.currentFrameIndex];
+    auto framesInFlight = context.context.MAX_FRAMES_IN_FLIGHT;
+    auto& perFrameSet = *perFrameSets[frameInfo.currentFrameIndex + framesInFlight * frameInfo.windowId];
     DescriptorWriter writer{};
     perSceneUbo->CopyMemoryToBuffer(frameInfo.currentFrameIndex, &perSceneData, sizeof(perSceneUbo));
     auto& buffer = (*perSceneUbo)[frameInfo.currentFrameIndex];
