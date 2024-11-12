@@ -16,6 +16,7 @@ add_subdirectory(libs/SPIRV-Cross)
 add_subdirectory(vulkan_rendering)
 add_subdirectory(libs/flecs)
 add_subdirectory(libs/fmt)
+add_subdirectory(libs/fastgltf)
 
 # Application executable
 add_executable(VulkanTut

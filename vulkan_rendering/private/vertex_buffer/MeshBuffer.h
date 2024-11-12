@@ -10,6 +10,32 @@
 
 struct Vertex;
 
+class VertexBuffer: public ObjectNode {
+    DeviceContext &ctx;
+    VkDeviceSize size;
+    std::unique_ptr<Buffer> buffer;
+    std::unique_ptr<Buffer> stagingBuffer;
+public:
+    VertexBuffer(DeviceContext &ctx, const std::vector<Vertex> &vertices,bool oneTimeStaging = true);
+    operator VkBuffer() const {
+        return *buffer;
+    }
+};
+
+class IndexBuffer: public ObjectNode {
+    DeviceContext &ctx;
+    VkDeviceSize size;
+    uint32_t indexCount;
+    std::unique_ptr<Buffer> buffer;
+    std::unique_ptr<Buffer> stagingBuffer;
+public:
+    IndexBuffer(DeviceContext &ctx, const std::vector<uint32_t> &indices,bool oneTimeStaging = true);
+    uint32_t getIndicesCount() const;
+    operator VkBuffer() const {
+        return *buffer;
+    }
+};
+
 class MeshBuffer: public ObjectNode {
     DeviceContext &ctx;
 

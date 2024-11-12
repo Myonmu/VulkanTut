@@ -16,6 +16,7 @@ set(INCLUDE_DIRS
         ${CMAKE_CURRENT_SOURCE_DIR}/public
         ${CMAKE_CURRENT_SOURCE_DIR}/private/vma
         ${CMAKE_CURRENT_SOURCE_DIR}/private/components
+        ${CMAKE_CURRENT_SOURCE_DIR}/private/model_loading
         ${CMAKE_CURRENT_SOURCE_DIR}/public/command_buffer_cmds
 )
 
@@ -105,6 +106,10 @@ set(SOURCES
         private/presentation/ColorAttachment.h
         private/misc/tiny_obj_loader.h
         private/misc/EcsSystem.h
+        private/model_loading/GltfLoader.cpp
+        private/model_loading/GltfLoader.h
+        private/model_loading/ObjLoader.cpp
+        private/model_loading/ObjLoader.h
 )
 
 # Create static library
@@ -123,9 +128,10 @@ include_directories(${CMAKE_SOURCE_DIR}/libs/SDL/include)
 include_directories(${CMAKE_SOURCE_DIR}/libs/glm/include)
 include_directories(${CMAKE_SOURCE_DIR}/libs/stb)
 include_directories(${CMAKE_SOURCE_DIR}/libs/SPIRV-Cross)
-include_directories(${CMAKE_SOURCE_DIR}/libs/rapidyaml)
-include_directories(${CMAKE_SOURCE_DIR}/libs/shaderc)
-include_directories(${CMAKE_SOURCE_DIR}/libs/flecs)
+include_directories(${CMAKE_SOURCE_DIR}/libs/rapidyaml/include)
+include_directories(${CMAKE_SOURCE_DIR}/libs/shaderc/include)
+include_directories(${CMAKE_SOURCE_DIR}/libs/flecs/include)
+include_directories(${CMAKE_SOURCE_DIR}/libs/fastgltf/include)
 
 # TODO: move to lower-level module
 include_directories(${CMAKE_SOURCE_DIR}/libs/fmt)

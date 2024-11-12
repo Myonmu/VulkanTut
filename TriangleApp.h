@@ -23,6 +23,7 @@
 #include "Camera.h"
 #include "EcsSystemsHeader.h"
 #include "EnginePipeline.h"
+#include "ObjLoader.h"
 #include "RenderingContext.h"
 #include "fmt/color.h"
 #include "libs/SDL/include/SDL3/SDL_init.h"
@@ -50,6 +51,7 @@ private:
     std::unique_ptr<RenderingContext> mainContext;
     std::unique_ptr<EventSystem> eventSystem;
     flecs::entity transformPrefab;
+    ObjLoader obj{};
     void setup() {
         eventSystem = std::make_unique<EventSystem>(ecs);
         EcsSystemsHeader systems_header{};
@@ -66,7 +68,7 @@ private:
         auto &material = deviceCtx.createObject<Material>(deviceCtx, shaders, deviceCtx.get_renderPass_at(0));
         auto &materialInstance = material.createInstance();
 
-        auto const &tex = deviceCtx.createObject<UnifiedTexture2D>(deviceCtx, "./textures/texture.jpg");
+        auto const &tex = deviceCtx.createObject<UnifiedTexture2D>(deviceCtx, "./assets/viking_room.png");
         auto const &sampler = deviceCtx.createObject<TextureSampler>(deviceCtx,
                                                                      TextureAddressMode::REPEAT,
                                                                      TextureFilterMode::LINEAR,
@@ -79,8 +81,10 @@ private:
         materialInstance.setCombinedImageSampler(0, tex, sampler);
         materialInstance.updateDescriptorSet(1);
 
-        auto &meshBuffer = deviceCtx.createObject<MeshBuffer>(deviceCtx, Vertex::testVerts, Vertex::testIndices);
+        obj.LoadGeometry("./assets/viking_room.obj");
+        auto &meshBuffer = deviceCtx.createObject<MeshBuffer>(deviceCtx, obj.vertices, obj.indices);
         auto &entt = ecs.entity("Some Object")
+
                 .emplace<MeshRenderer>(deviceCtx, meshBuffer, materialInstance)
                 .add<MeshRotate>().is_a(transformPrefab);
 
@@ -95,8 +99,6 @@ private:
                 .add<Velocity>()
                 .emplace<Camera>(&swapchain)
                 .add<Flycam>();
-
-        //Transform::lookAt(*camera.get_mut<Position>(), *camera.get_mut<Rotation>(), glm::vec3(0, 0, 0));
 
         mainContext = std::make_unique<RenderingContext>(deviceCtx);
         mainContext->renderer = &mainRenderer;
@@ -145,7 +147,14 @@ private:
                 renderer.vertexPushConstants.model = modelMatrix;
             }
         );
-
+        /*
+        ecs.system<Position, Rotation, Scale, MeshRendererSplitBuffer>("UpdatePerObjectUBOSplit").kind(flecs::PreStore).each(
+            [](Position &p, Rotation &r, Scale &s, MeshRendererSplitBuffer &renderer) {
+                const auto modelMatrix = Transform::getModelMatrix(p, r, s);
+                renderer.vertexPushConstants.model = modelMatrix;
+            }
+        );
+        */
         mainPass->clear();
         mainPass->enqueueCommand<SetViewport>();
         mainPass->enqueueCommand<SetScissors>();
@@ -153,6 +162,12 @@ private:
             [this](MeshRenderer &renderer) {
                 renderer.enqueueDrawCall(*mainContext, *mainPass);
             });
+        /*
+        ecs.system<MeshRendererSplitBuffer>("RenderMeshSplit").kind(flecs::OnStore).each(
+            [this](MeshRendererSplitBuffer &renderer) {
+                renderer.enqueueDrawCall(*mainContext, *mainPass);
+            });
+        */
         ecs.system<Rotation, Position, Camera>("RenderCamera").kind(flecs::OnStore).each(
             [this](Rotation &t, Position &p, Camera &cam) {
                 auto &perSceneData = mainContext->perSceneData;

@@ -32,6 +32,32 @@ public:
 };
 
 
+class BindIndexBuffer : public CommandBufferCmd {
+    const IndexBuffer &indexBuffer;
+public:
+    explicit BindIndexBuffer(const IndexBuffer &vertexBuffer): indexBuffer(vertexBuffer) {
+    }
+    void execute(const CommandBuffer &commandBuffer,
+                 const DeviceContext &context,
+                 const FrameInfo &frameInfo) override {
+        vkCmdBindIndexBuffer(commandBuffer, indexBuffer, 0, VK_INDEX_TYPE_UINT32);
+    }
+};
+
+class BindVertexBuffer : public CommandBufferCmd {
+    const VertexBuffer &vertexBuffer;
+public:
+    explicit BindVertexBuffer(const VertexBuffer &vertexBuffer): vertexBuffer(vertexBuffer) {
+    }
+    void execute(const CommandBuffer &commandBuffer,
+                 const DeviceContext &context,
+                 const FrameInfo &frameInfo) override {
+        VkBuffer buffer[] = {vertexBuffer};
+        VkDeviceSize offsets[] = {0};
+        vkCmdBindVertexBuffers(commandBuffer, 0, 1, buffer, offsets);
+    }
+};
+
 
 class BindMeshBuffer : public CommandBufferCmd {
     const MeshBuffer &meshBuffer;

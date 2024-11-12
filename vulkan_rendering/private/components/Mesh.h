@@ -8,14 +8,34 @@
 #include "RenderingContext.h"
 #include "RenderPassRecorder.h"
 
-class MeshRenderer{
-
-    const MeshBuffer& meshBuffer;
-    const MaterialInstance& materialInstance;
+class MeshRendererSplitBuffer {
+    const VertexBuffer &vertexBuffer;
+    const IndexBuffer &indexBuffer;
+    const MaterialInstance &materialInstance;
     CommandBufferRecorder recorder{true};
+
 public:
     PerObjectVertexPushConstants vertexPushConstants;
-    MeshRenderer(DeviceContext& ctx, const MeshBuffer& meshBuffer, const MaterialInstance& materialInstance);
-    ~MeshRenderer()  = default;
-    void enqueueDrawCall(RenderingContext& ctx, RenderPassRecorder& renderPassRecorder);
+
+    MeshRendererSplitBuffer(DeviceContext &ctx, const VertexBuffer &vertexBuffer, const IndexBuffer &indexBuffer,
+                            const MaterialInstance &materialInstance);
+
+    ~MeshRendererSplitBuffer() = default;
+
+    void enqueueDrawCall(RenderingContext &ctx, RenderPassRecorder &renderPassRecorder);
+};
+
+class MeshRenderer {
+    const MeshBuffer &meshBuffer;
+    const MaterialInstance &materialInstance;
+    CommandBufferRecorder recorder{true};
+
+public:
+    PerObjectVertexPushConstants vertexPushConstants;
+
+    MeshRenderer(DeviceContext &ctx, const MeshBuffer &meshBuffer, const MaterialInstance &materialInstance);
+
+    ~MeshRenderer() = default;
+
+    void enqueueDrawCall(RenderingContext &ctx, RenderPassRecorder &renderPassRecorder);
 };

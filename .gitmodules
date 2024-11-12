@@ -19,3 +19,6 @@ url = https://github.com/Myonmu/glm
 [submodule "libs/SDL"]
 	path = libs/SDL
 	url = https://github.com/Myonmu/SDL
+[submodule "libs/fastgltf"]
+	path = libs/fastgltf
+	url = https://github.com/Myonmu/fastgltf
