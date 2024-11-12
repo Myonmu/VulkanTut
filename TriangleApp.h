@@ -91,12 +91,12 @@ private:
 
         auto &swapchain = deviceCtx.get_windowContext_at(0).get_swapChain();
         auto &camera = ecs.entity("Camera")
-                .is_a(transformPrefab).set(Position{{2.f,2,2}})
+                .is_a(transformPrefab).set(Position{{0,0,2}})
                 .add<Velocity>()
                 .emplace<Camera>(&swapchain)
-                .add<MainCamera>();
+                .add<Flycam>();
 
-        Transform::lookAt(*camera.get_mut<Position>(), *camera.get_mut<Rotation>(), glm::vec3(0, 0, 0));
+        //Transform::lookAt(*camera.get_mut<Position>(), *camera.get_mut<Rotation>(), glm::vec3(0, 0, 0));
 
         mainContext = std::make_unique<RenderingContext>(deviceCtx);
         mainContext->renderer = &mainRenderer;
