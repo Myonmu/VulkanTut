@@ -22,6 +22,11 @@ add_executable(VulkanTut
         main.cpp
         TriangleApp.h
         AppSetup.h
+        scripts/FlycamSystem.h
+        EcsSystemsHeader.h
+        scripts/SimplePhysics.h
+        scripts/MeshRotate.h
+        scripts/EventSystem.h
 )
 
 # Link dependencies

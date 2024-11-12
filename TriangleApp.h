@@ -21,10 +21,13 @@
 #include "Vertex.h"
 #include <fmt/core.h>
 #include "Camera.h"
+#include "EcsSystemsHeader.h"
 #include "EnginePipeline.h"
 #include "RenderingContext.h"
 #include "fmt/color.h"
 #include "libs/SDL/include/SDL3/SDL_init.h"
+#include "scripts/FlycamSystem.h"
+#include "scripts/MeshRotate.h"
 
 class TriangleApp {
 public :
@@ -37,12 +40,6 @@ public :
     }
 
 private:
-    struct MeshRotate {
-    };
-
-    struct MainCamera {
-    };
-
     uint64_t frameCounter = 0;
     AppSetup appSetup{};
     std::unique_ptr<VulkanAppContext> context;
@@ -51,8 +48,16 @@ private:
     std::unique_ptr<RenderPassRecorder> mainPass;
     EnginePipeline enginePipeline{};
     std::unique_ptr<RenderingContext> mainContext;
-
+    std::unique_ptr<EventSystem> eventSystem;
+    flecs::entity transformPrefab;
     void setup() {
+        eventSystem = std::make_unique<EventSystem>(ecs);
+        EcsSystemsHeader systems_header{};
+        systems_header.createSystems(ecs);
+
+        transformPrefab = ecs.prefab("Transform").add<Position>().add<Rotation>().add<Scale>();
+
+
         auto &deviceCtx = *context->deviceContexts[0];
         auto f = FileUtility::ReadSpv("./shaders/shader.vert.spv");
         shaders.emplace_back(f, VK_SHADER_STAGE_VERTEX_BIT);
@@ -77,7 +82,7 @@ private:
         auto &meshBuffer = deviceCtx.createObject<MeshBuffer>(deviceCtx, Vertex::testVerts, Vertex::testIndices);
         auto &entt = ecs.entity("Some Object")
                 .emplace<MeshRenderer>(deviceCtx, meshBuffer, materialInstance)
-                .add<MeshRotate>().add<Position>().add<Rotation>().add<Scale>();
+                .add<MeshRotate>().is_a(transformPrefab);
 
 
         mainPass = std::make_unique<RenderPassRecorder>(deviceCtx.get_renderPass_at(0));
@@ -86,10 +91,8 @@ private:
 
         auto &swapchain = deviceCtx.get_windowContext_at(0).get_swapChain();
         auto &camera = ecs.entity("Camera")
-                .set(Position{glm::vec3(2, 2, 2)})
-                .emplace<Rotation>()
-                .emplace<Scale>()
-                .set(Velocity{glm::vec3(0.0f, 0, 0)})
+                .is_a(transformPrefab).set(Position{{2.f,2,2}})
+                .add<Velocity>()
                 .emplace<Camera>(&swapchain)
                 .add<MainCamera>();
 
@@ -101,7 +104,6 @@ private:
         mainContext->f = [this]() { return prepareRenderLoop(); };
 
         enginePipeline.addLoop([this] { return eventLoop(); });
-        enginePipeline.addLoop([this] { return playerLoop(); });
         enginePipeline.addLoop([this] { return renderLoop(); });
     }
 
@@ -109,33 +111,7 @@ private:
         //event processing
         SDL_Event e;
         while (SDL_PollEvent(&e)) {
-            // custom event handling
-            // TODO: Find a way to refactor this (EventSystem, subscription based)
-            // flycam
-            ecs.system<Velocity>("Flycam-KB").with<MainCamera>().each([e](Velocity &v) {
-                if (e.type == SDL_EVENT_KEY_DOWN || e.type == SDL_EVENT_KEY_UP) {
-                    switch (e.key.key) {
-                        case SDLK_W: v.velocity.z = e.key.down ? 1.0f : 0.0f;
-                            break;
-                        case SDLK_S: v.velocity.z = e.key.down ? -1.0f : 0.0f;
-                            break;
-                        case SDLK_A: v.velocity.x = e.key.down ? -1.0f : 0.0f;
-                            break;
-                        case SDLK_D: v.velocity.x = e.key.down ? 1.0f : 0.0f;
-                            break;
-                    }
-                }
-            });
-
-            ecs.system<Rotation>("Flycam-Mouse").with<MainCamera>().each([e](Rotation &rot) {
-                switch (e.type) {
-                    case SDL_EVENT_KEY_DOWN:
-                        break;
-                    case SDL_EVENT_KEY_UP:
-                        break;
-                }
-            });
-
+            eventSystem->pushSdlEvent(e);
             // window events
             auto windowId = e.window.windowID;
             try {
@@ -159,24 +135,6 @@ private:
                 continue;
             }
         }
-        return true;
-    }
-
-    bool playerLoop() {
-        ecs.system<Velocity, Position, Rotation>("VelocityUpdate").kind(flecs::OnUpdate).each(
-            [this](Velocity &v, Position &p, Rotation &rot) {
-                glm::mat4 rotMat = rot.getRotationMatrix();
-                p.translation += glm::vec3(rotMat * glm::vec4(v.velocity * ecs.delta_time(), 0.f));
-            });
-        ecs.system<Rotation>("ScriptUpdate").with<MeshRotate>().kind(flecs::OnUpdate).each(
-            [](Rotation &rot) {
-                static auto startTime = std::chrono::high_resolution_clock::now();
-                auto currentTime = std::chrono::high_resolution_clock::now();
-                auto time = std::chrono::duration<float>(currentTime - startTime).count();
-                auto euler = glm::vec3{0.0f, 0, glm::radians(90.0f) * time};
-                auto result = glm::quat(euler);
-                rot.rotation = result;
-            });
         return true;
     }
 
@@ -223,9 +181,9 @@ private:
     void mainLoop() {
         auto shouldExit = false;
         while (!shouldExit) {
-            fmt::print(fg(fmt::color::crimson) | fmt::emphasis::bold, "vvvvvv FRAME {}\n", frameCounter);
+            //fmt::print(fg(fmt::color::crimson) | fmt::emphasis::bold, "vvvvvv FRAME {}\n", frameCounter);
             shouldExit = !enginePipeline.mainLoop();
-            fmt::print(fg(fmt::color::aqua) | fmt::emphasis::bold, "^^^^^^ END FRAME {}\n", frameCounter);
+            //fmt::print(fg(fmt::color::aqua) | fmt::emphasis::bold, "^^^^^^ END FRAME {}\n", frameCounter);
             frameCounter++;
         }
         vkDeviceWaitIdle(context->deviceContexts[0]->getLogicalDevice());

@@ -104,6 +104,7 @@ set(SOURCES
         private/presentation/ColorAttachment.cpp
         private/presentation/ColorAttachment.h
         private/misc/tiny_obj_loader.h
+        private/misc/EcsSystem.h
 )
 
 # Create static library

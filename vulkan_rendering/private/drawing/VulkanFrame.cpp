@@ -62,9 +62,9 @@ void VulkanFrame::drawFrame(uint32_t currentFrameIndex, RenderingContext& render
 
     renderingCtx.prepareFrame(frameInfo);
 
-    fmt::println("   - - - Start recording main command buffer");
+    //fmt::println("   - - - Start recording main command buffer");
     context.get_renderer().recordCommandBuffer(commandBuffer, context.context, frameInfo);
-    fmt::println("   - - - Finish recording main command buffer");
+    //fmt::println("   - - - Finish recording main command buffer");
     // Submit command buffer
     VkSubmitInfo submitInfo{};
     submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
