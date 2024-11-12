@@ -68,7 +68,7 @@ private:
         auto &material = deviceCtx.createObject<Material>(deviceCtx, shaders, deviceCtx.get_renderPass_at(0));
         auto &materialInstance = material.createInstance();
 
-        auto const &tex = deviceCtx.createObject<UnifiedTexture2D>(deviceCtx, "./assets/viking_room.png");
+        auto const &tex = deviceCtx.createObject<UnifiedTexture2D>(deviceCtx, "./assets/viking_room.png", true);
         auto const &sampler = deviceCtx.createObject<TextureSampler>(deviceCtx,
                                                                      TextureAddressMode::REPEAT,
                                                                      TextureFilterMode::LINEAR,

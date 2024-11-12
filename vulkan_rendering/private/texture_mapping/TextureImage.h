@@ -15,12 +15,14 @@ struct DeviceContext;
  */
 class TextureImage: public VulkanResource<VkImage, DeviceContext>, public ObjectNode {
 public:
-    TextureImage(DeviceContext& ctx, Texture2D& t2d, bool requiresBuffer = true);
+    TextureImage(DeviceContext& ctx, Texture2D& t2d, bool generateMipMap = false, bool requiresBuffer = true);
 
     TextureImage(DeviceContext &ctx, const int &width, const int &height, const int &channels,
                  VkFormat textureFormat,
                  VkImageTiling tiling, VkImageUsageFlags usage,
-                 VkMemoryPropertyFlags memoryProperties, bool requiresBuffer = true);
+                 VkMemoryPropertyFlags memoryProperties,
+                 uint32_t mipLevels = 1,
+                 bool requiresBuffer = true);
 
     [[nodiscard]] uint32_t findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties) const;
 
@@ -31,11 +33,15 @@ public:
     [[nodiscard]] inline VkImageLayout getCurrentLayout() const {
         return currentLayout;
     };
+    uint32_t getMipLevels() const {return mipLevels;};
+
+    static uint32_t calculateMaxMipLevels(uint32_t width, uint32_t height);
 private:
     VkImageLayout currentLayout = VK_IMAGE_LAYOUT_UNDEFINED;
     int width, height, channels;
     VkFormat format;
     VkDeviceSize imageSize;
+    uint32_t mipLevels = 1;
     std::unique_ptr<Buffer> stagingBuffer;
     VkDeviceMemory textureImageMemory{};
 };

@@ -4,9 +4,9 @@
 
 #include "UnifiedTexture2D.h"
 
-UnifiedTexture2D::UnifiedTexture2D(DeviceContext& ctx, const std::string& path) {
+UnifiedTexture2D::UnifiedTexture2D(DeviceContext& ctx, const std::string& path, bool generateMipMap) {
     cpuTexture = std::make_unique<Texture2D>(path.c_str());
-    textureImage = std::make_unique<TextureImage>(ctx, *cpuTexture);
+    textureImage = std::make_unique<TextureImage>(ctx, *cpuTexture, generateMipMap);
     textureImage->transitionLayout(VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
     textureImage->stage();
     textureImage->transitionLayout(VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);

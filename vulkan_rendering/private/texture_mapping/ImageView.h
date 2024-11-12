@@ -8,11 +8,13 @@
 #include <vulkan/vulkan_core.h>
 
 
+class TextureImage;
 struct DeviceContext;
 
 class ImageView : public VulkanResource<VkImageView, DeviceContext>{
 public:
     ImageView(DeviceContext& ctx, const VkImage &image, VkFormat format, VkImageAspectFlags aspectFlags);
+    ImageView(DeviceContext& ctx, const TextureImage &image, VkFormat format, VkImageAspectFlags aspectFlags);
     ~ImageView() override;
 };
 

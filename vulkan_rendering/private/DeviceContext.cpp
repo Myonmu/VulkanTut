@@ -23,7 +23,7 @@ void DeviceContext::createWindow(const char *name, int width, int height, QueueF
         // or when required queue families are already satisfied
         if (auto combinedRequirements = getCombinedQueueFamilyRequirements();
             (combinedRequirements | requiredQueueFamilies) == combinedRequirements) {
-            const auto id = create_windowContext( name, width, height, requiredQueueFamilies);
+            const auto id = create_windowContext(name, width, height, requiredQueueFamilies);
             get_windowContext_at(id).id = id;
         } else {
             // or else, requiring a new queue family would cause a device recreation
@@ -50,13 +50,12 @@ void DeviceContext::init() {
         create_queueContext(id, 0);
     }
 
+    vma = std::make_unique<VmaInstance>(*this);
     isDeviceCreated = true;
     // now we finalize window contexts
     for (const auto &window: windowContext) {
         window->init();
     }
-
-    vma = std::make_unique<VmaInstance>(*this);
 }
 
 DeviceContext::~DeviceContext() = default;
@@ -73,7 +72,8 @@ QueueFamily DeviceContext::getCombinedQueueFamilyRequirements() const {
     return q;
 }
 
-void DeviceContext::queryPresentQueues(QueueFamilyIndices& queueFamilyIndices, VkPhysicalDevice physicalDevice, QueueFamilyIndices &queueFamilies) const {
+void DeviceContext::queryPresentQueues(QueueFamilyIndices &queueFamilyIndices, VkPhysicalDevice physicalDevice,
+                                       QueueFamilyIndices &queueFamilies) const {
     for (auto &window: windowContext) {
         queueFamilyIndices.queryPresentFamilyIndex(physicalDevice, window->get_surface());
     }
@@ -107,9 +107,9 @@ void DeviceContext::destroyWindow(uint32_t id) {
     windowContext.erase(windowContext.begin() + i);
 }
 
-WindowContext& DeviceContext::getWindowContextFromSdlId(const SDL_WindowID& window_id) {
+WindowContext &DeviceContext::getWindowContextFromSdlId(const SDL_WindowID &window_id) {
     for (auto &window: windowContext) {
-        if(window->window->get_SdlWindowId() == window_id) return *window;
+        if (window->window->get_SdlWindowId() == window_id) return *window;
     }
     throw std::runtime_error("Window context not found");
 }

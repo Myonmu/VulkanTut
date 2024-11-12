@@ -16,6 +16,7 @@ public:
     [[nodiscard]] int getWidth() const;
     [[nodiscard]] int getHeight() const;
     [[nodiscard]] int getChannelCount() const;
+    [[nodiscard]] uint32_t getMaxMipLevel() const;
     [[nodiscard]] VkFormat getFormat() const;
 
 private:

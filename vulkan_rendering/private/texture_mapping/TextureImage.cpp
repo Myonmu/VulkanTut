@@ -16,11 +16,13 @@ TextureImage::TextureImage(DeviceContext &ctx,
                            VkImageTiling tiling,
                            VkImageUsageFlags usage,
                            VkMemoryPropertyFlags memoryProperties,
+                           uint32_t mipLevels,
                            bool requiresBuffer
 ): VulkanResource(ctx),
    width(width),
    height(height), channels(channels), format(textureFormat),
-   imageSize(width * height * channels) {
+   imageSize(width * height * channels), mipLevels(mipLevels)
+{
     if (requiresBuffer) {
         stagingBuffer = std::make_unique<Buffer>(
             ctx,
@@ -36,7 +38,7 @@ TextureImage::TextureImage(DeviceContext &ctx,
     imageInfo.extent.width = width;
     imageInfo.extent.height = height;
     imageInfo.extent.depth = 1;
-    imageInfo.mipLevels = 1;
+    imageInfo.mipLevels = mipLevels;
     imageInfo.arrayLayers = 1;
     imageInfo.samples = VK_SAMPLE_COUNT_1_BIT;
     imageInfo.usage = usage;
@@ -65,10 +67,10 @@ TextureImage::TextureImage(DeviceContext &ctx,
     vkBindImageMemory(ctx.getLogicalDevice(), resource, textureImageMemory, 0);
 }
 
-TextureImage::TextureImage(DeviceContext &ctx, Texture2D &t2d, bool requiresBuffer) : TextureImage(
+TextureImage::TextureImage(DeviceContext &ctx, Texture2D &t2d, bool generateMipMap, bool requiresBuffer) : TextureImage(
     ctx, t2d.getWidth(), t2d.getHeight(), 4, t2d.getFormat(),
     VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT,
-    VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, requiresBuffer) {
+    VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, generateMipMap? t2d.getMaxMipLevel() : 1,requiresBuffer) {
     if (requiresBuffer) stagingBuffer->copyToBufferMemory(t2d.pixels, 0);
 }
 
@@ -114,4 +116,8 @@ void TextureImage::transitionLayout(VkImageLayout newLayout) {
 TextureImage::~TextureImage() {
     vkDestroyImage(ctx.getLogicalDevice(), resource, nullptr);
     vkFreeMemory(ctx.getLogicalDevice(), textureImageMemory, nullptr);
+}
+
+uint32_t TextureImage::calculateMaxMipLevels(uint32_t width, uint32_t height) {
+    return static_cast<uint32_t>(std::floor(std::log2(std::max(width, height))) + 1);
 }

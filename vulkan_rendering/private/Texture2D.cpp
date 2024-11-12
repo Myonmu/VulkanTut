@@ -33,6 +33,11 @@ int Texture2D::getChannelCount() const {
     return channels;
 }
 
+uint32_t Texture2D::getMaxMipLevel() const {
+    return static_cast<uint32_t>(std::floor(std::log2(std::max(width, height)))) + 1;
+}
+
+
 VkFormat Texture2D::getFormat() const {
     return VK_FORMAT_R8G8B8A8_SRGB;
 }

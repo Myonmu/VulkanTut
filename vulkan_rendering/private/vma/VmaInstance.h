@@ -13,7 +13,8 @@ class VmaInstance {
 
 public:
     explicit VmaInstance(DeviceContext &ctx);
-
+    VmaInstance(const VmaInstance &) = delete;
+    VmaInstance &operator=(const VmaInstance &) = delete;
     ~VmaInstance();
 
     operator VmaAllocator() const {

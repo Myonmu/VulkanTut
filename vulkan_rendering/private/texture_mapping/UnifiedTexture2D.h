@@ -15,6 +15,6 @@ class UnifiedTexture2D : public ObjectNode {
     CTX_PROPERTY(TextureImage, textureImage)
     CTX_PROPERTY(ImageView, imageView)
 public:
-    explicit UnifiedTexture2D(DeviceContext& ctx, const std::string& path);
+    explicit UnifiedTexture2D(DeviceContext& ctx, const std::string& path, bool generateMipMap = false);
     ~UnifiedTexture2D() override = default;
 };
