@@ -15,6 +15,7 @@ class LogicalDevice final : public VulkanResource<VkDevice, DeviceContext> {
 public:
     explicit LogicalDevice(DeviceContext& context);
     ~LogicalDevice() override;
+    VkPhysicalDeviceFeatures deviceFeatures{};
 private:
     void createLogicalDevice(DeviceContext& context);
 };

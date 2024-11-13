@@ -100,10 +100,8 @@ set(SOURCES
         private/misc/RenderingContext.h
         private/Components/Transform.h
         private/misc/EnginePipeline.h
-        private/presentation/DepthAttachment.cpp
-        private/presentation/DepthAttachment.h
-        private/presentation/ColorAttachment.cpp
-        private/presentation/ColorAttachment.h
+        private/presentation/RenderAttachment.cpp
+        private/presentation/RenderAttachment.h
         private/misc/tiny_obj_loader.h
         private/misc/EcsSystem.h
         private/model_loading/GltfLoader.cpp

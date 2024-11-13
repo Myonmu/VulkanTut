@@ -4,6 +4,7 @@
 
 #include "FrameBuffers.h"
 
+#include <array>
 #include <VulkanAppContext.h>
 #include <SwapChain.h>
 
@@ -18,8 +19,10 @@ void FrameBuffers::createFrameBuffers(const RenderPass& renderPass) {
     for (size_t i = 0; i < swapChainSize; i++) {
         auto& color = colorAttachment.get_imageView_at(i);
         auto& depth = ctx.get_depthAttachment();
-        std::array<VkImageView,2> attachments = {
-            color, depth
+        auto& msaaTarget = ctx.get_msaaAttachment();
+        //TODO: generate this based on renderpass
+        std::array<VkImageView,3> attachments = {
+             msaaTarget,depth, color,
         };
 
         VkFramebufferCreateInfo framebufferInfo{};

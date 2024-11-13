@@ -17,6 +17,7 @@ TextureImage::TextureImage(DeviceContext &ctx,
                            VkImageUsageFlags usage,
                            VkMemoryPropertyFlags memoryProperties,
                            uint32_t mipLevels,
+                           VkSampleCountFlagBits msaaSamples,
                            bool requiresBuffer
 ): VulkanResource(ctx),
    width(width),
@@ -39,7 +40,7 @@ TextureImage::TextureImage(DeviceContext &ctx,
     imageInfo.extent.depth = 1;
     imageInfo.mipLevels = mipLevels;
     imageInfo.arrayLayers = 1;
-    imageInfo.samples = VK_SAMPLE_COUNT_1_BIT;
+    imageInfo.samples = msaaSamples;
     imageInfo.usage = usage;
     imageInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
     imageInfo.tiling = tiling;
@@ -66,11 +67,21 @@ TextureImage::TextureImage(DeviceContext &ctx,
     vkBindImageMemory(ctx.getLogicalDevice(), resource, textureImageMemory, 0);
 }
 
-TextureImage::TextureImage(DeviceContext &ctx, Texture2D &t2d, bool generateMipMap, bool requiresBuffer) : TextureImage(
-    ctx, t2d.getWidth(), t2d.getHeight(), 4, t2d.getFormat(),
-    VK_IMAGE_TILING_OPTIMAL,
-    VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT | (generateMipMap ? VK_IMAGE_USAGE_TRANSFER_SRC_BIT : 0),
-    VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT , generateMipMap ? t2d.getMaxMipLevel() : 1, requiresBuffer) {
+TextureImage::TextureImage(DeviceContext &ctx,
+                           Texture2D &t2d,
+                           bool generateMipMap,
+                           VkSampleCountFlagBits msaaSamples,
+                           bool requiresBuffer)
+    : TextureImage(
+        ctx, t2d.getWidth(), t2d.getHeight(), 4, t2d.getFormat(),
+        VK_IMAGE_TILING_OPTIMAL,
+        VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT | (
+            generateMipMap ? VK_IMAGE_USAGE_TRANSFER_SRC_BIT : 0),
+        VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
+        generateMipMap ? t2d.getMaxMipLevel() : 1,
+        msaaSamples,
+        requiresBuffer
+    ) {
     if (requiresBuffer) stagingBuffer->copyToBufferMemory(t2d.pixels, 0, stagingBuffer->getSize());
 }
 
@@ -114,7 +125,6 @@ void TextureImage::transitionLayout(VkImageLayout newLayout) {
 }
 
 void TextureImage::generateMipmap(uint32_t mipLevels, VkFilter filter) {
-
     VkFormatProperties formatProperties;
     vkGetPhysicalDeviceFormatProperties(ctx.get_physicalDevice(), format, &formatProperties);
     if (filter == VK_FILTER_LINEAR &&
@@ -171,10 +181,10 @@ void TextureImage::generateMipmap(uint32_t mipLevels, VkFilter filter) {
         barrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
 
         vkCmdPipelineBarrier(cmd,
-            VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT, 0,
-            0, nullptr,
-            0, nullptr,
-            1, &barrier);
+                             VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT, 0,
+                             0, nullptr,
+                             0, nullptr,
+                             1, &barrier);
 
         if (mipWidth > 1) mipWidth /= 2;
         if (mipHeight > 1) mipHeight /= 2;
@@ -186,10 +196,10 @@ void TextureImage::generateMipmap(uint32_t mipLevels, VkFilter filter) {
     barrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
 
     vkCmdPipelineBarrier(cmd,
-        VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT, 0,
-        0, nullptr,
-        0, nullptr,
-        1, &barrier);
+                         VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT, 0,
+                         0, nullptr,
+                         0, nullptr,
+                         1, &barrier);
     CommandBufferRecorder::endRecordCommandBuffer(cmd);
     cmd.executeImmediate();
     currentLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;

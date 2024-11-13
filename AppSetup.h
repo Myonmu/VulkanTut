@@ -22,9 +22,16 @@ public:
     }
 
     void createRenderPasses(DeviceContext &deviceContext) override {
-        auto colorFormat = deviceContext.get_windowContext_at(0).get_colorAttachment().get_format();
-        auto depthFormat = deviceContext.get_windowContext_at(0).get_depthAttachment().get_format();
-        const auto passId = deviceContext.create_renderPass(colorFormat, depthFormat);
+        auto& window = deviceContext.get_windowContext_at(0);
+        auto& color = window.get_colorAttachment();
+        auto& depth = window.get_depthAttachment();
+        auto& msaa = window.get_msaaAttachment();
+        std::vector<AttachmentRef> attachments = {
+            AttachmentRef{0, msaa, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL},
+            AttachmentRef{1, depth, VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL},
+            AttachmentRef{2, color, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL},
+        };
+        const auto passId = deviceContext.create_renderPass(attachments);
         deviceContext.bindRenderPassToWindow(0, passId);
         //deviceContext.bindRenderPassToWindow(1, passId);
     }

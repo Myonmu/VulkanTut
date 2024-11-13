@@ -12,9 +12,8 @@
 #include <VulkanRenderer.h>
 #include <VulkanSurface.h>
 
-#include "ColorAttachment.h"
+#include "RenderAttachment.h"
 #include "ContextMacros.h"
-#include "DepthAttachment.h"
 #include "SubContext.h"
 
 
@@ -32,7 +31,9 @@ struct WindowContext : public SubContext<DeviceContext>{
     CTX_PROPERTY(VulkanSurface, surface)
     // requires device
     CTX_PROPERTY(SwapChain, swapChain)
-    CTX_PROPERTY(ColorAttachment, colorAttachment)
+    //TODO: make attachments dynamic (attachment list rather than hard coded properties)
+    CTX_PROPERTY(PresentColorAttachment, colorAttachment)
+    CTX_PROPERTY(ColorAttachment, msaaAttachment)
     CTX_PROPERTY(DepthAttachment, depthAttachment)
     // requires render pass
     CTX_PROPERTY(FrameBuffers, frameBuffers)

@@ -9,7 +9,8 @@
 
 WindowContext::~WindowContext() = default;
 
-WindowContext::WindowContext(DeviceContext &ctx, const char *name, int width, int height, QueueFamily requiredQueueFamilies)
+WindowContext::WindowContext(DeviceContext &ctx, const char *name, int width, int height,
+                             QueueFamily requiredQueueFamilies)
     : SubContext(ctx), name(name), width(width), height(height), requiredQueueFamilies(requiredQueueFamilies) {
     window = std::make_unique<SdlWindow>(*this, width, height, name);
     surface = std::make_unique<VulkanSurface>(*this);
@@ -20,11 +21,13 @@ WindowContext::WindowContext(DeviceContext &ctx, const char *name, int width, in
 
 void WindowContext::init() {
     swapChain = std::make_unique<SwapChain>(*this);
-    colorAttachment = std::make_unique<ColorAttachment>(*this);
+    colorAttachment = std::make_unique<PresentColorAttachment>(*this);
+    msaaAttachment = std::make_unique<ColorAttachment>(*this, get_physicalDevice().getMaxMsaaSampleCount(),
+                                                       AttachmentType::MSAA);
     depthAttachment = std::make_unique<DepthAttachment>(*this);
 }
 
-void WindowContext::createFrameBuffers(const RenderPass& renderPass) {
+void WindowContext::createFrameBuffers(const RenderPass &renderPass) {
     if (frameBuffers != nullptr) return;
     frameBuffers = std::make_unique<FrameBuffers>(*this, renderPass);
     renderer = std::make_unique<VulkanRenderer>(*this);

@@ -11,8 +11,43 @@ RenderPass::~RenderPass() {
 }
 
 // TODO: make render pass configurable
-RenderPass::RenderPass(DeviceContext &context, VkFormat colorAttachmentFormat, VkFormat depthAttachmentFormat)
+RenderPass::RenderPass(DeviceContext &context, std::vector<AttachmentRef> &attachments)
     : VulkanResource(context) {
+    std::vector<VkAttachmentDescription> attachmentDesc(attachments.size());
+    std::vector<VkAttachmentReference> colorAttachments{};
+    std::vector<VkAttachmentReference> depthStencilAttachments{};
+    std::vector<VkAttachmentReference> resolveAttachments{};
+    bool containsMsaa = false;
+    for (auto &attachmentRef: attachments) {
+        attachmentDesc[attachmentRef.index] = attachmentRef.attachment.getAttachmentDescription();
+        if (attachmentRef.attachment.getAttachmentType() == AttachmentType::MSAA) {
+            containsMsaa = true;
+        }
+    }
+
+    for (auto &attachmentRef: attachments) {
+        auto ref = VkAttachmentReference{
+            .attachment = attachmentRef.index,
+            .layout = attachmentRef.layout
+        };
+        switch (attachmentRef.attachment.getAttachmentType()) {
+            case AttachmentType::PRESENT:
+                if (containsMsaa)
+                    resolveAttachments.push_back(ref);
+                else
+                    colorAttachments.push_back(ref);
+                break;
+            case AttachmentType::MSAA:
+                colorAttachments.push_back(ref);
+                break;
+            case AttachmentType::DEPTH_STENCIL:
+                depthStencilAttachments.push_back(ref);
+                break;
+        }
+    }
+
+
+    /*
     VkAttachmentDescription colorAttachment{};
     // we *may* use swap chain image format but not necessarily.
     // VkRenderPass can be shared between swap chains
@@ -42,28 +77,30 @@ RenderPass::RenderPass(DeviceContext &context, VkFormat colorAttachmentFormat, V
     VkAttachmentReference depthAttachmentRef{};
     depthAttachmentRef.attachment = 1;
     depthAttachmentRef.layout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+    */
 
     // TODO: dynamic subpass creation
     VkSubpassDescription subpass{};
     subpass.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
     subpass.colorAttachmentCount = 1;
-    subpass.pColorAttachments = &colorAttachmentRef;
-    subpass.pDepthStencilAttachment = &depthAttachmentRef;
+    subpass.pColorAttachments = colorAttachments.data();
+    subpass.pDepthStencilAttachment = depthStencilAttachments.data();
+    subpass.pResolveAttachments = resolveAttachments.data();
 
     VkSubpassDependency dependency{};
     dependency.srcSubpass = VK_SUBPASS_EXTERNAL;
     dependency.dstSubpass = 0;
-    dependency.srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT | VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
+    dependency.srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT |
+                              VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
     dependency.srcAccessMask = 0;
-    dependency.dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT | VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
+    dependency.dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT |
+                              VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
     dependency.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT | VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
-
-    const std::array attachments = {colorAttachment, depthAttachment};
 
     VkRenderPassCreateInfo renderPassInfo{};
     renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
-    renderPassInfo.attachmentCount = static_cast<uint32_t>(attachments.size());
-    renderPassInfo.pAttachments = attachments.data();
+    renderPassInfo.attachmentCount = static_cast<uint32_t>(attachmentDesc.size());
+    renderPassInfo.pAttachments = attachmentDesc.data();
     renderPassInfo.subpassCount = 1;
     renderPassInfo.pSubpasses = &subpass;
     renderPassInfo.dependencyCount = 1;

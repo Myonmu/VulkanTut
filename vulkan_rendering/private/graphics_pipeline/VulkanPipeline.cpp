@@ -66,12 +66,12 @@ VkPipelineColorBlendAttachmentState getColorBlendAttachmentState() {
     return colorBlendAttachment;
 }
 
-VkPipelineMultisampleStateCreateInfo getPipelineMultisampleStateCreateInfo() {
+VkPipelineMultisampleStateCreateInfo getPipelineMultisampleStateCreateInfo(DeviceContext& ctx) {
     VkPipelineMultisampleStateCreateInfo multisampling{};
     multisampling.sType = VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO;
-    multisampling.sampleShadingEnable = VK_FALSE;
-    multisampling.rasterizationSamples = VK_SAMPLE_COUNT_1_BIT;
-    multisampling.minSampleShading = 1.0f; // Optional
+    multisampling.sampleShadingEnable = ctx.getLogicalDevice().deviceFeatures.sampleRateShading;
+    multisampling.rasterizationSamples = ctx.get_physicalDevice().getMaxMsaaSampleCount();
+    multisampling.minSampleShading = .2f; // Optional
     multisampling.pSampleMask = nullptr; // Optional
     multisampling.alphaToCoverageEnable = VK_FALSE; // Optional
     multisampling.alphaToOneEnable = VK_FALSE; // Optional
@@ -140,7 +140,7 @@ VulkanPipeline::VulkanPipeline(DeviceContext &context,
     viewportState.pScissors = &scissor;
 
     auto rasterizer = getRasterizerStateCreateInfo();
-    auto multisampling = getPipelineMultisampleStateCreateInfo();
+    auto multisampling = getPipelineMultisampleStateCreateInfo(context);
     auto colorBlendAttachment = getColorBlendAttachmentState();
 
     VkPipelineColorBlendStateCreateInfo colorBlending{};

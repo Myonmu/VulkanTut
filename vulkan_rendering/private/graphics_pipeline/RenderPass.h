@@ -5,14 +5,15 @@
 #pragma once
 
 
-
+#include <vector>
 #include "VulkanResource.h"
 #include <vulkan/vulkan_core.h>
 
+struct AttachmentRef;
 struct DeviceContext;
 class RenderPass : public VulkanResource<VkRenderPass, DeviceContext>{
 public:
-    explicit RenderPass(DeviceContext& context, VkFormat colorAttachmentFormat, VkFormat depthAttachmentFormat);
+    RenderPass(DeviceContext& context, std::vector<AttachmentRef>& attachments);
     ~RenderPass() override;
 };
 
