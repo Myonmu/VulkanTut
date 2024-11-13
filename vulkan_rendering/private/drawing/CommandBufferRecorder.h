@@ -17,9 +17,6 @@ struct VulkanAppContext;
 class CommandBuffer;
 
 class CommandBufferRecorder {
-    void beginRecordCommandBuffer(const CommandBuffer &commandBuffer) const;
-
-    static void endRecordCommandBuffer(const CommandBuffer &commandBuffer);
 
     std::vector<CommandBufferCmd*> commands;
 
@@ -34,6 +31,10 @@ class CommandBufferRecorder {
 public:
     explicit CommandBufferRecorder(bool isSubRecorder = false);
     explicit CommandBufferRecorder(VkCommandBufferUsageFlags flags, bool isSubRecorder = false);
+
+    void beginRecordCommandBuffer(const CommandBuffer &commandBuffer) const;
+
+    static void endRecordCommandBuffer(const CommandBuffer &commandBuffer);
 
     // Use this to inject custom recorder (e.g. call raw vulkan api)
     void setRecordFunc(const RecordFunc& f);

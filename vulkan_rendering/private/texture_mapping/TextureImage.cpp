@@ -21,8 +21,7 @@ TextureImage::TextureImage(DeviceContext &ctx,
 ): VulkanResource(ctx),
    width(width),
    height(height), channels(channels), format(textureFormat),
-   imageSize(width * height * channels), mipLevels(mipLevels)
-{
+   imageSize(width * height * channels), mipLevels(mipLevels) {
     if (requiresBuffer) {
         stagingBuffer = std::make_unique<Buffer>(
             ctx,
@@ -69,8 +68,9 @@ TextureImage::TextureImage(DeviceContext &ctx,
 
 TextureImage::TextureImage(DeviceContext &ctx, Texture2D &t2d, bool generateMipMap, bool requiresBuffer) : TextureImage(
     ctx, t2d.getWidth(), t2d.getHeight(), 4, t2d.getFormat(),
-    VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT,
-    VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, generateMipMap? t2d.getMaxMipLevel() : 1,requiresBuffer) {
+    VK_IMAGE_TILING_OPTIMAL,
+    VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT | (generateMipMap ? VK_IMAGE_USAGE_TRANSFER_SRC_BIT : 0),
+    VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT , generateMipMap ? t2d.getMaxMipLevel() : 1, requiresBuffer) {
     if (requiresBuffer) stagingBuffer->copyToBufferMemory(t2d.pixels, 0, stagingBuffer->getSize());
 }
 
@@ -111,6 +111,80 @@ void TextureImage::transitionLayout(VkImageLayout newLayout) {
     recorder.recordCommandBuffer(cmd, ctx, FrameInfo::DONT_CARE);
     cmd.executeImmediate();
     currentLayout = newLayout;
+}
+
+void TextureImage::generateMipmap(uint32_t mipLevels, VkFilter filter) {
+    CommandBuffer cmd{ctx, QueueFamily::QUEUE_FAMILY_GRAPHICS};
+    CommandBufferRecorder recorder{};
+    recorder.beginRecordCommandBuffer(cmd);
+    VkImageMemoryBarrier barrier{};
+    barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
+    barrier.image = *this;
+    barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+    barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+    barrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+    barrier.subresourceRange.baseArrayLayer = 0;
+    barrier.subresourceRange.layerCount = 1;
+    barrier.subresourceRange.levelCount = 1;
+    auto mipWidth = width;
+    auto mipHeight = height;
+    for (uint32_t i = 1; i < mipLevels; i++) {
+        barrier.subresourceRange.baseMipLevel = i - 1;
+        barrier.oldLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
+        barrier.newLayout = VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL;
+        barrier.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+        barrier.dstAccessMask = VK_ACCESS_TRANSFER_READ_BIT;
+        vkCmdPipelineBarrier(cmd,
+                             VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_TRANSFER_BIT, 0,
+                             0, nullptr,
+                             0, nullptr,
+                             1, &barrier);
+        VkImageBlit blit{};
+        blit.srcOffsets[0] = {0, 0, 0};
+        blit.srcOffsets[1] = {mipWidth, mipHeight, 1};
+        blit.srcSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+        blit.srcSubresource.mipLevel = i - 1;
+        blit.srcSubresource.baseArrayLayer = 0;
+        blit.srcSubresource.layerCount = 1;
+        blit.dstOffsets[0] = {0, 0, 0};
+        blit.dstOffsets[1] = {mipWidth > 1 ? mipWidth / 2 : 1, mipHeight > 1 ? mipHeight / 2 : 1, 1};
+        blit.dstSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+        blit.dstSubresource.mipLevel = i;
+        blit.dstSubresource.baseArrayLayer = 0;
+        blit.dstSubresource.layerCount = 1;
+        vkCmdBlitImage(cmd,
+                       *this, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
+                       *this, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+                       1, &blit,
+                       filter);
+
+        barrier.oldLayout = VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL;
+        barrier.newLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+        barrier.srcAccessMask = VK_ACCESS_TRANSFER_READ_BIT;
+        barrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
+
+        vkCmdPipelineBarrier(cmd,
+            VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT, 0,
+            0, nullptr,
+            0, nullptr,
+            1, &barrier);
+
+        if (mipWidth > 1) mipWidth /= 2;
+        if (mipHeight > 1) mipHeight /= 2;
+    }
+    barrier.subresourceRange.baseMipLevel = mipLevels - 1;
+    barrier.oldLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
+    barrier.newLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+    barrier.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+    barrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
+
+    vkCmdPipelineBarrier(cmd,
+        VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT, 0,
+        0, nullptr,
+        0, nullptr,
+        1, &barrier);
+    CommandBufferRecorder::endRecordCommandBuffer(cmd);
+    cmd.executeImmediate();
 }
 
 TextureImage::~TextureImage() {

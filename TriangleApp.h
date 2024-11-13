@@ -69,6 +69,7 @@ private:
         auto &materialInstance = material.createInstance();
 
         auto const &tex = deviceCtx.createObject<UnifiedTexture2D>(deviceCtx, "./assets/viking_room.png", true);
+        tex.get_textureImage().generateMipmap(tex.get_cpuTexture().getMaxMipLevel(), VK_FILTER_LINEAR);
         auto const &sampler = deviceCtx.createObject<TextureSampler>(deviceCtx,
                                                                      TextureAddressMode::REPEAT,
                                                                      TextureFilterMode::LINEAR,
@@ -77,6 +78,7 @@ private:
                                                                      TextureMipmapInfo::DEFAULT,
                                                                      VK_BORDER_COLOR_INT_OPAQUE_BLACK,
                                                                      VK_FALSE);
+
 
         materialInstance.setCombinedImageSampler(0, tex, sampler);
         materialInstance.updateDescriptorSet(1);

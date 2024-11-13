@@ -141,7 +141,7 @@ private:
     void checkFlags(const VkQueueFamilyProperties &prop, const QueueFamily &compareFlag, const VkQueueFlagBits vkFlag,
                     const uint32_t i) {
         if (static_cast<bool>(requiredBits & compareFlag) && prop.queueFlags & vkFlag) {
-            indices[QueueFamily::QUEUE_FAMILY_GRAPHICS] = i;
+            indices[compareFlag] = i;
         }
     }
 };

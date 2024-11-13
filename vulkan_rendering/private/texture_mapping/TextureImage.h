@@ -30,6 +30,7 @@ public:
 
     void stage();
     void transitionLayout(VkImageLayout newLayout);
+    void generateMipmap(uint32_t mipLevels, VkFilter filter);
     [[nodiscard]] inline VkImageLayout getCurrentLayout() const {
         return currentLayout;
     };
