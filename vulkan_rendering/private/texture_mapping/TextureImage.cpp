@@ -114,12 +114,19 @@ void TextureImage::transitionLayout(VkImageLayout newLayout) {
 }
 
 void TextureImage::generateMipmap(uint32_t mipLevels, VkFilter filter) {
+
+    VkFormatProperties formatProperties;
+    vkGetPhysicalDeviceFormatProperties(ctx.get_physicalDevice(), format, &formatProperties);
+    if (filter == VK_FILTER_LINEAR &&
+        !(formatProperties.optimalTilingFeatures & VK_FORMAT_FEATURE_SAMPLED_IMAGE_FILTER_LINEAR_BIT)) {
+        throw std::runtime_error("texture image format does not support linear blitting!");
+    }
     CommandBuffer cmd{ctx, QueueFamily::QUEUE_FAMILY_GRAPHICS};
     CommandBufferRecorder recorder{};
     recorder.beginRecordCommandBuffer(cmd);
     VkImageMemoryBarrier barrier{};
     barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
-    barrier.image = *this;
+    barrier.image = resource;
     barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
     barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
     barrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
@@ -185,6 +192,7 @@ void TextureImage::generateMipmap(uint32_t mipLevels, VkFilter filter) {
         1, &barrier);
     CommandBufferRecorder::endRecordCommandBuffer(cmd);
     cmd.executeImmediate();
+    currentLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 }
 
 TextureImage::~TextureImage() {

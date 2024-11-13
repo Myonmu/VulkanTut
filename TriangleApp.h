@@ -52,6 +52,7 @@ private:
     std::unique_ptr<EventSystem> eventSystem;
     flecs::entity transformPrefab;
     ObjLoader obj{};
+
     void setup() {
         eventSystem = std::make_unique<EventSystem>(ecs);
         EcsSystemsHeader systems_header{};
@@ -68,29 +69,36 @@ private:
         auto &material = deviceCtx.createObject<Material>(deviceCtx, shaders, deviceCtx.get_renderPass_at(0));
         auto &materialInstance = material.createInstance();
 
-        auto const &tex = deviceCtx.createObject<UnifiedTexture2D>(deviceCtx, "./assets/viking_room.png", true);
-        tex.get_textureImage().generateMipmap(tex.get_cpuTexture().getMaxMipLevel(), VK_FILTER_LINEAR);
-        auto const &sampler = deviceCtx.createObject<TextureSampler>(deviceCtx,
-                                                                     TextureAddressMode::REPEAT,
-                                                                     TextureFilterMode::LINEAR,
-                                                                     TextureAnisotropyInfo::getAutoAnisotropyInfo(),
-                                                                     TextureCompareInfo(),
-                                                                     TextureMipmapInfo::DEFAULT,
-                                                                     VK_BORDER_COLOR_INT_OPAQUE_BLACK,
-                                                                     VK_FALSE);
+        auto const &tex =
+                deviceCtx.createObject<UnifiedTexture2D>(deviceCtx, "./assets/viking_room.png", VK_FILTER_LINEAR);
+        auto const &sampler = deviceCtx.createObject<TextureSampler>(
+            deviceCtx,
+            TextureAddressMode::REPEAT,
+            TextureFilterMode::LINEAR,
+            TextureAnisotropyInfo::getAutoAnisotropyInfo(),
+            TextureCompareInfo(),
+            TextureMipmapInfo{
+                .mipmapMode = VK_SAMPLER_MIPMAP_MODE_LINEAR,
+                .mipmapBias = 0.0f,
+                .minLod = 0,
+                .maxLod = static_cast<float>(tex.get_cpuTexture().getMaxMipLevel())
+            },
+            VK_BORDER_COLOR_INT_OPAQUE_BLACK,
+            VK_FALSE);
 
 
         materialInstance.setCombinedImageSampler(0, tex, sampler);
         materialInstance.updateDescriptorSet(1);
 
         obj.LoadGeometry("./assets/viking_room.obj");
-        //auto &meshBuffer = deviceCtx.createObject<MeshBuffer>(deviceCtx, obj.vertices, obj.indices);
-        auto &vertexBuffer = deviceCtx.createObject<VertexBuffer>(deviceCtx, obj.vertices);
-        auto &indexBuffer = deviceCtx.createObject<IndexBuffer>(deviceCtx,obj.indices);
+        auto &meshBuffer = deviceCtx.createObject<MeshBuffer>(deviceCtx, obj.vertices, obj.indices);
+        //auto &vertexBuffer = deviceCtx.createObject<VertexBuffer>(deviceCtx, obj.vertices);
+        //auto &indexBuffer = deviceCtx.createObject<IndexBuffer>(deviceCtx,obj.indices);
         auto &entt = ecs.entity("Some Object")
-                //.emplace<MeshRenderer>(deviceCtx, meshBuffer, materialInstance)
-                .emplace<MeshRendererSplitBuffer>(deviceCtx, vertexBuffer, indexBuffer, materialInstance)
-                .add<MeshRotate>().is_a(transformPrefab);
+                .emplace<MeshRenderer>(deviceCtx, meshBuffer, materialInstance)
+                //.emplace<MeshRendererSplitBuffer>(deviceCtx, vertexBuffer, indexBuffer, materialInstance)
+                //.add<MeshRotate>()
+                .is_a(transformPrefab);
 
 
         mainPass = std::make_unique<RenderPassRecorder>(deviceCtx.get_renderPass_at(0));
@@ -99,7 +107,7 @@ private:
 
         auto &swapchain = deviceCtx.get_windowContext_at(0).get_swapChain();
         auto &camera = ecs.entity("Camera")
-                .is_a(transformPrefab).set(Position{{0,0,2}})
+                .is_a(transformPrefab).set(Position{{0, 0, 2}})
                 .add<Velocity>()
                 .emplace<Camera>(&swapchain)
                 .add<Flycam>();
@@ -152,12 +160,13 @@ private:
             }
         );
 
-        ecs.system<Position, Rotation, Scale, MeshRendererSplitBuffer>("UpdatePerObjectUBOSplit").kind(flecs::PreStore).each(
-            [](Position &p, Rotation &r, Scale &s, MeshRendererSplitBuffer &renderer) {
-                const auto modelMatrix = Transform::getModelMatrix(p, r, s);
-                renderer.vertexPushConstants.model = modelMatrix;
-            }
-        );
+        ecs.system<Position, Rotation, Scale, MeshRendererSplitBuffer>("UpdatePerObjectUBOSplit").kind(flecs::PreStore).
+                each(
+                    [](Position &p, Rotation &r, Scale &s, MeshRendererSplitBuffer &renderer) {
+                        const auto modelMatrix = Transform::getModelMatrix(p, r, s);
+                        renderer.vertexPushConstants.model = modelMatrix;
+                    }
+                );
 
         mainPass->clear();
         mainPass->enqueueCommand<SetViewport>();
