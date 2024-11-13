@@ -24,7 +24,7 @@ PerFrameBufferGroup::PerFrameBufferGroup(DeviceContext &ctx, VkDeviceSize buffer
 PerFrameBufferGroup::~PerFrameBufferGroup() = default;
 
 void PerFrameBufferGroup::CopyMemoryToBuffer(const uint32_t &slot, const void *data, const size_t &size) const {
-    buffers[slot].get()->copyToBufferMemory(data, 0);
+    buffers[slot].get()->copyToBufferMemory(data, 0, size);
 }
 
 

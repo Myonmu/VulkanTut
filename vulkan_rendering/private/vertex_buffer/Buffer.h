@@ -19,8 +19,11 @@ public:
     explicit Buffer(DeviceContext& context, VkDeviceSize size, VkBufferUsageFlags usage, VmaMemoryUsage memUsage,
         VmaAllocationCreateFlags flags = VMA_ALLOCATION_CREATE_MAPPED_BIT);
     ~Buffer() override;
-    void copyToBufferMemory(const void* sourceData, size_t offset) const;
+    void copyToBufferMemory(const void* sourceData, size_t offset, size_t size) const;
     static void copyBuffer(Buffer& srcBuffer, Buffer& dstBuffer, DeviceContext& ctx, VkDeviceSize size);
+    [[nodiscard]] size_t getSize() const {
+        return size;
+    }
 protected:
     VmaAllocationCreateFlags flags;
     VkDeviceSize size{};

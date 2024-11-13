@@ -71,7 +71,7 @@ TextureImage::TextureImage(DeviceContext &ctx, Texture2D &t2d, bool generateMipM
     ctx, t2d.getWidth(), t2d.getHeight(), 4, t2d.getFormat(),
     VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT,
     VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, generateMipMap? t2d.getMaxMipLevel() : 1,requiresBuffer) {
-    if (requiresBuffer) stagingBuffer->copyToBufferMemory(t2d.pixels, 0);
+    if (requiresBuffer) stagingBuffer->copyToBufferMemory(t2d.pixels, 0, stagingBuffer->getSize());
 }
 
 

@@ -82,10 +82,12 @@ private:
         materialInstance.updateDescriptorSet(1);
 
         obj.LoadGeometry("./assets/viking_room.obj");
-        auto &meshBuffer = deviceCtx.createObject<MeshBuffer>(deviceCtx, obj.vertices, obj.indices);
+        //auto &meshBuffer = deviceCtx.createObject<MeshBuffer>(deviceCtx, obj.vertices, obj.indices);
+        auto &vertexBuffer = deviceCtx.createObject<VertexBuffer>(deviceCtx, obj.vertices);
+        auto &indexBuffer = deviceCtx.createObject<IndexBuffer>(deviceCtx,obj.indices);
         auto &entt = ecs.entity("Some Object")
-
-                .emplace<MeshRenderer>(deviceCtx, meshBuffer, materialInstance)
+                //.emplace<MeshRenderer>(deviceCtx, meshBuffer, materialInstance)
+                .emplace<MeshRendererSplitBuffer>(deviceCtx, vertexBuffer, indexBuffer, materialInstance)
                 .add<MeshRotate>().is_a(transformPrefab);
 
 
@@ -147,14 +149,14 @@ private:
                 renderer.vertexPushConstants.model = modelMatrix;
             }
         );
-        /*
+
         ecs.system<Position, Rotation, Scale, MeshRendererSplitBuffer>("UpdatePerObjectUBOSplit").kind(flecs::PreStore).each(
             [](Position &p, Rotation &r, Scale &s, MeshRendererSplitBuffer &renderer) {
                 const auto modelMatrix = Transform::getModelMatrix(p, r, s);
                 renderer.vertexPushConstants.model = modelMatrix;
             }
         );
-        */
+
         mainPass->clear();
         mainPass->enqueueCommand<SetViewport>();
         mainPass->enqueueCommand<SetScissors>();
@@ -162,12 +164,12 @@ private:
             [this](MeshRenderer &renderer) {
                 renderer.enqueueDrawCall(*mainContext, *mainPass);
             });
-        /*
+
         ecs.system<MeshRendererSplitBuffer>("RenderMeshSplit").kind(flecs::OnStore).each(
             [this](MeshRendererSplitBuffer &renderer) {
                 renderer.enqueueDrawCall(*mainContext, *mainPass);
             });
-        */
+
         ecs.system<Rotation, Position, Camera>("RenderCamera").kind(flecs::OnStore).each(
             [this](Rotation &t, Position &p, Camera &cam) {
                 auto &perSceneData = mainContext->perSceneData;

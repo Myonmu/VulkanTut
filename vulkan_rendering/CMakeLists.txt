@@ -138,7 +138,7 @@ include_directories(${CMAKE_SOURCE_DIR}/libs/fmt)
 
 
 # Link GLFW, Vulkan, and GLM with the library
-target_link_libraries(Vk SDL3::SDL3-static Vulkan::Vulkan glm)
+target_link_libraries(Vk SDL3::SDL3-shared Vulkan::Vulkan glm)
 target_link_libraries(Vk flecs::flecs_static)
 
 # Add include directories to target

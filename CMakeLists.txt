@@ -2,7 +2,6 @@ cmake_minimum_required(VERSION 3.27)
 project(VulkanTut)
 
 set(CMAKE_CXX_STANDARD 23)
-
 # Vulkan and GLFW setup
 find_package(Vulkan REQUIRED)
 set(GLFW_BUILD_DOCS OFF CACHE BOOL "" FORCE)
@@ -33,7 +32,6 @@ add_executable(VulkanTut
 # Link dependencies
 target_link_libraries(VulkanTut
         Vk # This is your core module
-        SDL3::SDL3-static
         Vulkan::Vulkan
         glm
         spirv-cross-core
@@ -42,11 +40,21 @@ target_link_libraries(VulkanTut
         fmt::fmt
 )
 
+target_link_libraries(VulkanTut SDL3::SDL3-shared)
+
 # Include directories for the app
 target_include_directories(VulkanTut PUBLIC
         ${CMAKE_SOURCE_DIR}/core/public
 )
 
-add_custom_command(TARGET VulkanTut POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/shaders ${CMAKE_CURRENT_BINARY_DIR}/shaders )
-add_custom_command(TARGET VulkanTut POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/textures ${CMAKE_CURRENT_BINARY_DIR}/textures )
-add_custom_command(TARGET VulkanTut POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/assets ${CMAKE_CURRENT_BINARY_DIR}/assets )
+add_custom_command(TARGET VulkanTut POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy_directory
+        ${CMAKE_SOURCE_DIR}/shaders ${CMAKE_CURRENT_BINARY_DIR}/shaders )
+add_custom_command(TARGET VulkanTut POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy_directory
+        ${CMAKE_SOURCE_DIR}/textures ${CMAKE_CURRENT_BINARY_DIR}/textures )
+add_custom_command(TARGET VulkanTut POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy_directory
+        ${CMAKE_SOURCE_DIR}/assets ${CMAKE_CURRENT_BINARY_DIR}/assets )
+
+add_custom_command(TARGET VulkanTut POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        $<TARGET_FILE:SDL3::SDL3-shared>
+        $<TARGET_FILE_DIR:VulkanTut>)

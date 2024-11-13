@@ -15,7 +15,7 @@ VertexBuffer::VertexBuffer(DeviceContext &ctx, const std::vector<Vertex> &vertic
     stagingBuffer = std::make_unique<Buffer>(ctx, size,
                                              VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
                                              VMA_MEMORY_USAGE_CPU_ONLY, 0);
-    stagingBuffer->copyToBufferMemory(vertices.data(), 0);
+    stagingBuffer->copyToBufferMemory(vertices.data(), 0, size);
     Buffer::copyBuffer(*stagingBuffer, *buffer, ctx, size);
     if (oneTimeStaging) {
         stagingBuffer.reset();
@@ -31,7 +31,7 @@ IndexBuffer::IndexBuffer(DeviceContext &ctx, const std::vector<uint32_t> &indice
     stagingBuffer = std::make_unique<Buffer>(ctx, size,
                                              VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
                                              VMA_MEMORY_USAGE_CPU_ONLY, 0);
-    stagingBuffer->copyToBufferMemory(indices.data(), 0);
+    stagingBuffer->copyToBufferMemory(indices.data(), 0, size);
     Buffer::copyBuffer(*stagingBuffer, *buffer, ctx, size);
     if (oneTimeStaging) {
         stagingBuffer.reset();
@@ -58,8 +58,8 @@ MeshBuffer::MeshBuffer(DeviceContext &ctx,
     stagingBuffer = std::make_unique<Buffer>(ctx, size,
                                              VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
                                              VMA_MEMORY_USAGE_CPU_ONLY, 0);
-    stagingBuffer->copyToBufferMemory(vertices.data(), 0);
-    stagingBuffer->copyToBufferMemory(indices.data(), indexOffset);
+    stagingBuffer->copyToBufferMemory(vertices.data(), 0, indexOffset);
+    stagingBuffer->copyToBufferMemory(indices.data(), indexOffset, size - indexOffset);
     Buffer::copyBuffer(*stagingBuffer, *buffer, ctx, size);
     if (oneTimeStaging) {
         stagingBuffer.reset();

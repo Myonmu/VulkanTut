@@ -71,7 +71,7 @@ uint32_t Buffer::findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags prope
 
 
 // Uploads source data to the buffer (there will be memcpy)
-void Buffer::copyToBufferMemory(const void *sourceData, size_t offset) const {
+void Buffer::copyToBufferMemory(const void *sourceData, size_t offset, size_t size) const {
     if (flags & VMA_ALLOCATION_CREATE_MAPPED_BIT) {
         memcpy(static_cast<char *>(vmaAllocationInfo.pMappedData) + offset, sourceData, size);
     } else {

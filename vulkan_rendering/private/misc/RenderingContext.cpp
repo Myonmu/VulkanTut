@@ -44,7 +44,7 @@ void RenderingContext::prepareFrame(const FrameInfo &frameInfo) {
     auto framesInFlight = context.context.MAX_FRAMES_IN_FLIGHT;
     auto& perFrameSet = *perFrameSets[frameInfo.currentFrameIndex + framesInFlight * frameInfo.windowId];
     DescriptorWriter writer{};
-    perSceneUbo->CopyMemoryToBuffer(frameInfo.currentFrameIndex, &perSceneData, sizeof(perSceneUbo));
+    perSceneUbo->CopyMemoryToBuffer(frameInfo.currentFrameIndex, &perSceneData, sizeof(PerSceneRenderingData));
     auto& buffer = (*perSceneUbo)[frameInfo.currentFrameIndex];
     writer.writeBuffer(0, buffer,
         sizeof(perSceneData), 0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER);
