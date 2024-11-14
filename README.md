@@ -12,13 +12,21 @@ Hence, the repo tries to mitigate this:
 
 We also use Vulkan Guide as supplementary reference.
 
-A homebrew OOP version (more specifically, custom RAII wrapers from scratch), is potentially not optimal compared to the official RAII but should allow us to understand better the inner workings of the API. 
+A homebrew OOP version (more specifically, custom RAII wrappers from scratch), is potentially not optimal compared to the official RAII but should allow us to understand better the inner workings of the API. 
 
 Moreover, the repo goes slightly beyond the tutorials by also implementing:
 
-- Player loop updates driven by ECS
+- Player loop updates driven by flecs ECS
 - Shader reflection
 - Multi-window support
+
+## Installation
+
+The primary IDE used during the development is *CLion*, but *Visual Studio 2022* should work as well. We have only tested building with **MSVC**.
+
+We use *CMake* as our build system. 
+
+The repo has changed to use **vcpkg** for package management. Follow [Tutorial: Install and use packages with CMake](https://learn.microsoft.com/en-us/vcpkg/get_started/get-started?pivots=shell-powershell) to configure vcpkg on your system.
 
 ## Topics
 
