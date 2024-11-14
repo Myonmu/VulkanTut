@@ -26,7 +26,7 @@
 #include "ObjLoader.h"
 #include "RenderingContext.h"
 #include "fmt/color.h"
-#include "libs/SDL/include/SDL3/SDL_init.h"
+#include "SDL3/SDL.h"
 #include "scripts/FlycamSystem.h"
 #include "scripts/MeshRotate.h"
 
