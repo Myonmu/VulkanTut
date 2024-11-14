@@ -1,21 +1,3 @@
-[submodule "libs/SPIRV-Cross"]
-	path = libs/SPIRV-Cross
-	url = https://github.com/Myonmu/SPIRV-Cross
-[submodule "libs/shaderc"]
-	path = libs/shaderc
-	url = https://github.com/Myonmu/shaderc
-[submodule "libs/fmt"]
-	path = libs/fmt
-	url = https://github.com/Myonmu/fmt
 [submodule "libs/rapidyaml"]
 	path = libs/rapidyaml
 	url = https://github.com/Myonmu/rapidyaml
-[submodule "libs/flecs"]
-	path = libs/flecs
-	url = https://github.com/Myonmu/flecs
-[submodule "libs/SDL"]
-	path = libs/SDL
-	url = https://github.com/Myonmu/SDL
-[submodule "libs/fastgltf"]
-	path = libs/fastgltf
-	url = https://github.com/Myonmu/fastgltf
