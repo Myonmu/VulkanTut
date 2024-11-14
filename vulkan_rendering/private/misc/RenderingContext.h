@@ -4,6 +4,7 @@
 
 #pragma once
 #include <CommandBufferRecorder.h>
+#include <functional>
 #include <map>
 #include "DescriptorPoolAllocator.h"
 #include "DescriptorSetLayoutBinding.h"

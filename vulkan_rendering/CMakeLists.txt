@@ -45,7 +45,6 @@ set(SOURCES
         private/vertex_buffer/Vertex.h
         private/vertex_buffer/Vertex.cpp
         private/vertex_buffer/Buffer.cpp
-        private/vma/vk_mem_alloc.h
         private/vma/VmaInstance.cpp
         private/descriptor/DescriptorSetLayout.cpp
         private/uniform_buffer/PerFrameBufferGroup.h
@@ -102,7 +101,6 @@ set(SOURCES
         private/misc/EnginePipeline.h
         private/presentation/RenderAttachment.cpp
         private/presentation/RenderAttachment.h
-        private/misc/tiny_obj_loader.h
         private/misc/EcsSystem.h
         private/model_loading/GltfLoader.cpp
         private/model_loading/GltfLoader.h
@@ -116,28 +114,28 @@ add_library(Vk STATIC ${SOURCES})
 # Vulkan package
 find_package(Vulkan REQUIRED)
 
-# GLFW setup (disable unnecessary parts)
-set(GLFW_BUILD_DOCS OFF CACHE BOOL "" FORCE)
-set(GLFW_BUILD_TESTS OFF CACHE BOOL "" FORCE)
-set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
-
-# Include GLFW and GLM
-include_directories(${CMAKE_SOURCE_DIR}/libs/SDL/include)
-include_directories(${CMAKE_SOURCE_DIR}/libs/glm/include)
-include_directories(${CMAKE_SOURCE_DIR}/libs/stb)
-include_directories(${CMAKE_SOURCE_DIR}/libs/SPIRV-Cross)
-include_directories(${CMAKE_SOURCE_DIR}/libs/rapidyaml/include)
-include_directories(${CMAKE_SOURCE_DIR}/libs/shaderc/include)
-include_directories(${CMAKE_SOURCE_DIR}/libs/flecs/include)
-include_directories(${CMAKE_SOURCE_DIR}/libs/fastgltf/include)
-
-# TODO: move to lower-level module
-include_directories(${CMAKE_SOURCE_DIR}/libs/fmt)
+find_package(fmt CONFIG REQUIRED)
+find_package(SDL3 CONFIG REQUIRED)
+find_package(glm CONFIG REQUIRED)
+find_package(flecs CONFIG REQUIRED)
+find_package(fastgltf CONFIG REQUIRED)
+find_package(Stb REQUIRED)
+find_package(spirv_cross_core CONFIG REQUIRED)
+find_package(spirv_cross_util CONFIG REQUIRED)
+find_package(spirv_cross_glsl CONFIG REQUIRED)
 
 
 # Link GLFW, Vulkan, and GLM with the library
-target_link_libraries(Vk SDL3::SDL3-shared Vulkan::Vulkan glm)
-target_link_libraries(Vk flecs::flecs_static)
+target_link_libraries(Vk
+        Vulkan::Vulkan
+        fmt::fmt
+        SDL3::SDL3-shared
+        glm::glm
+        spirv-cross-core
+        spirv-cross-util
+        spirv-cross-glsl
+)
+target_link_libraries(Vk flecs::flecs)
 
 # Add include directories to target
 target_include_directories(Vk

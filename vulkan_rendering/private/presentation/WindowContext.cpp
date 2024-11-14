@@ -43,6 +43,7 @@ void WindowContext::resize() {
     vkDeviceWaitIdle(getLogicalDevice());
     swapChain->recreate();
     colorAttachment->recreate();
+    msaaAttachment->recreate();
     depthAttachment->recreate();
     frameBuffers->recreate();
 }

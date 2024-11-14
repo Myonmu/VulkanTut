@@ -10,10 +10,12 @@
 #include <SDL3/SDL_vulkan.h>
 
 [[nodiscard]] std::vector<const char *> VulkanInstance::getRequiredExtensions(const VulkanAppContext& context) {
-    uint32_t glfwExtensionCount = 0;
-    SDL_Vulkan_LoadLibrary(nullptr);
-    char const *const*sdlExtensions = SDL_Vulkan_GetInstanceExtensions(&glfwExtensionCount);
-    std::vector extensions(sdlExtensions, sdlExtensions + glfwExtensionCount);
+    uint32_t sdlExtensionCount = 0;
+    if (!SDL_Vulkan_LoadLibrary(nullptr)) {
+        throw std::runtime_error(SDL_GetError());
+    }
+    char const *const*sdlExtensions = SDL_Vulkan_GetInstanceExtensions(&sdlExtensionCount);
+    std::vector extensions(sdlExtensions, sdlExtensions + sdlExtensionCount);
     // ReSharper disable once CppDFAConstantConditions
     if (context.enableValidationLayers) {
         extensions.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);

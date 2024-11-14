@@ -7,7 +7,7 @@
 #include <Buffer.h>
 #include <DescriptorSet.h>
 #include <DescriptorSetLayout.h>
-#include <include/fmt/core.h>
+#include <fmt/core.h>
 #include <TextureSampler.h>
 
 void DescriptorWriter::writeImage(uint32_t binding,

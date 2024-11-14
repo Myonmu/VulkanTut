@@ -33,7 +33,9 @@
 class TriangleApp {
 public :
     void Run() {
-        SDL_Init(SDL_INIT_VIDEO);
+        if (!SDL_Init(SDL_INIT_VIDEO)) {
+            throw std::runtime_error(SDL_GetError());
+        }
         context = std::make_unique<VulkanAppContext>("VulkanApp", appSetup);
         setup();
         mainLoop();
