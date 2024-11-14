@@ -1,7 +1,8 @@
 {
   "dependencies" : [ {
     "name" : "sdl3",
-    "version>=" : "3.1.6-preview#1"
+    "version>=" : "3.1.6-preview#1",
+    "features": ["vulkan"]
   }, {
     "name" : "fmt",
     "version>=" : "11.0.2#1"

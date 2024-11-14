@@ -1,7 +1,6 @@
 cmake_minimum_required(VERSION 3.27)
 project(Vk)
 set(CMAKE_CXX_STANDARD 23)
-
 # Add subdirectories' include paths
 set(INCLUDE_DIRS
         ${CMAKE_CURRENT_SOURCE_DIR}/private/graphics_pipeline
@@ -116,6 +115,7 @@ find_package(Vulkan REQUIRED)
 
 find_package(fmt CONFIG REQUIRED)
 find_package(SDL3 CONFIG REQUIRED)
+set(SDL_VULKAN ON CACHE BOOL "")
 find_package(glm CONFIG REQUIRED)
 find_package(flecs CONFIG REQUIRED)
 find_package(fastgltf CONFIG REQUIRED)

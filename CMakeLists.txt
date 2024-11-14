@@ -6,6 +6,8 @@ set(CMAKE_CXX_STANDARD 23)
 find_package(Vulkan REQUIRED)
 
 find_package(SDL3 CONFIG REQUIRED)
+set(SDL_VULKAN ON CACHE BOOL "")
+
 find_package(fmt CONFIG REQUIRED)
 find_package(glm CONFIG REQUIRED)
 find_package(flecs CONFIG REQUIRED)
