@@ -29,7 +29,6 @@ struct PerObjectVertexPushConstants {
 
 struct RenderingContext: public SubContext<DeviceContext> {
     PerSceneRenderingData perSceneData{};
-    CommandBufferRecorder recorder{0, false};
     std::unique_ptr<PerFrameBufferGroup> perSceneUbo;
     std::vector<std::unique_ptr<DescriptorSet>> perFrameSets;
 

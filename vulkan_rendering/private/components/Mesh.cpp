@@ -3,6 +3,9 @@
 //
 
 #include "Mesh.h"
+
+#include <VulkanAppContext.h>
+
 #include "CBC_Drawing.h"
 #include "CBC_Misc.h"
 #include "RenderingContext.h"
@@ -57,8 +60,10 @@ void MeshRenderer::enqueueDrawCall(RenderingContext &ctx, RenderPassRecorder &re
 
     recorder.enqueueCommand<BindMeshBuffer>(meshBuffer);
 
+    auto framesInFlight = ctx.context.context.MAX_FRAMES_IN_FLIGHT;
+    auto offset = framesInFlight * frameInfo.windowId;
     recorder.enqueueCommand<BindDescriptorSet>(materialInstance.getPipelineLayout(),
-                                               *ctx.perFrameSets[frameInfo.currentFrameIndex], 0);
+                                               *ctx.perFrameSets[frameInfo.currentFrameIndex + offset], 0);
 
     for (auto &[setId, set]: materialInstance.descriptorSets) {
         if (setId <= 0)continue; // 0 is reserved for global set

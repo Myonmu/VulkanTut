@@ -38,23 +38,6 @@ void VulkanRenderer::recordCommandBuffer(const CommandBuffer &command_buffer, co
 
 
 void VulkanRenderer::drawFrame(RenderingContext& renderingCtx) {
-    SDL_Event e;
-    while (SDL_PollEvent(&e)) {
-        // close the window when user alt-f4s or clicks the X button
-        if (e.type == SDL_EVENT_QUIT) {
-             vkDeviceWaitIdle(ctx.getLogicalDevice());
-            ctx.closeWindow();
-        }
-        if (e.window.type == SDL_EVENT_WINDOW_RESIZED) {
-            signalResize();
-        }
-        if (e.window.type == SDL_EVENT_WINDOW_MINIMIZED) {
-            isPaused = true;
-        }
-        if (e.window.type == SDL_EVENT_WINDOW_RESTORED) {
-            isPaused = false;
-        }
-    }
 
     if(isPaused) return;
 

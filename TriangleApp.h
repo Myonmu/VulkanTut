@@ -106,6 +106,8 @@ private:
         mainPass = std::make_unique<RenderPassRecorder>(deviceCtx.get_renderPass_at(0));
         auto &mainRenderer = deviceCtx.get_windowContext_at(0).get_renderer();
         mainRenderer.recorder->enqueueCommand<EnqueueRenderPass>(*mainPass);
+        auto& otherRenderer = deviceCtx.get_windowContext_at(1).get_renderer();
+        otherRenderer.recorder->enqueueCommand<EnqueueRenderPass>(*mainPass);
 
         auto &swapchain = deviceCtx.get_windowContext_at(0).get_swapChain();
         auto &camera = ecs.entity("Camera")
@@ -202,6 +204,7 @@ private:
         for (auto const &device: context->deviceContexts) {
             for (auto const &window: device->windowContext) {
                 anyWindowAlive = true;
+                mainContext->renderer = &window->get_renderer();
                 window->get_renderer().drawFrame(*mainContext);
             }
         }
