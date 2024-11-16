@@ -63,7 +63,7 @@ private:
         transformPrefab = ecs.prefab("Transform").add<Position>().add<Rotation>().add<Scale>();
 
 
-        auto &deviceCtx = *context->deviceContexts[0];
+        auto &deviceCtx = context->get_deviceContexts_at(0);
         auto f = FileUtility::ReadSpv("./shaders/shader.vert.spv");
         shaders.emplace_back(f, VK_SHADER_STAGE_VERTEX_BIT);
         shaders.emplace_back(FileUtility::ReadSpv("./shaders/shader.frag.spv"), VK_SHADER_STAGE_FRAGMENT_BIT);
@@ -133,7 +133,7 @@ private:
             // window events
             auto windowId = e.window.windowID;
             try {
-                auto &windowCtx = context->deviceContexts[0]->getWindowContextFromSdlId(windowId);
+                auto &windowCtx = context->get_deviceContexts_at(0).getWindowContextFromSdlId(windowId);
                 switch (e.type) {
                     case SDL_EVENT_WINDOW_CLOSE_REQUESTED:
                         windowCtx.closeWindow();
@@ -219,6 +219,6 @@ private:
             //fmt::print(fg(fmt::color::aqua) | fmt::emphasis::bold, "^^^^^^ END FRAME {}\n", frameCounter);
             frameCounter++;
         }
-        vkDeviceWaitIdle(context->deviceContexts[0]->getLogicalDevice());
+        vkDeviceWaitIdle(context->get_deviceContexts_at(0).getLogicalDevice());
     }
 };
