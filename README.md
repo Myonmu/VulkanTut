@@ -68,6 +68,9 @@ As a generic engine, even if we do not need video encoding/decoding at the momen
 
 A final note, it is actually possible to not recreate everything, *if we are able to find another physical device that suits the needs*. We could simply run the window on another GPU... But that can cause significant headache afterwards as you might want to synchronize between different devices.
 
+*Multi-window rendering reusing the same render pass:*
+  ![image](https://github.com/user-attachments/assets/26518b13-2121-4658-9564-cda472b0c583)
+
 ### VkSwapchainKHR, VkRenderPass, and VkFrameBuffer
 
 This is perhaps another understated relationship in the tutorial. 
