@@ -20,7 +20,7 @@ void FrameBuffers::createFrameBuffers(const RenderPass& renderPass) {
         auto& color = colorAttachment.get_imageView_at(i);
         auto& depth = ctx.get_depthAttachment();
         auto& msaaTarget = ctx.get_msaaAttachment();
-        //TODO: generate this based on renderpass
+        //TODO: generate this based on renderpass (even better, signal creation of the attachments HERE)
         std::array<VkImageView,3> attachments = {
              msaaTarget,depth, color,
         };

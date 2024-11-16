@@ -192,3 +192,9 @@ Though, it isn't always true that between *Shader Asset* and *Descriptor Set Lay
 Different shaders can have the same *Descriptor Set Layout* if they have the same layout declarations (we don't care the variable names except for vertex input), and *Pipeline Layout* can be shared if they only differ in the data we provide (the content of the descriptor sets or push constants). This means shader code that only differ in method implementation, can use the same pipeline layout.
 
 Now recall that binding pipeline and binding descriptor sets are two distinct function calls: `vkCmdBindPipeline` and `vkCmdBindDescriptorSets`. Moreover, descriptor sets are bound to *pipeline layout* rather than pipeline (we bind them according to descriptor set layout, and the descriptor set layout is stored in pipeline layout). This further enhances that `VkPipeline` should be shared, because you could bind a pipeline, and then issue different pipelines with different draw calls   
+
+### Render Graph
+
+When Unity first launched Render Graph to replace the old SRP API, it was quite scary to write. I was never so certain why would I need to specify the resources I need to access in what way before calling rendering code. Actually, when I heard about Render Graph, I thought it was actually a graphical interface like Shader Graph. 
+
+After diving into vulkan and its Render Passes and Subpasses, I began to see the whole picture. What Render Graph does, essentially, is automatically resolving dependencies between passes (synchronization) and group sub passes into a render pass.

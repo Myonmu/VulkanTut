@@ -17,8 +17,8 @@ public:
             deviceContext.context.name, 800, 600,
             QueueFamily::QUEUE_FAMILY_GRAPHICS | QueueFamily::QUEUE_FAMILY_PRESENT | QueueFamily::QUEUE_FAMILY_TRANSFER
         );
-        //deviceContext.createWindow("extra window", 400, 300,
-        //    QueueFamily::QUEUE_FAMILY_GRAPHICS | QueueFamily::QUEUE_FAMILY_PRESENT);
+        deviceContext.createWindow("extra window", 400, 300,
+            QueueFamily::QUEUE_FAMILY_GRAPHICS | QueueFamily::QUEUE_FAMILY_PRESENT | QueueFamily::QUEUE_FAMILY_TRANSFER);
     }
 
     void createRenderPasses(DeviceContext &deviceContext) override {
@@ -33,7 +33,7 @@ public:
         };
         const auto passId = deviceContext.create_renderPass(attachments);
         deviceContext.bindRenderPassToWindow(0, passId);
-        //deviceContext.bindRenderPassToWindow(1, passId);
+        deviceContext.bindRenderPassToWindow(1, passId);
     }
 };
 

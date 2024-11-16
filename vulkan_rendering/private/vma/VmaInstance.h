@@ -7,7 +7,6 @@
 
 struct DeviceContext;
 
-// TODO: Stub.
 class VmaInstance {
     VmaAllocator allocator;
 

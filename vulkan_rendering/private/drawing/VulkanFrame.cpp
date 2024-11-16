@@ -36,6 +36,7 @@ void VulkanFrame::signalResize() {
 //TODO: Could this be modular?
 void VulkanFrame::drawFrame(uint32_t currentFrameIndex, RenderingContext& renderingCtx) {
 
+    //TODO: Multi-window support:
     const auto &device = context.getLogicalDevice();
     const auto &swapChain = context.get_swapChain();
     vkWaitForFences(device, 1, &inFlightFence, VK_TRUE, UINT64_MAX);
