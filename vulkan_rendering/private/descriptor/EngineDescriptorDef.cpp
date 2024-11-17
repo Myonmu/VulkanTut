@@ -11,6 +11,7 @@ EngineDescriptorSetCreateInfo EngineDescriptorDef::getSet(uint32_t setId) {
 
 
 #define BINDING_DECL_UBO(i) {i, DescriptorSetLayoutBinding{.binding = (i), .type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER}},
+#define BINDING_DECL_UBO_SIZE(i, type) {static_cast<uint32_t>(i), static_cast<uint32_t>(sizeof(type))},
 
 std::map<uint32_t, EngineDescriptorSetCreateInfo> EngineDescriptorDef::descriptorSets{
     // set 0: per-frame
@@ -19,14 +20,13 @@ std::map<uint32_t, EngineDescriptorSetCreateInfo> EngineDescriptorDef::descripto
         EngineDescriptorSetCreateInfo{
             .setId = 0,
             .bindings = {
-                // Camera ubo data
-                BINDING_DECL_UBO(0)
+                BINDING_DECL_UBO(0) // Camera ubo data
             },
             .poolSizes = {
                 DescriptorAllocator::PoolSizeRatio{.type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, .ratio = 1.f}
             },
             .bufferSizes = {
-                {static_cast<uint32_t>(0), static_cast<uint32_t>(sizeof(CameraUboData))} // Camera ubo data
+                BINDING_DECL_UBO_SIZE(0, CameraUboData) // Camera ubo data
             }
         }
     },

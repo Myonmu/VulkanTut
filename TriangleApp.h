@@ -157,24 +157,11 @@ private:
     }
 
     bool prepareRenderLoop() {
-        ecs.system<Position, Rotation, Scale, MeshRenderer>("UpdatePerObjectUBO").kind(flecs::PreStore).each(
-            [](Position &p, Rotation &r, Scale &s, MeshRenderer &renderer) {
-                const auto modelMatrix = Transform::getModelMatrix(p, r, s);
-                renderer.vertexPushConstants.model = modelMatrix;
-            }
-        );
-
-        ecs.system<Position, Rotation, Scale, MeshRendererSplitBuffer>("UpdatePerObjectUBOSplit").kind(flecs::PreStore).
-                each(
-                    [](Position &p, Rotation &r, Scale &s, MeshRendererSplitBuffer &renderer) {
-                        const auto modelMatrix = Transform::getModelMatrix(p, r, s);
-                        renderer.vertexPushConstants.model = modelMatrix;
-                    }
-                );
-
         mainPass->clear();
         mainPass->enqueueCommand<SetViewport>();
         mainPass->enqueueCommand<SetScissors>();
+
+        // TODO: Move to ECS system (currently they depend on main context and main pass, refactor this dependency)
         ecs.system<MeshRenderer>("RenderMesh").kind(flecs::OnStore).each(
             [this](MeshRenderer &renderer) {
                 renderer.enqueueDrawCall(*mainContext, *mainPass);

@@ -24,6 +24,7 @@ add_executable(VulkanTut
         scripts/SimplePhysics.h
         scripts/MeshRotate.h
         scripts/EventSystem.h
+        scripts/MeshRendering.h
 )
 
 # Link dependencies

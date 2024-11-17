@@ -42,6 +42,7 @@ public:
                 query.build();
                 query.each([&evt](flecs::entity entity, Rotation &rot, Flycam &f) {
                     if (auto e = evt.currentEvent; e.type == SDL_EVENT_MOUSE_MOTION) {
+                        //TODO: gimbal lock
                         f.yaw += e.motion.xrel * f.mouseSensitivity;
                         f.pitch -= e.motion.yrel * f.mouseSensitivity;
                         glm::quat pitchRotation = glm::angleAxis(f.pitch, glm::vec3{1.f, 0.f, 0.f});
