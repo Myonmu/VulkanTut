@@ -3,12 +3,20 @@
 //
 
 #pragma once
+#include <map>
 #include <SwapChain.h>
 #include <glm/mat4x4.hpp>
+#include "DescriptorPoolAllocator.h"
+#include "DescriptorSetLayoutBinding.h"
 
 
 struct Rotation;
 struct Position;
+
+struct CameraUboData {
+    glm::mat4 view;
+    glm::mat4 projection;
+};
 
 //TODO: Support ortho camera
 class Camera {

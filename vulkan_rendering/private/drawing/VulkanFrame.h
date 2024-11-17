@@ -6,29 +6,58 @@
 
 #include <CommandBufferRecorder.h>
 #include <vulkan/vulkan_core.h>
-
+#include <map>
 #include "DescriptorPoolAllocator.h"
+#include "DescriptorSetLayout.h"
+#include "DescriptorWriter.h"
+#include "EngineDescriptorDef.h"
 #include "FrameInfo.h"
-
 
 struct RenderingContext;
 struct WindowContext;
 class CommandBuffer;
 
-struct PerFrameResources {
-    std::unique_ptr<DescriptorAllocator> frameDescriptorAllocator;
+#define PER_FRAME_SET_ID 0
+
+class PerFrameDescriptorAllocator {
+    friend struct PerFrameDescriptorSet;
+
+    std::unique_ptr<DescriptorSetLayout> layout;
+    std::unique_ptr<DescriptorAllocator> allocator;
+    EngineDescriptorSetCreateInfo createInfo;
+
+    [[nodiscard]] std::unique_ptr<DescriptorSet> allocate() const;
+public:
+    explicit PerFrameDescriptorAllocator(WindowContext& ctx);
+    PerFrameDescriptorAllocator(WindowContext& ctx, EngineDescriptorSetCreateInfo createInfo);
+    ~PerFrameDescriptorAllocator() = default;
+};
+
+// Set 1, binding 0 = camera data
+struct PerFrameDescriptorSet {
+    const WindowContext& ctx;
+    std::unique_ptr<DescriptorSet> perFrameSet;
+    std::map<uint32_t, std::unique_ptr<Buffer>> buffers;
+    std::unique_ptr<DescriptorWriter> writer;
+    PerFrameDescriptorSet(WindowContext& ctx, PerFrameDescriptorAllocator& allocator);
+    void writeBuffer(uint32_t binding, void* data, uint32_t size);
+    void updateSet() const;
 };
 
 class VulkanFrame {
 public:
-    explicit VulkanFrame(WindowContext& context);
+    VulkanFrame(WindowContext &context, VulkanRenderer& renderer);
+
     ~VulkanFrame();
 
-    void drawFrame(uint32_t currentFrameIndex, RenderingContext& renderingCtx);
+    void drawFrame(uint32_t currentFrameIndex, RenderingContext &renderingCtx);
 
     void signalResize();
+
+    CTX_PROPERTY(PerFrameDescriptorSet, perFrameDescriptorSet)
+
 private:
-    WindowContext& context;
+    WindowContext &context;
     CommandBuffer commandBuffer;
     FrameInfo frameInfo{};
 
@@ -39,4 +68,3 @@ private:
 
     bool frameBufferResized = false;
 };
-

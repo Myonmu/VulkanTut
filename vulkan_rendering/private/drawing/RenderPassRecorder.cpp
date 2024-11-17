@@ -33,9 +33,9 @@ void RenderPassRecorder::recordRenderPass(const CommandBuffer &commandBuffer, co
     // TODO: Move clear values to ColorAttachment and DepthAttachment classes
     // TODO: Generate this based on render pass
     std::array<VkClearValue, 3> clearValues{};
-    clearValues[0].color = {{0.0f, 0.0f, 0.0f, 1.0f}};
+    clearValues[0].color = {{0.0f, 0.0f, 0.0f, 0.0f}};
     clearValues[1].depthStencil = {1.0f, 0};
-    clearValues[2].color = {{0.0f, 0.0f, 0.0f, 1.0f}};
+    clearValues[2].color = {{0.0f, 0.0f, 0.0f, 0.0f}};
 
 
     renderPassInfo.clearValueCount = clearValues.size();

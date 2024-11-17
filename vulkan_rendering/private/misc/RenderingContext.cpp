@@ -6,17 +6,10 @@
 
 #include <DescriptorSetLayout.h>
 #include <VulkanAppContext.h>
+#include <VulkanFrame.h>
 
 #include "DescriptorWriter.h"
 #include "FrameInfo.h"
-
-std::map<uint32_t, DescriptorSetLayoutBinding> PerSceneRenderingData::bindings = {
-    {0, {.binding = 0, .type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER}},
-};
-
-std::vector<DescriptorAllocator::PoolSizeRatio> PerSceneRenderingData::poolSizes = {
-    {.type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER , .ratio = 2}
-};
 
 VkPushConstantRange PerObjectVertexPushConstants::getPushConstantsRange() {
     return {
@@ -28,28 +21,14 @@ VkPushConstantRange PerObjectVertexPushConstants::getPushConstantsRange() {
 
 RenderingContext::RenderingContext(DeviceContext& ctx)
     : SubContext(ctx){
-    perSceneDescriptorLayout = std::make_unique<DescriptorSetLayout>(ctx, 0,  PerSceneRenderingData::bindings);
-    descriptorAllocator = std::make_unique<DescriptorAllocator>(ctx);
-    descriptorAllocator->init(1000, PerSceneRenderingData::poolSizes);
-    perSceneUbo = std::make_unique<PerFrameBufferGroup>(ctx, sizeof(PerSceneRenderingData));
-    auto framesInFlight = ctx.context.MAX_FRAMES_IN_FLIGHT;
-    auto windowCount = ctx.windowContext.size(); //TODO: This may change during runtime (especially when increasing)
-    for(int i = 0 ; i < framesInFlight * windowCount; ++i) {
-        perFrameSets.emplace_back(descriptorAllocator->allocate(*perSceneDescriptorLayout));
-    }
 }
 
 
 void RenderingContext::prepareFrame(const FrameInfo &frameInfo) {
-    auto framesInFlight = context.context.MAX_FRAMES_IN_FLIGHT;
-    auto& perFrameSet = *perFrameSets[frameInfo.currentFrameIndex + framesInFlight * frameInfo.windowId];
-    DescriptorWriter writer{};
-    perSceneUbo->CopyMemoryToBuffer(frameInfo.currentFrameIndex, &perSceneData, sizeof(PerSceneRenderingData));
-    auto& buffer = (*perSceneUbo)[frameInfo.currentFrameIndex];
-    writer.writeBuffer(0, buffer,
-        sizeof(perSceneData), 0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER);
-    writer.updateSet(context.get_logicalDevice(),perFrameSet);
-
+    auto& frame = renderer->getCurrentFrame();
+    auto& perFrameSet =  frame.get_perFrameDescriptorSet();
+    perFrameSet.writeBuffer(0, &cameraUboData, sizeof(CameraUboData));
+    perFrameSet.updateSet();
     f();
 }
 

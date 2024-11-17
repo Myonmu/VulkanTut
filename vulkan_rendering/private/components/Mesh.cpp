@@ -5,6 +5,7 @@
 #include "Mesh.h"
 
 #include <VulkanAppContext.h>
+#include <VulkanFrame.h>
 
 #include "CBC_Drawing.h"
 #include "CBC_Misc.h"
@@ -20,7 +21,6 @@ MeshRendererSplitBuffer::MeshRendererSplitBuffer(
 }
 
 void MeshRendererSplitBuffer::enqueueDrawCall(RenderingContext &ctx, RenderPassRecorder &renderPassRecorder) {
-    auto frameInfo = ctx.renderer->getCurrentFrameInfo();
 
     recorder.clear();
 
@@ -30,8 +30,9 @@ void MeshRendererSplitBuffer::enqueueDrawCall(RenderingContext &ctx, RenderPassR
     recorder.enqueueCommand<BindVertexBuffer>(vertexBuffer);
     recorder.enqueueCommand<BindIndexBuffer>(indexBuffer);
 
-    recorder.enqueueCommand<BindDescriptorSet>(materialInstance.getPipelineLayout(),
-                                               *ctx.perFrameSets[frameInfo.currentFrameIndex], 0);
+    // bind per-frame set
+    auto& perFrameSet = *ctx.renderer->getCurrentFrame().get_perFrameDescriptorSet().perFrameSet;
+    recorder.enqueueCommand<BindDescriptorSet>(materialInstance.getPipelineLayout(),perFrameSet, PER_FRAME_SET_ID);
 
     for (auto &[setId, set]: materialInstance.descriptorSets) {
         if (setId <= 0)continue; // 0 is reserved for global set
@@ -51,8 +52,6 @@ MeshRenderer::MeshRenderer(DeviceContext &ctx, const MeshBuffer &meshBuffer, con
 }
 
 void MeshRenderer::enqueueDrawCall(RenderingContext &ctx, RenderPassRecorder &renderPassRecorder) {
-    auto frameInfo = ctx.renderer->getCurrentFrameInfo();
-
     recorder.clear();
 
     // TODO: same pipeline could be batched
@@ -60,10 +59,9 @@ void MeshRenderer::enqueueDrawCall(RenderingContext &ctx, RenderPassRecorder &re
 
     recorder.enqueueCommand<BindMeshBuffer>(meshBuffer);
 
-    auto framesInFlight = ctx.context.context.MAX_FRAMES_IN_FLIGHT;
-    auto offset = framesInFlight * frameInfo.windowId;
-    recorder.enqueueCommand<BindDescriptorSet>(materialInstance.getPipelineLayout(),
-                                               *ctx.perFrameSets[frameInfo.currentFrameIndex + offset], 0);
+    // bind per-frame set
+    auto& perFrameSet = *ctx.renderer->getCurrentFrame().get_perFrameDescriptorSet().perFrameSet;
+    recorder.enqueueCommand<BindDescriptorSet>(materialInstance.getPipelineLayout(),perFrameSet, PER_FRAME_SET_ID);
 
     for (auto &[setId, set]: materialInstance.descriptorSets) {
         if (setId <= 0)continue; // 0 is reserved for global set

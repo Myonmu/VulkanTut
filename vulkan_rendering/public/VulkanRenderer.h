@@ -7,6 +7,7 @@
 #include <CommandBufferRecorder.h>
 #include <vector>
 
+class PerFrameDescriptorAllocator;
 struct RenderingContext;
 struct WindowContext;
 class VulkanFrame;
@@ -30,8 +31,9 @@ public:
 
     bool isPaused { false };
 private:
-
+    friend class VulkanFrame;
     WindowContext& ctx;
+    std::unique_ptr<PerFrameDescriptorAllocator> perFrameAllocator;
     std::vector<std::unique_ptr<VulkanFrame>> frames;
     uint32_t currentFrame = 0;
 };

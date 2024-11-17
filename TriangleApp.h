@@ -187,9 +187,9 @@ private:
 
         ecs.system<Rotation, Position, Camera>("RenderCamera").kind(flecs::OnStore).each(
             [this](Rotation &t, Position &p, Camera &cam) {
-                auto &perSceneData = mainContext->perSceneData;
-                perSceneData.projection = cam.getProjectionMatrix();
-                perSceneData.view = Camera::getViewMatrix(p, t);
+                auto &cameraData = mainContext->cameraUboData;
+                cameraData.projection = cam.getProjectionMatrix();
+                cameraData.view = Camera::getViewMatrix(p, t);
             }
         );
         if (const auto result = ecs.progress(); !result) {

@@ -5,13 +5,57 @@
 #include "VulkanFrame.h"
 #include "CommandBuffer.h"
 #define GLM_ENABLE_EXPERIMENTAL
+#include <DescriptorSetLayout.h>
+
 #include "DeviceContext.h"
 #include "FrameInfo.h"
 #include "RenderingContext.h"
 #include <fmt/core.h>
 
-VulkanFrame::VulkanFrame(WindowContext &context): context(context),
-                                                  commandBuffer(context.context, QueueFamily::QUEUE_FAMILY_GRAPHICS) {
+PerFrameDescriptorAllocator::PerFrameDescriptorAllocator(WindowContext &ctx): PerFrameDescriptorAllocator(
+    ctx, EngineDescriptorDef::getSet(PER_FRAME_SET_ID)) {
+}
+
+PerFrameDescriptorAllocator::PerFrameDescriptorAllocator(WindowContext &ctx,
+                                                         EngineDescriptorSetCreateInfo createInfo)
+    : createInfo(createInfo) {
+    layout = std::make_unique<DescriptorSetLayout>(ctx.context, PER_FRAME_SET_ID, createInfo.bindings);
+    allocator = std::make_unique<DescriptorAllocator>(ctx.context);
+    allocator->init(2, createInfo.poolSizes);
+}
+
+std::unique_ptr<DescriptorSet> PerFrameDescriptorAllocator::allocate() const {
+    return allocator->allocate(*layout);
+}
+
+PerFrameDescriptorSet::PerFrameDescriptorSet(WindowContext &ctx,
+                                             PerFrameDescriptorAllocator &allocator): ctx(ctx) {
+    writer = std::make_unique<DescriptorWriter>();
+    perFrameSet = allocator.allocate();
+    for (auto &[id, binding]: allocator.createInfo.bindings) {
+        //TODO: other types of buffer?
+        if (binding.type == VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER) {
+            buffers.emplace(id, std::make_unique<Buffer>(
+                                ctx.context, allocator.createInfo.bufferSizes[id],
+                                VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
+                                VMA_MEMORY_USAGE_CPU_TO_GPU)
+            );
+        }
+    }
+}
+
+void PerFrameDescriptorSet::writeBuffer(uint32_t binding, void *data, uint32_t size) {
+    buffers[binding]->copyToBufferMemory(data, 0, size);
+    writer->writeBuffer(binding, *buffers[binding], size, 0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER);
+}
+
+void PerFrameDescriptorSet::updateSet() const {
+    writer->updateSet(ctx.getLogicalDevice(), *perFrameSet);
+}
+
+VulkanFrame::VulkanFrame(WindowContext &context, VulkanRenderer &renderer)
+    : context(context),
+      commandBuffer(context.context, QueueFamily::QUEUE_FAMILY_GRAPHICS) {
     VkSemaphoreCreateInfo semaphoreInfo{};
     semaphoreInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
     VkFenceCreateInfo fenceInfo{};
@@ -27,6 +71,8 @@ VulkanFrame::VulkanFrame(WindowContext &context): context(context),
         vkCreateFence(context.getLogicalDevice(), &fenceInfo, nullptr, &inFlightFence) != VK_SUCCESS) {
         throw std::runtime_error("failed to create semaphores!");
     }
+
+    perFrameDescriptorSet = std::make_unique<PerFrameDescriptorSet>(context, *renderer.perFrameAllocator);
 }
 
 void VulkanFrame::signalResize() {
@@ -34,9 +80,7 @@ void VulkanFrame::signalResize() {
 }
 
 //TODO: Could this be modular?
-void VulkanFrame::drawFrame(uint32_t currentFrameIndex, RenderingContext& renderingCtx) {
-
-    //TODO: Multi-window support:
+void VulkanFrame::drawFrame(uint32_t currentFrameIndex, RenderingContext &renderingCtx) {
     const auto &device = context.getLogicalDevice();
     const auto &swapChain = context.get_swapChain();
     vkWaitForFences(device, 1, &inFlightFence, VK_TRUE, UINT64_MAX);
@@ -81,7 +125,7 @@ void VulkanFrame::drawFrame(uint32_t currentFrameIndex, RenderingContext& render
     submitInfo.signalSemaphoreCount = 1;
     submitInfo.pSignalSemaphores = signalSemaphores;
 
-    if (const auto& queue = context.context.getCommonQueueContext(QueueFamily::QUEUE_FAMILY_GRAPHICS).get_queue();
+    if (const auto &queue = context.context.getCommonQueueContext(QueueFamily::QUEUE_FAMILY_GRAPHICS).get_queue();
         vkQueueSubmit(queue, 1, &submitInfo, inFlightFence) != VK_SUCCESS) {
         throw std::runtime_error("failed to submit draw command buffer");
     }
@@ -97,7 +141,7 @@ void VulkanFrame::drawFrame(uint32_t currentFrameIndex, RenderingContext& render
     presentInfo.pImageIndices = &imageIndex;
     presentInfo.pResults = nullptr;
 
-    auto& presentQueue = context.context.getPresentQueueContext(context.get_surface()).get_queue();
+    auto &presentQueue = context.context.getPresentQueueContext(context.get_surface()).get_queue();
     result = vkQueuePresentKHR(presentQueue, &presentInfo);
     if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR || frameBufferResized) {
         frameBufferResized = false;

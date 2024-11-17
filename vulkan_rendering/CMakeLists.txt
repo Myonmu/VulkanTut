@@ -105,6 +105,10 @@ set(SOURCES
         private/model_loading/GltfLoader.h
         private/model_loading/ObjLoader.cpp
         private/model_loading/ObjLoader.h
+        private/components/Lights.cpp
+        private/components/Lights.h
+        private/descriptor/EngineDescriptorDef.h
+        private/descriptor/EngineDescriptorDef.cpp
 )
 
 # Create static library
