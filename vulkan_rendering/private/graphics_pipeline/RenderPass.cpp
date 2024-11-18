@@ -47,31 +47,44 @@ RenderPass::RenderPass(DeviceContext &context, std::vector<AttachmentRef> &attac
     }
 
     // TODO: dynamic subpass creation
-    VkSubpassDescription mrt{};
-    mrt.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
-    mrt.colorAttachmentCount = 1;
-    mrt.pColorAttachments = colorAttachments.data();
-    mrt.pDepthStencilAttachment = depthStencilAttachments.data();
-    mrt.pResolveAttachments = resolveAttachments.data();
+    VkSubpassDescription subpass{};
+    subpass.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
+    subpass.colorAttachmentCount = colorAttachments.size();
+    subpass.pColorAttachments = colorAttachments.data();
+    subpass.pDepthStencilAttachment = depthStencilAttachments.data();
+    subpass.pResolveAttachments = resolveAttachments.data();
 
-    VkSubpassDependency dependency{};
-    dependency.srcSubpass = VK_SUBPASS_EXTERNAL;
-    dependency.dstSubpass = 0;
-    dependency.srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT |
-                              VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
-    dependency.srcAccessMask = 0;
-    dependency.dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT |
-                              VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
-    dependency.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT | VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
+    // This is just the GBuffer pass, NOT the lighting pass. The example splits them into 2 separate render passes.
+    // But it is more optimal to combine them into the same pass but with 2 sub passes.
+    VkSubpassDependency dependency1{};
+    dependency1.srcSubpass = VK_SUBPASS_EXTERNAL;
+    dependency1.dstSubpass = 0;
+    dependency1.srcStageMask = VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT ;
+    dependency1.dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+    dependency1.srcAccessMask = VK_ACCESS_MEMORY_READ_BIT;
+    dependency1.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_READ_BIT | VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+    dependency1.dependencyFlags = VK_DEPENDENCY_BY_REGION_BIT;
+
+    VkSubpassDependency dependency2{};
+    dependency2.srcSubpass = 0;
+    dependency2.dstSubpass = VK_SUBPASS_EXTERNAL;
+    dependency2.srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+    dependency2.dstStageMask = VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT;
+    dependency2.srcAccessMask = VK_ACCESS_COLOR_ATTACHMENT_READ_BIT | VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+    dependency2.dstAccessMask = VK_ACCESS_MEMORY_READ_BIT;
+    dependency2.dependencyFlags = VK_DEPENDENCY_BY_REGION_BIT;
+
+    std::array subPasses = {subpass};
+    std::array dependencies = {dependency1, dependency2};
 
     VkRenderPassCreateInfo renderPassInfo{};
     renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
     renderPassInfo.attachmentCount = static_cast<uint32_t>(attachmentDesc.size());
     renderPassInfo.pAttachments = attachmentDesc.data();
-    renderPassInfo.subpassCount = 1;
-    renderPassInfo.pSubpasses = &mrt;
-    renderPassInfo.dependencyCount = 1;
-    renderPassInfo.pDependencies = &dependency;
+    renderPassInfo.subpassCount = subPasses.size();
+    renderPassInfo.pSubpasses = subPasses.data();
+    renderPassInfo.dependencyCount = dependencies.size();
+    renderPassInfo.pDependencies = dependencies.data();
 
     if (vkCreateRenderPass(ctx.getLogicalDevice(),
                            &renderPassInfo, nullptr,
