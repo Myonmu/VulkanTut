@@ -25,11 +25,15 @@ public:
         auto& window = deviceContext.get_windowContext_at(0);
         auto& color = window.get_colorAttachment();
         auto& depth = window.get_depthAttachment();
-        auto& msaa = window.get_msaaAttachment();
+        auto& albedo = window.get_gbufferAlbedo();
+        auto& normal = window.get_gbufferNormal();
+        auto& pos = window.get_gbufferPosition();
         std::vector<AttachmentRef> attachments = {
-            AttachmentRef{0, msaa, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL},
-            AttachmentRef{1, depth, VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL},
-            AttachmentRef{2, color, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL},
+            AttachmentRef{0, pos, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL},
+            AttachmentRef{1, normal, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL},
+            AttachmentRef{2, albedo, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL},
+            AttachmentRef{3, depth, VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL},
+            AttachmentRef{4, color, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL},
         };
         const auto passId = deviceContext.create_renderPass(attachments);
         deviceContext.bindRenderPassToWindow(0, passId);

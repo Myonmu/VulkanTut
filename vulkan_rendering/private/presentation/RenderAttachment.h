@@ -3,6 +3,7 @@
 //
 
 #pragma once
+#include <map>
 #include <vector>
 
 #include "ContextMacros.h"
@@ -16,7 +17,8 @@ class SwapChain;
 enum class AttachmentType {
     MSAA,
     DEPTH_STENCIL,
-    PRESENT
+    PRESENT,
+    TRANSIENT_COLOR
 };
 
 class RenderAttachment {
@@ -117,7 +119,7 @@ public:
 
     void recreate();
 
-    AttachmentType getAttachmentType() const override { return type; };
+    [[nodiscard]] AttachmentType getAttachmentType() const override { return type; };
 
     operator VkImageView() const { return *depthImageView; }
 };

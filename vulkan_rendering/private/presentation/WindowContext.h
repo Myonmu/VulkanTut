@@ -33,7 +33,9 @@ struct WindowContext : public SubContext<DeviceContext>{
     CTX_PROPERTY(SwapChain, swapChain)
     //TODO: make attachments dynamic (attachment list rather than hard coded properties)
     CTX_PROPERTY(PresentColorAttachment, colorAttachment)
-    CTX_PROPERTY(ColorAttachment, msaaAttachment)
+    CTX_PROPERTY(ColorAttachment, gbufferAlbedo)
+    CTX_PROPERTY(ColorAttachment, gbufferNormal)
+    CTX_PROPERTY(ColorAttachment, gbufferPosition)
     CTX_PROPERTY(DepthAttachment, depthAttachment)
     // requires render pass
     CTX_PROPERTY(FrameBuffers, frameBuffers)

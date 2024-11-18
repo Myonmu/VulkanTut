@@ -47,12 +47,12 @@ RenderPass::RenderPass(DeviceContext &context, std::vector<AttachmentRef> &attac
     }
 
     // TODO: dynamic subpass creation
-    VkSubpassDescription subpass{};
-    subpass.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
-    subpass.colorAttachmentCount = 1;
-    subpass.pColorAttachments = colorAttachments.data();
-    subpass.pDepthStencilAttachment = depthStencilAttachments.data();
-    subpass.pResolveAttachments = resolveAttachments.data();
+    VkSubpassDescription mrt{};
+    mrt.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
+    mrt.colorAttachmentCount = 1;
+    mrt.pColorAttachments = colorAttachments.data();
+    mrt.pDepthStencilAttachment = depthStencilAttachments.data();
+    mrt.pResolveAttachments = resolveAttachments.data();
 
     VkSubpassDependency dependency{};
     dependency.srcSubpass = VK_SUBPASS_EXTERNAL;
@@ -69,7 +69,7 @@ RenderPass::RenderPass(DeviceContext &context, std::vector<AttachmentRef> &attac
     renderPassInfo.attachmentCount = static_cast<uint32_t>(attachmentDesc.size());
     renderPassInfo.pAttachments = attachmentDesc.data();
     renderPassInfo.subpassCount = 1;
-    renderPassInfo.pSubpasses = &subpass;
+    renderPassInfo.pSubpasses = &mrt;
     renderPassInfo.dependencyCount = 1;
     renderPassInfo.pDependencies = &dependency;
 

@@ -92,7 +92,7 @@ VkAttachmentDescription PresentColorAttachment::getAttachmentDescription() const
     // VkRenderPass can be shared between swap chains
     colorAttachment.format = format;
     colorAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
-    colorAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+    colorAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
     colorAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
     colorAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
     colorAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
@@ -123,7 +123,7 @@ DepthAttachment::DepthAttachment(const WindowContext &ctx)
           VK_FORMAT_D32_SFLOAT,
           VK_FORMAT_D32_SFLOAT_S8_UINT,
           VK_FORMAT_D24_UNORM_S8_UINT
-      })), msaaSamples(ctx.get_physicalDevice().getMaxMsaaSampleCount()) {
+      })), msaaSamples(VK_SAMPLE_COUNT_1_BIT) {
     create();
 }
 
@@ -144,7 +144,9 @@ void DepthAttachment::create() {
         VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, 1,
         msaaSamples,
         false);
-    depthImageView = std::make_unique<ImageView>(ctx.context, *depthImage, format, VK_IMAGE_ASPECT_DEPTH_BIT);
+    VkImageAspectFlags aspect = VK_IMAGE_ASPECT_DEPTH_BIT;
+    if (format >= VK_FORMAT_D16_UNORM_S8_UINT) aspect |= VK_IMAGE_ASPECT_STENCIL_BIT;
+    depthImageView = std::make_unique<ImageView>(ctx.context, *depthImage, format, aspect);
 }
 
 VkAttachmentDescription DepthAttachment::getAttachmentDescription() const {
