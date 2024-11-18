@@ -8,6 +8,12 @@
 #include "LogicalDevice.h"
 
 
+AttachmentRef::AttachmentRef(uint32_t id, const RenderAttachment &attachment, VkImageLayout layout)
+    : index(id), type(attachment.getAttachmentType())
+      , description(attachment.getAttachmentDescription()), layout(layout) {
+}
+
+
 void ColorAttachment::create() {
     auto &swapChain = ctx.get_swapChain();
     format = swapChain.swapChainImageFormat;
@@ -24,7 +30,7 @@ void ColorAttachment::create() {
 }
 
 ColorAttachment::ColorAttachment(const WindowContext &ctx, VkSampleCountFlagBits msaaSamples, AttachmentType type)
-    : ctx(ctx),type(type), msaaSamples(msaaSamples) {
+    : ctx(ctx), type(type), msaaSamples(msaaSamples) {
     create();
 }
 
@@ -46,7 +52,6 @@ VkAttachmentDescription ColorAttachment::getAttachmentDescription() const {
     colorAttachment.finalLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
     return colorAttachment;
 }
-
 
 
 void PresentColorAttachment::create() {

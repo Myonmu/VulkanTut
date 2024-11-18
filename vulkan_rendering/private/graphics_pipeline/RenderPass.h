@@ -11,6 +11,11 @@
 
 struct AttachmentRef;
 struct DeviceContext;
+
+class SubPass {
+
+};
+
 class RenderPass : public VulkanResource<VkRenderPass, DeviceContext>{
 public:
     RenderPass(DeviceContext& context, std::vector<AttachmentRef>& attachments);

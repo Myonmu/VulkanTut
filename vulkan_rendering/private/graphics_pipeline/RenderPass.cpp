@@ -19,8 +19,8 @@ RenderPass::RenderPass(DeviceContext &context, std::vector<AttachmentRef> &attac
     std::vector<VkAttachmentReference> resolveAttachments{};
     bool containsMsaa = false;
     for (auto &attachmentRef: attachments) {
-        attachmentDesc[attachmentRef.index] = attachmentRef.attachment.getAttachmentDescription();
-        if (attachmentRef.attachment.getAttachmentType() == AttachmentType::MSAA) {
+        attachmentDesc[attachmentRef.index] = attachmentRef.description;
+        if (attachmentRef.type == AttachmentType::MSAA) {
             containsMsaa = true;
         }
     }
@@ -30,7 +30,7 @@ RenderPass::RenderPass(DeviceContext &context, std::vector<AttachmentRef> &attac
             .attachment = attachmentRef.index,
             .layout = attachmentRef.layout
         };
-        switch (attachmentRef.attachment.getAttachmentType()) {
+        switch (attachmentRef.type) {
             case AttachmentType::PRESENT:
                 if (containsMsaa)
                     resolveAttachments.push_back(ref);
@@ -45,39 +45,6 @@ RenderPass::RenderPass(DeviceContext &context, std::vector<AttachmentRef> &attac
                 break;
         }
     }
-
-
-    /*
-    VkAttachmentDescription colorAttachment{};
-    // we *may* use swap chain image format but not necessarily.
-    // VkRenderPass can be shared between swap chains
-    colorAttachment.format = colorAttachmentFormat;
-    colorAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
-    colorAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
-    colorAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
-    colorAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
-    colorAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-    colorAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-    colorAttachment.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
-
-    VkAttachmentReference colorAttachmentRef{};
-    colorAttachmentRef.attachment = 0;
-    colorAttachmentRef.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-
-    VkAttachmentDescription depthAttachment{};
-    depthAttachment.format = depthAttachmentFormat;
-    depthAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
-    depthAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
-    depthAttachment.storeOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-    depthAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
-    depthAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-    depthAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-    depthAttachment.finalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
-
-    VkAttachmentReference depthAttachmentRef{};
-    depthAttachmentRef.attachment = 1;
-    depthAttachmentRef.layout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
-    */
 
     // TODO: dynamic subpass creation
     VkSubpassDescription subpass{};

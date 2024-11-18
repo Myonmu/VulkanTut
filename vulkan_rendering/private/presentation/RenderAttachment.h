@@ -30,8 +30,12 @@ public:
 
 struct AttachmentRef {
     uint32_t index;
-    RenderAttachment &attachment;
+    AttachmentType type;
+    VkAttachmentDescription description;
     VkImageLayout layout;
+
+    AttachmentRef() = default;
+    AttachmentRef(uint32_t id, const RenderAttachment& attachment, VkImageLayout layout);
 };
 
 class ColorAttachment : public RenderAttachment {
