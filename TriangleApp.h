@@ -103,10 +103,17 @@ private:
                 .is_a(transformPrefab);
 
 
+        auto &light = ecs.entity("Main Light")
+                .set(MainLight{
+                    .direction = glm::normalize(glm::vec3{-1.f, -2.f, -1.f}),
+                    .color = {1.f, 1.f, 1.f}
+                });
+
+
         mainPass = std::make_unique<RenderPassRecorder>(deviceCtx.get_renderPass_at(0));
         auto &mainRenderer = deviceCtx.get_windowContext_at(0).get_renderer();
         mainRenderer.recorder->enqueueCommand<EnqueueRenderPass>(*mainPass);
-        auto& otherRenderer = deviceCtx.get_windowContext_at(1).get_renderer();
+        auto &otherRenderer = deviceCtx.get_windowContext_at(1).get_renderer();
         otherRenderer.recorder->enqueueCommand<EnqueueRenderPass>(*mainPass);
 
         auto &swapchain = deviceCtx.get_windowContext_at(0).get_swapChain();
@@ -177,6 +184,14 @@ private:
                 auto &cameraData = mainContext->cameraUboData;
                 cameraData.projection = cam.getProjectionMatrix();
                 cameraData.view = Camera::getViewMatrix(p, t);
+            }
+        );
+        //TODO: currently only support 1 main light, subsequent main lights overwrite the previous
+        ecs.system<MainLight>("MainLight").kind(flecs::OnStore).each(
+            [this](MainLight &l) {
+                auto &lightData = mainContext->mainLightUboData;
+                lightData.color = glm::vec4(l.color, 1.0f);
+                lightData.direction = glm::vec4(l.direction, 0.0f);
             }
         );
         if (const auto result = ecs.progress(); !result) {

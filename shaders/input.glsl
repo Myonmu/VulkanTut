@@ -3,3 +3,7 @@ layout(set = 0, binding = 0) uniform SceneUbo {
     mat4 proj;
 } sceneUbo;
 
+layout(set = 0, binding = 1) uniform MainLight{
+    vec4 direction;
+    vec4 color;
+} mainLight;

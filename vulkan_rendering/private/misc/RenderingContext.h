@@ -5,12 +5,9 @@
 #pragma once
 #include <CommandBufferRecorder.h>
 #include <functional>
-#include <map>
-
 #include "Camera.h"
 #include "DescriptorPoolAllocator.h"
-#include "DescriptorSetLayoutBinding.h"
-#include "PerFrameBufferGroup.h"
+#include "Lights.h"
 
 
 struct PerObjectVertexPushConstants {
@@ -23,6 +20,7 @@ struct PerObjectVertexPushConstants {
 
 struct RenderingContext: public SubContext<DeviceContext> {
     CameraUboData cameraUboData{};
+    MainLightUboData mainLightUboData{};
     VulkanRenderer* renderer;
 
     explicit RenderingContext(DeviceContext& ctx);

@@ -3,10 +3,15 @@
 //
 
 #pragma once
+#include <glm/vec3.hpp>
 #include <glm/vec4.hpp>
 
-struct MainLightData {
-    glm::vec4 color;
+struct MainLightUboData {
     glm::vec4 direction;
+    glm::vec4 color;
 };
 
+struct MainLight {
+    glm::vec3 direction;
+    glm::vec3 color;
+};

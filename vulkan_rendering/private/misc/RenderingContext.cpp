@@ -3,13 +3,9 @@
 //
 
 #include "RenderingContext.h"
-
 #include <DescriptorSetLayout.h>
-#include <VulkanAppContext.h>
 #include <VulkanFrame.h>
 
-#include "DescriptorWriter.h"
-#include "FrameInfo.h"
 
 VkPushConstantRange PerObjectVertexPushConstants::getPushConstantsRange() {
     return {
@@ -28,6 +24,7 @@ void RenderingContext::prepareFrame(const FrameInfo &frameInfo) {
     auto& frame = renderer->getCurrentFrame();
     auto& perFrameSet =  frame.get_perFrameDescriptorSet();
     perFrameSet.writeBuffer(0, &cameraUboData, sizeof(CameraUboData));
+    perFrameSet.writeBuffer(1, &mainLightUboData, sizeof(MainLightUboData));
     perFrameSet.updateSet();
     f();
 }
