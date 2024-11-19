@@ -109,6 +109,8 @@ set(SOURCES
         private/components/Lights.h
         private/descriptor/EngineDescriptorDef.h
         private/descriptor/EngineDescriptorDef.cpp
+        private/graphics_pipeline/RenderGraph.cpp
+        private/graphics_pipeline/RenderGraph.h
 )
 
 # Create static library

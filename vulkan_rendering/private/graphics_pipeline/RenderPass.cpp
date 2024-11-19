@@ -6,13 +6,30 @@
 
 #include "DeviceContext.h"
 
+VkSubpassDescription Subpass::getSubpassDescription() const {
+    return {
+        .flags = flags,
+        .pipelineBindPoint = bindPoint,
+        .inputAttachmentCount = inputAttachments.size(),
+        .pInputAttachments = inputAttachments.data(),
+        .colorAttachmentCount = colorAttachments.size(),
+        .pColorAttachments = colorAttachments.data(),
+        .pResolveAttachments = resolveAttachment.has_value() ? &resolveAttachment.value() : nullptr,
+        .pDepthStencilAttachment = depthStencilAttachment.has_value() ? &depthStencilAttachment.value() : nullptr,
+        .preserveAttachmentCount = preserveAttachments.size(),
+        .pPreserveAttachments = preserveAttachments.data()
+    };
+}
+
+
 RenderPass::~RenderPass() {
     vkDestroyRenderPass(ctx.getLogicalDevice(), resource, nullptr);
 }
 
 // TODO: make render pass configurable
-RenderPass::RenderPass(DeviceContext &context, std::vector<AttachmentRef> &attachments)
+RenderPass::RenderPass(DeviceContext &context)
     : VulkanResource(context) {
+    /*
     std::vector<VkAttachmentDescription> attachmentDesc(attachments.size());
     std::vector<VkAttachmentReference> colorAttachments{};
     std::vector<VkAttachmentReference> depthStencilAttachments{};
@@ -59,7 +76,7 @@ RenderPass::RenderPass(DeviceContext &context, std::vector<AttachmentRef> &attac
     VkSubpassDependency dependency1{};
     dependency1.srcSubpass = VK_SUBPASS_EXTERNAL;
     dependency1.dstSubpass = 0;
-    dependency1.srcStageMask = VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT ;
+    dependency1.srcStageMask = VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT;
     dependency1.dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
     dependency1.srcAccessMask = VK_ACCESS_MEMORY_READ_BIT;
     dependency1.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_READ_BIT | VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
@@ -76,15 +93,16 @@ RenderPass::RenderPass(DeviceContext &context, std::vector<AttachmentRef> &attac
 
     std::array subPasses = {subpass};
     std::array dependencies = {dependency1, dependency2};
+    */
 
     VkRenderPassCreateInfo renderPassInfo{};
     renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
-    renderPassInfo.attachmentCount = static_cast<uint32_t>(attachmentDesc.size());
-    renderPassInfo.pAttachments = attachmentDesc.data();
-    renderPassInfo.subpassCount = subPasses.size();
-    renderPassInfo.pSubpasses = subPasses.data();
-    renderPassInfo.dependencyCount = dependencies.size();
-    renderPassInfo.pDependencies = dependencies.data();
+    renderPassInfo.attachmentCount = static_cast<uint32_t>(attachments.size());
+    renderPassInfo.pAttachments = attachments.data();
+    renderPassInfo.subpassCount = subpassDescriptions.size();
+    renderPassInfo.pSubpasses = subpassDescriptions.data();
+    renderPassInfo.dependencyCount = subpassDependencies.size();
+    renderPassInfo.pDependencies = subpassDependencies.data();
 
     if (vkCreateRenderPass(ctx.getLogicalDevice(),
                            &renderPassInfo, nullptr,
