@@ -214,3 +214,24 @@ Now recall that binding pipeline and binding descriptor sets are two distinct fu
 When Unity first launched Render Graph to replace the old SRP API, it was quite scary to write. I was never so certain why would I need to specify the resources I need to access in what way before calling rendering code. Actually, when I heard about Render Graph, I thought it was actually a graphical interface like Shader Graph. 
 
 After diving into vulkan and its Render Passes and Subpasses, I began to see the whole picture. What Render Graph does, essentially, is automatically resolving dependencies between passes (synchronization) and group sub passes into a render pass.
+
+Now, the primary source of this knowledge comes from [the famous 2017 post](https://themaister.net/blog/2017/08/15/render-graphs-and-vulkan-a-deep-dive/), informative, but also, the code is 3k lines long which is slightly daunting. To facilitate comprehension, I decided to break this down into...more bite-size pieces. This might not be entirely correct due to my still-limited knowledge.
+
+#### Reformulation of Goals
+
+So, what should a render graph system achieve? 
+
+- A way to specify a *Subpass*, with its *input* and *output* *usages*, its *execution order* and a *render function* telling what the subpass should do. Here, *Subpass* is both a Vulkan lingo and Unity lingo, except for Unity they kept *Scriptable Render Pass* in code due to historic reasons. Also, the *execution order* of a subpass is often less pronounced in articles I have read, as they generally use declaration order. In Unity, however, a serialized property is used (e.g. "Before GBuffer" )
+- Manage resource allocations automatically, with the option to *import* externally allocated resources. To achieve this, the *input* and *output* usages mentioned above should be decoupled from actual resource (means you don't provide raw Vulkan handles as usage information). Instead, they should be a custom data type that contains enough information for us to allocate the required resources later. And *import* would simply mean a process to bind an actual resource to the custom data type and remove it from render graph's auto-management system. 
+- Deduct the proper usage of resources, so that when specifying input and output usages, we only need to consider a small subset of the resource's properties, such as size, memory access (read/write), format, etc. An example of deducible property is `StoreOp`, which you could also verify in Unity: If a resource is accessed later in the frame and there's no way to combine it with a pass that writes to the resource, the StoreOp of the resource in the writing pass would become `Store`. And if it isn't used later, StoreOp becomes `Don't Care`. But, obviously, figure out what properties can be deducted is tricky and often requires to think about the relationship between passes.
+- Automatically create *Render Passes* by grouping *Subpasses*. 
+- Automatically generate *barriers*.
+
+To summarize, these requirements mean:
+
+- Data structure of `RenderGraphNode`, and `RenderGraph`.
+- Data structure of `AttachmentUsageDeclaration`, and a way to use this declaration to allocate resources (similar to RTHandles). Note that the Declaration might not necessarily be the datatype we use directly in allocation, it could be converted into an `AttachmentAllocInfo` if that makes more sense.
+- Figure out what can be deducted from subpass relationships. (This would mean `AttachmentUsageDeclaration` will only have the necessary fields while `AttachmentAllocInfo` would have deduced fields).
+- Find the *Merge Condition* of the subpasses. (Resolve render graph into vulkan render passes)
+- Find *when to add synchronization*.
+

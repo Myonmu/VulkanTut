@@ -20,6 +20,7 @@ enum class AttachmentSizeMode {
 };
 
 // "Virtual" attachment handle (not "Virtual Texture", just an attachment placeholder)
+// Contains enough information to generate an alloc info
 struct AttachmentDecl {
     AttachmentSizeMode sizeMode = AttachmentSizeMode::SWAPCHAIN_RELATIVE;
     float width = 1.f;
@@ -32,6 +33,14 @@ struct AttachmentDecl {
     VkImageUsageFlags usage = 0;
 };
 
+struct BufferDecl {
+    VkDeviceSize size = 0;
+    VkBufferUsageFlags usage = 0;
+};
+
+struct RenderGraphNode {
+    
+};
 
 
 class RenderGraph {
