@@ -10,13 +10,13 @@ VkSubpassDescription Subpass::getSubpassDescription() const {
     return {
         .flags = flags,
         .pipelineBindPoint = bindPoint,
-        .inputAttachmentCount = inputAttachments.size(),
+        .inputAttachmentCount = static_cast<uint32_t>(inputAttachments.size()),
         .pInputAttachments = inputAttachments.data(),
-        .colorAttachmentCount = colorAttachments.size(),
+        .colorAttachmentCount = static_cast<uint32_t>(colorAttachments.size()),
         .pColorAttachments = colorAttachments.data(),
         .pResolveAttachments = resolveAttachment.has_value() ? &resolveAttachment.value() : nullptr,
         .pDepthStencilAttachment = depthStencilAttachment.has_value() ? &depthStencilAttachment.value() : nullptr,
-        .preserveAttachmentCount = preserveAttachments.size(),
+        .preserveAttachmentCount = static_cast<uint32_t>(preserveAttachments.size()),
         .pPreserveAttachments = preserveAttachments.data()
     };
 }
