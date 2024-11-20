@@ -35,9 +35,9 @@ public:
             AttachmentRef{3, depth, VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL},
             AttachmentRef{4, color, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL},
         };
-        const auto passId = deviceContext.create_renderPass(attachments);
-        deviceContext.bindRenderPassToWindow(0, passId);
-        deviceContext.bindRenderPassToWindow(1, passId);
+        //const auto passId = deviceContext.create_renderPass(attachments);
+        //deviceContext.bindRenderPassToWindow(0, passId);
+        //deviceContext.bindRenderPassToWindow(1, passId);
     }
 };
 

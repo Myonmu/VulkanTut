@@ -90,7 +90,8 @@ QueueContext &DeviceContext::getCommonQueueContext(const QueueFamily queueFamily
 }
 
 void DeviceContext::bindRenderPassToWindow(const uint32_t windowId, const uint32_t renderPassId) const {
-    get_windowContext_at(windowId).createFrameBuffers(get_renderPass_at(renderPassId));
+    throw std::runtime_error("Not implemented");
+    //get_windowContext_at(windowId).createFrameBuffers(get_renderPass_at(renderPassId));
 }
 
 void DeviceContext::destroyWindow(uint32_t id) {
