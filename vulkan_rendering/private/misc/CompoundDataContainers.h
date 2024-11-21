@@ -30,6 +30,8 @@ using cascade_##name## = typename cascade_##name##_helper<T...>::type;
 CASCADE_KV_DECL(std::unordered_map, unordered_map)
 CASCADE_KV_DECL(std::map, map)
 
+
+
 /* A double-key unordered map, with one key being "Strong" and the other "Weak".
  * Each strong key is mapped to a value,
  * and each weak key is mapped to a strong key.
@@ -110,6 +112,14 @@ public:
     // Check if a WeakKey exists
     bool containsWeakKey(const WeakKey &weakKey) const {
         return weakToStrong.contains(weakKey);
+    }
+
+    template <typename Func>
+    requires std::invocable<Func, const StrongKey&, const Val&>
+    void forEachValue(Func&& func) const {
+        for (const auto& [key, value] : strongToVal) {
+            func(key, value);
+        }
     }
 };
 
