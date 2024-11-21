@@ -90,21 +90,24 @@ enum AttachmentInfoInternalFlagBits {
 
 using AttachmentInfoFlags = uint32_t;
 
-
-// "Virtual" attachment handle (not "Virtual Texture", just an attachment placeholder)
-// Contains enough information to generate an alloc info
-struct AttachmentDecl {
+struct TextureRelativeDimensions {
     AttachmentSizeMode sizeMode = AttachmentSizeMode::SWAPCHAIN_RELATIVE;
     float width = 1.f;
     float height = 1.f;
     float depth = 0.f;
+    // If size mode is relative, this points to the texture that serves as a reference
+    std::string sizeReferenceTextureName;
+};
+// "Virtual" attachment handle (not "Virtual Texture", just an attachment placeholder)
+// Contains enough information to generate an alloc info
+struct AttachmentDecl {
+    TextureRelativeDimensions dimensions;
     VkFormat format = VK_FORMAT_UNDEFINED;
     uint32_t samples = 1;
     uint32_t levels = 1;
     uint32_t layers = 1;
     VkImageUsageFlags usage = 0;
-    // If size mode is relative, this points to the texture that serves as a reference
-    std::string sizeReferenceTextureName;
+    AttachmentInfoFlags flags = ATTACHMENT_INFO_PERSISTENT_BIT;
 };
 
 struct BufferDecl {
@@ -129,12 +132,22 @@ struct TexturePxDimensions {
     uint32_t depth = 1;
 
     bool operator==(const TexturePxDimensions &texture_dimensions) const = default;
+
+    [[nodiscard]] uint32_t getLevels() const{
+        uint32_t levels = 0;
+        uint32_t max_dim = std::max(std::max(width, height), depth);
+        while (max_dim) {
+            levels++;
+            max_dim >>= 1;
+        }
+        return levels;
+    };
 };
 
 struct ResourceDimensions {
     VkFormat format = VK_FORMAT_UNDEFINED;
     BufferDecl buffer_info;
-    TexturePxDimensions textureDimensions;
+    TexturePxDimensions dimensions;
     uint32_t layers = 1;
     uint32_t levels = 1;
     uint32_t samples = 1;
@@ -145,7 +158,7 @@ struct ResourceDimensions {
 
     bool operator==(const ResourceDimensions &other) const {
         return format == other.format &&
-               textureDimensions == other.textureDimensions &&
+               dimensions == other.dimensions &&
                layers == other.layers &&
                levels == other.levels &&
                buffer_info == other.buffer_info &&
@@ -269,9 +282,11 @@ class RenderGraph {
 
     void validate();
 
-    TexturePxDimensions resolveTexturePxDimensions(AttachmentDecl& decl);
+    TexturePxDimensions resolveTexturePxDimensions(const TextureRelativeDimensions &decl);
 
     ResourceDimensions getResourceDimensions(const RenderBufferResource &resource) const;
+
+    static bool surfaceTransformSwapsXy(VkSurfaceTransformFlagBitsKHR transform);
 
     ResourceDimensions getResourceDimensions(const RenderTextureResource &resource);
 

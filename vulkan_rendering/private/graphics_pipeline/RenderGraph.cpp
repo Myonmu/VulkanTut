@@ -45,7 +45,7 @@ namespace ResourceTypeUtils {
 }
 
 RenderTextureResource &RenderGraphNode::addTextureResource(const std::string &name, const AttachmentDecl &decl,
-                                                           ResourceType resourceType, ResourceUsageType usageType) {
+                                                           ResourceType resourceType, ResourceUsageDeclType usageType) {
     auto &res = renderGraph.getOrCreateResource<RenderTextureResource>(name);
     res.decl = decl;
     res.writtenInPasses.insert(id);
@@ -131,7 +131,7 @@ void RenderGraph::validate() {
                 for (unsigned i = 0; i < output.size(); i++) {
                     if (!input[i]) continue;
                     if (getResourceDimensions(*input[i]) != getResourceDimensions(*output[i]))
-                        throw std::logic_error("Doing RMW on a blit image, but usage and sizes do not match.");
+                        throw std::logic_error("Doing RMW on a storage image, but usage and sizes do not match.");
                 }
             }
 
@@ -148,77 +148,76 @@ ResourceDimensions RenderGraph::getResourceDimensions(const RenderBufferResource
     ResourceDimensions dim;
     auto &info = resource.decl;
     dim.buffer_info = info;
-    dim.buffer_info.usage |= resource.get_buffer_usage();
+    dim.buffer_info.usage |= resource.decl.usage;
     dim.flags |= info.flags;
     dim.name = resource.name;
     return dim;
 }
 
-TexturePxDimensions RenderGraph::resolveTexturePxDimensions(AttachmentDecl &decl) {
+bool RenderGraph::surfaceTransformSwapsXy(VkSurfaceTransformFlagBitsKHR transform)
+{
+    return (transform & (
+            VK_SURFACE_TRANSFORM_HORIZONTAL_MIRROR_ROTATE_90_BIT_KHR |
+            VK_SURFACE_TRANSFORM_HORIZONTAL_MIRROR_ROTATE_270_BIT_KHR |
+            VK_SURFACE_TRANSFORM_ROTATE_90_BIT_KHR |
+            VK_SURFACE_TRANSFORM_ROTATE_270_BIT_KHR)) != 0;
+}
+
+TexturePxDimensions RenderGraph::resolveTexturePxDimensions(const TextureRelativeDimensions &decl) {
+    TexturePxDimensions dim{};
     switch (decl.sizeMode) {
 #define RELATIVE_SIZE_TO_ABSOLUTE(relativeTo)\
-        dim.width = std::max(static_cast<unsigned>(std::ceil(info.width * relativeTo.width)), 1u);\
-        dim.height = std::max(static_cast<unsigned>(std::ceil(info.height * relativeTo.height)), 1u);\
-        dim.depth = std::max(static_cast<unsigned>(std::ceil(info.depth * relativeTo.depth)), 1u);
+        dim.width = std::max(static_cast<unsigned>(std::ceil(decl.width * relativeTo.width)), 1u);\
+        dim.height = std::max(static_cast<unsigned>(std::ceil(decl.height * relativeTo.height)), 1u);\
+        dim.depth = std::max(static_cast<unsigned>(std::ceil(decl.depth * relativeTo.depth)), 1u);
 
         case AttachmentSizeMode::SWAPCHAIN_RELATIVE:
-            RELATIVE_SIZE_TO_ABSOLUTE(swapchainDimensions)
-            if (swapchainDimensions.transform)
+            RELATIVE_SIZE_TO_ABSOLUTE(swapchainDimensions.dimensions)
+            if (surfaceTransformSwapsXy(swapchainDimensions.transform))
                 std::swap(dim.width, dim.height);
             break;
 
         case AttachmentSizeMode::ABSOLUTE:
-            dim.width = std::max(static_cast<unsigned>(info.width), 1u);
-            dim.height = std::max(static_cast<unsigned>(info.height), 1u);
-            dim.depth = std::max(static_cast<unsigned>(info.depth), 1u);
+            dim.width = std::max(static_cast<unsigned>(decl.width), 1u);
+            dim.height = std::max(static_cast<unsigned>(decl.height), 1u);
+            dim.depth = std::max(static_cast<unsigned>(decl.depth), 1u);
             break;
 
         case AttachmentSizeMode::INPUT_RELATIVE: {
-            if (resources.containsWeakKey(info.sizeReferenceTextureName))
+            if (resources.containsWeakKey(decl.sizeReferenceTextureName))
                 throw std::logic_error("Resource does not exist.");
-            auto &input = dynamic_cast<RenderTextureResource &>(*resources[info.sizeReferenceTextureName]);
-            auto input_dim = getResourceDimensions(input);
-            RELATIVE_SIZE_TO_ABSOLUTE(input_dim)
+            auto &input = dynamic_cast<RenderTextureResource &>(*resources[decl.sizeReferenceTextureName]);
+            auto inputPxDim = resolveTexturePxDimensions(input.decl.dimensions);
+            RELATIVE_SIZE_TO_ABSOLUTE(inputPxDim)
             break;
         }
     }
+    return dim;
 }
 
 
 ResourceDimensions RenderGraph::getResourceDimensions(const RenderTextureResource &resource) {
     ResourceDimensions dim;
-    auto &info = resource.decl;
-    dim.layers = info.layers;
-    dim.samples = info.samples;
-    dim.format = info.format;
+    auto &decl = resource.decl;
+    dim.layers = decl.layers;
+    dim.samples = decl.samples;
+    dim.format = decl.format;
     dim.queues = resource.queueFlags;
-    dim.image_usage = info.aux_usage | resource.usage;
+    dim.image_usage = decl.usage | resource.usage;
     dim.name = resource.name;
-    dim.flags = info.flags & ~(ATTACHMENT_INFO_SUPPORTS_PREROTATE_BIT | ATTACHMENT_INFO_INTERNAL_TRANSIENT_BIT);
-
+    dim.flags = decl.flags & ~(ATTACHMENT_INFO_SUPPORTS_PREROTATE_BIT | ATTACHMENT_INFO_INTERNAL_TRANSIENT_BIT);
+    dim.dimensions = resolveTexturePxDimensions(resource.decl.dimensions);
     if (resource.isTransient)
         dim.flags |= ATTACHMENT_INFO_INTERNAL_TRANSIENT_BIT;
 
     // Mark the resource as potentially supporting pre-rotate.
     // If this resource ends up aliasing with the swapchain, it might go through.
-    if ((info.flags & ATTACHMENT_INFO_SUPPORTS_PREROTATE_BIT) != 0)
+    if ((decl.flags & ATTACHMENT_INFO_SUPPORTS_PREROTATE_BIT) != 0)
         dim.transform = swapchainDimensions.transform;
-
-
 
     if (dim.format == VK_FORMAT_UNDEFINED)
         dim.format = swapchainDimensions.format;
 
-    const auto num_levels = [](unsigned width, unsigned height, unsigned depth) -> unsigned {
-        unsigned levels = 0;
-        unsigned max_dim = std::max(std::max(width, height), depth);
-        while (max_dim) {
-            levels++;
-            max_dim >>= 1;
-        }
-        return levels;
-    };
-
-    dim.levels = std::min(num_levels(dim.width, dim.height, dim.depth), info.levels == 0 ? ~0u : info.levels);
+    dim.levels = std::min(dim.dimensions.getLevels(), decl.levels == 0 ? ~0u : decl.levels);
     return dim;
 }
