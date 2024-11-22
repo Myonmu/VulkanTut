@@ -362,7 +362,13 @@ To summarize, these requirements mean:
 
 #### Some Notable Architectural Choices
 
-##### Input-Output Pairing
+##### Subpass Merging
+
+The underlying logic in subpass merging is obtained from observing the raw Vulkan structs - Render Passes and Subpasses only care about *Frame Buffers*, namely, *Attachment output, Depth Stencil, Resolve, and Input Attachments*. There's a distinction between *Texture* and *Attachment* - they physically mean the same thing (`VkImage`, `VkImageView`), but an *Attachment* is used by `VkFrameBuffer`. 
+
+This is why in Granite, a distinction is made between *Pass Dependency* and *Pass Merge Dependency*. *Pass Dependency* would account for all types of resources, and *Pass Merge Dependency* is only built from frame buffer resources.
+
+##### Input-Output Pairing and Submission Order
 
 Granite implementation specifically enforces that each output must have an input (could be a nullptr (placeholder)),
 otherwise an error is thrown. The API looks like this:
@@ -389,12 +395,19 @@ The basic assumption behind it is that the render graph is allowed to rearrange 
 
 If we fully trust the submission order, then we know that GBuffer1 is persistent across frames, Pass 1 would be reading from the result of Pass 2.
 
-But if render graph can rearrange passes for optimal results, then we would certainly put Pass 2 before Pass 1, because that would actually make GBuffer1 *transient* and remove the need of LoadOp and StoreOp, similar to how we make GBuffer pass and Deferred Lighting pass as 2 sub-passes of a single render pass.
+But if render graph can rearrange passes for optimal results, then we would certainly put Pass 2 before Pass 1, because that would actually make GBuffer1 *transient* and remove the need of LoadOp and StoreOp, similar to how we make GBuffer pass and Deferred Lighting pass as 2 sub-passes of a single render pass. (We assume that render graph is greedy, always tries to rearrange passes for best performance, the real situation may or may not be the case).
 
-The question is, what if we actually want to maintain the order? What if for some strange reason, we need to make that GBuffer be accessed as the submission order?
+The question is, what if we actually want to maintain the order? What if for some strange reason, we need to make that GBuffer be accessed as the submission order? 
 
 The pairing mechanism effectively allow us to clarify our intention by reasoning with logical resources:
 
 - Pass 1: Reads from GBuffer1, Writes to TextureA
 - Pass 2: Writes to TextureA
 
+This may seem strange, as both passes are trying to write to TextureA, and is unclear which one should be executed first. However, a greedy render graph now has no reason to put Pass 2 before Pass 1.
+
+Now, my impression of this design is that it doesn't reduce the burden of the programmer, as if I could submit passes in arbitrary order and the render graph magically rearrange it to make it optimal. The programmer still needs to know an optimal submission order or else they would fail to come up with a meaningful name for the input and outputs. What's more, the added layer of render graph being able to reorder the passes makes it inherently more difficult to debug, as programmers can no longer trust their submission order and must draw the graph using the input and output names, and understand how the reordering works under the hood.
+
+What I would instead, is that render graph strictly follows the submission order, no pass can go before another pass submitted before that pass. This makes the render graph more predictable and easier to debug. We could still keep the rearrangement design, but that would become a "diagnostic module", outputting suggestions (print to the console) rather than actually applying it. A programmer must enable the diagnostic module and change the submission order manually if they were to accept the suggestions. 
+
+An added benefit of sticking strictly to submission order is that we can now force a pass to be executed even if they do not contribute to the swapchain image, and the render graph doesn't need to worry where to put that pass. This is useful for cases where, Camera 1 writes to an external texture in Pass A, and that texture is used by a material that is rendered by a UI camera later (Normally, Pass A would be pruned since it does not contribute to Camera 1's frame buffer). 

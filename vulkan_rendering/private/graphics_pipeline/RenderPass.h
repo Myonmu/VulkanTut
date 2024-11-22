@@ -20,7 +20,7 @@ class Subpass {
     std::vector<VkAttachmentReference> colorAttachments;
     std::vector<uint32_t> preserveAttachments;
     std::optional<VkAttachmentReference> depthStencilAttachment;
-    std::optional<VkAttachmentReference> resolveAttachment;
+    std::vector<VkAttachmentReference> resolveAttachments;
 public:
     [[nodiscard]] VkSubpassDescription getSubpassDescription() const;
 };

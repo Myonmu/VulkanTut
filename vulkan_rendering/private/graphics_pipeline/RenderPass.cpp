@@ -14,7 +14,7 @@ VkSubpassDescription Subpass::getSubpassDescription() const {
         .pInputAttachments = inputAttachments.data(),
         .colorAttachmentCount = static_cast<uint32_t>(colorAttachments.size()),
         .pColorAttachments = colorAttachments.data(),
-        .pResolveAttachments = resolveAttachment.has_value() ? &resolveAttachment.value() : nullptr,
+        .pResolveAttachments = resolveAttachments.data(),
         .pDepthStencilAttachment = depthStencilAttachment.has_value() ? &depthStencilAttachment.value() : nullptr,
         .preserveAttachmentCount = static_cast<uint32_t>(preserveAttachments.size()),
         .pPreserveAttachments = preserveAttachments.data()

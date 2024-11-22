@@ -278,7 +278,8 @@ class RenderGraph {
     uint32_t nodesCounter = 0;
     uint32_t resourcesCounter = 0;
     aliased_unordered_map<uint32_t, std::string, std::unique_ptr<RenderResource> > resources{};
-    aliased_unordered_map<uint32_t, std::string, std::unique_ptr<RenderGraphNode> > nodes{};
+    // since strong key is assigned by submission order, nodes are arranged in submission order as well
+    aliased_map<uint32_t, std::string, std::unique_ptr<RenderGraphNode> > nodes{};
 
     void validate();
 
