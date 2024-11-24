@@ -22,9 +22,9 @@ void ColorAttachment::create() {
         swapChain.swapChainExtent.width, swapChain.swapChainExtent.height,
         4, format,
         VK_IMAGE_TILING_OPTIMAL,
-        VK_IMAGE_USAGE_TRANSIENT_ATTACHMENT_BIT |
-        VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT,
-        VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, 1, msaaSamples, false
+        VK_IMAGE_USAGE_TRANSIENT_ATTACHMENT_BIT | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_INPUT_ATTACHMENT_BIT,
+        VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
+        1, msaaSamples, false
     );
     imageView = std::make_unique<ImageView>(ctx.context, *image, format, VK_IMAGE_ASPECT_COLOR_BIT);
 }

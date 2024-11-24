@@ -47,26 +47,13 @@ void MeshRendererSplitBuffer::enqueueDrawCall(RenderingContext &ctx, RenderPassR
 }
 
 MeshRenderer::MeshRenderer(DeviceContext &ctx, const MeshBuffer &meshBuffer, const MaterialInstance &materialInstance)
-    : meshBuffer(meshBuffer),
-      materialInstance(materialInstance) {
+    :RenderingBase(ctx, materialInstance), meshBuffer(meshBuffer){
 }
 
 void MeshRenderer::enqueueDrawCall(RenderingContext &ctx, RenderPassRecorder &renderPassRecorder) {
     recorder.clear();
-
-    // TODO: same pipeline could be batched
-    recorder.enqueueCommand<BindPipeline>(materialInstance.getPipeline(), VK_PIPELINE_BIND_POINT_GRAPHICS);
-
+    enqueueSharedCommands(ctx, renderPassRecorder);
     recorder.enqueueCommand<BindMeshBuffer>(meshBuffer);
-
-    // bind per-frame set
-    auto& perFrameSet = *ctx.renderer->getCurrentFrame().get_perFrameDescriptorSet().perFrameSet;
-    recorder.enqueueCommand<BindDescriptorSet>(materialInstance.getPipelineLayout(),perFrameSet, PER_FRAME_SET_ID);
-
-    for (auto &[setId, set]: materialInstance.descriptorSets) {
-        if (setId <= 0)continue; // 0 is reserved for global set
-        recorder.enqueueCommand<BindDescriptorSet>(materialInstance.getPipelineLayout(), *set, setId);
-    }
     recorder.enqueueCommand<PushConstants>(materialInstance.getPipelineLayout(),
                                            VK_SHADER_STAGE_VERTEX_BIT,
                                            sizeof(PerObjectVertexPushConstants), 0,

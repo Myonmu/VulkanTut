@@ -113,6 +113,8 @@ set(SOURCES
         private/graphics_pipeline/RenderGraph.h
         private/misc/UtilityMacros.h
         private/misc/CompoundDataContainers.h
+        private/components/RenderingBase.cpp
+        private/components/RenderingBase.h
 )
 
 # Create static library

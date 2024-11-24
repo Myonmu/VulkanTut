@@ -16,6 +16,8 @@ struct Position;
 struct CameraUboData {
     glm::mat4 view;
     glm::mat4 projection;
+    // .x near plane, .y far plane, .z aspect, .w fov
+    glm::vec4 camProps;
 };
 
 //TODO: Support ortho camera
@@ -32,4 +34,8 @@ public:
     [[nodiscard]] static glm::mat4x4 getViewMatrix(const Position &position, const Rotation &rotation) ;
 
     [[nodiscard]] glm::mat4x4 getProjectionMatrix();
+
+    glm::vec4 getCameraPropertyVector() const {
+        return glm::vec4(nearPlane, farPlane, aspectRatio, fov);
+    }
 };

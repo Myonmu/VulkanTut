@@ -10,7 +10,7 @@
 #include "UnifiedTexture2D.h"
 #include "PerFrameBufferGroup.h"
 
-Material::Material(DeviceContext& ctx, std::vector<Shader>& shaders, RenderPass& renderPass):
+Material::Material(DeviceContext& ctx, std::vector<Shader>& shaders, RenderPass& renderPass, uint32_t subpassId):
 ctx(ctx)
 {
     for (auto& shader: shaders) {
@@ -31,7 +31,7 @@ ctx(ctx)
         vkLayouts.push_back(descriptorSetLayouts[set]->getRaw());
     }
     pipelineLayout = std::make_unique<PipelineLayout>(ctx, vkLayouts);
-    pipeline = std::make_unique<VulkanPipeline>(ctx, shaders, *pipelineLayout, renderPass);
+    pipeline = std::make_unique<VulkanPipeline>(ctx, shaders, *pipelineLayout, renderPass, subpassId);
 }
 
 MaterialInstance &Material::createInstance() {

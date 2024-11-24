@@ -26,6 +26,14 @@ void ObjLoader::LoadGeometry(const std::string &path) {
                 attrib.vertices[3 * index.vertex_index + 2]
             };
 
+            vertex.normal = {
+                attrib.normals[3 * index.normal_index + 0],
+                attrib.normals[3 * index.normal_index + 1],
+                attrib.normals[3 * index.normal_index + 2]
+            };
+
+
+
             vertex.texCoord = {
                 attrib.texcoords[2 * index.texcoord_index + 0],
                 1.0f - attrib.texcoords[2 * index.texcoord_index + 1]
@@ -43,6 +51,4 @@ void ObjLoader::LoadGeometry(const std::string &path) {
 }
 
 void ObjLoader::LoadTexture(const std::string &path) {
-
 }
-

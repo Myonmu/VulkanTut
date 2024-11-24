@@ -285,7 +285,7 @@ From these declarations we can see the following procedure:
 ### Pipeline Layout, Pipeline, Descriptor Sets
 
 Consider this scenario in *Unity*: When we want to create a *Material*, we first right-click on a shader and then click
-Create Material. This will add a Material asset in the project. And then, we could assign textures, change numbers, in
+Create Material. This will add a Material asset in the project. And then, we could assign textures, change numbers - all in
 the inspector of that material asset. Finally, when the material is dragged on a renderer, it exposes a *Material
 Property Block* that can be used to further override the properties.
 
@@ -301,15 +301,45 @@ Though, it isn't always true that between *Shader Asset* and *Descriptor Set Lay
 relationship. The only thing that can be directly created from shader code is *Shader Modules*.
 
 Different shaders can have the same *Descriptor Set Layout* if they have the same layout declarations (we don't care the
-variable names except for vertex input), and *Pipeline Layout* can be shared if they only differ in the data we
-provide (the content of the descriptor sets or push constants). This means shader code that only differ in method
-implementation, can use the same pipeline layout.
+variable names except for vertex input), and *Pipeline Layout* can be shared if they only differ in the content of the descriptor sets or push constants we
+provide. This means shader code that only differ in execution, can use the same pipeline layout.
 
 Now recall that binding pipeline and binding descriptor sets are two distinct function calls: `vkCmdBindPipeline` and
 `vkCmdBindDescriptorSets`. Moreover, descriptor sets are bound to *pipeline layout* rather than pipeline (we bind them
 according to descriptor set layout, and the descriptor set layout is stored in pipeline layout). This further enhances
 that `VkPipeline` should be shared, because you could bind a pipeline, and then issue different pipelines with different
 draw calls
+
+### Render Pass and Associated Resources
+
+The original tutorial has only one render pass with only one subpass. The detailed breakdown of these different components are detailed below in the Render Graph section, here I would only outline the top-level relationships between Render Pass related concepts.
+
+For each window, we have only one swapchain. This means we can only have a single color output that gets rendered to that window (surface, to be exact). Due to frame overlaps, we have multiple swapchain images, and during each render loop, we acquire one from the swapchain. Now, these swapchian-specific VkImage(s) are created differently, by calling `vkGetSwapchainImagesKHR` (see `PresentColorAttachment`). We then need to write to this specific image during render loop to actually show something on the window.
+
+To use this swapchain image, two things need to be done: 
+
+- Reference it in a frame buffer.
+- Use the frame buffer in a render pass.
+
+The swapchain image is like any other color attachments, except being used to present the result. Frame buffer is per-Render Pass, so it means when we have multiple render passes, we don't necessarily write to a swapchain image, it all depends on the declaration of the frame buffer and whether the image is passed to color attachment during render pass and subpass creation.
+
+Well, render pass is created earlier than frame buffers (because we need a render pass reference in frame buffer create info), so logically we create frame buffers based on the declared usages in a render pass. This is one of the essences that we use in render graph. 
+
+As for subpasses, they are inside render pass and use a subset of the frame buffers. The details are in the Render Graph section.
+
+```
+  Window
+    \                                 RenderPass 1------* Subpass
+     \                                    |         
+  Swapchain   ColorAttachments 0*---1 FrameBuffer
+       \1                            /     /
+        \                         01/     /
+         \     DepthStencilAttachment    /
+          \*                            /
+          PresentColorAttachment 01----/
+```
+
+It is worth noting that Render Pass does not directly reference an attachment's handle, but only through *Attachment Description* and *Attachment Reference*, which can exist before the attachment is even created. The actual correspondence is done through the frame buffer (or descriptor sets if not managed by render pass).
 
 ### Render Graph
 
@@ -362,11 +392,42 @@ To summarize, these requirements mean:
 
 #### Some Notable Architectural Choices
 
-##### Subpass Merging
+##### Subpass Grouping
 
-The underlying logic in subpass merging is obtained from observing the raw Vulkan structs - Render Passes and Subpasses only care about *Frame Buffers*, namely, *Attachment output, Depth Stencil, Resolve, and Input Attachments*. There's a distinction between *Texture* and *Attachment* - they physically mean the same thing (`VkImage`, `VkImageView`), but an *Attachment* is used by `VkFrameBuffer`. 
+The underlying logic in subpass Grouping is obtained from observing the raw Vulkan structs - Render Passes and Subpasses only care about *Frame Buffers*, namely, *Attachment output, Depth Stencil, Resolve, and Input Attachments*. There's a distinction between *Texture* and *Attachment* - they physically mean the same thing (`VkImage`, `VkImageView`), but an *Attachment* is used by `VkFrameBuffer` while *Texture* is more generic. 
 
 This is why in Granite, a distinction is made between *Pass Dependency* and *Pass Merge Dependency*. *Pass Dependency* would account for all types of resources, and *Pass Merge Dependency* is only built from frame buffer resources.
+
+Narrowing down the candidates isn't enough, because nothing stops us from creating a single render pass with all the textures we need and spam subpasses. 
+
+Render Pass and Subpasses are essentially there for Tile Based Rendering, which is commonly seen on mobile devices. When we designate something as framebuffer attachment, the frame buffers are cut into small tiles and each tile would be rendered separately in a render pass.
+
+The first constraint that can prevent us from doing this is this phrase in the Vulkan Specs (Chapter 8):
+
+    The subpasses in a render pass all render to the same dimensions, and fragments for pixel (x,y,layer) in one subpass can only read attachment contents written by previous subpasses at that same (x,y,layer) location.
+
+It means all attachments that we use in a render pass should have the same dimensions (width, height, layer). Because if we don't then we cannot cut the attachments equally.
+
+This extends to a second constraint. A texture that is read as input of a subpass is not accessed as what we usually do (by sampling), but with a special syntax both in declaration and reading the data:
+
+```glsl
+layout (input_attachment_index = 0, binding = 0) uniform subpassInput inputPosition;
+
+void main()
+{
+    vec3 fragPos = subpassLoad(inputPosition).rgb;
+}
+```
+
+Why can't we simply bind it to a descriptor and sample it as other normal textures? - Since tiles are rendered separately, we do not have guarantee that they all finish rendering at the same moment nor are they able to be sampled. And if we introduce inter-tile synchronization, we might just not have tile based rendering at all. Therefore, *randomly accessing (`texture(texSampler, fragTexCoord)`)* a framebuffer attachment is impossible. The only way to do it is to exit the render pass, convert the attachment into a sampled texture, and use it in a subsequent render pass.
+
+To sum up:
+
+- Only *Attachments* are concerned in subpass grouping.
+- All attachments in a Render Pass must have the same dimensions (width, height, layers).
+- No random access to the attachments is allowed.
+
+Note that I avoided the term "Subpass Merging" despite that seems to be an appropriate name. This is because *Merging* refers to another drive-level optimization which combines subpasses into... something lower level. Refer to [this](https://github.com/KhronosGroup/Vulkan-Samples/tree/main/samples/performance/subpasses#merging) article in the Vulkan samples.
 
 ##### Input-Output Pairing and Submission Order
 
@@ -384,7 +445,7 @@ pass.get_color_outputs()[i]->set_physical_index(input->get_physical_index());
 ```
 
 At first, I didn't quite understand the intention behind it - we could just assign a Read-Write flag to the resource,
-rather than using some sort of pairing mechanism. Also, the implementation does not prevent naming the input and output as the same thing, which faintly suggest that it is possible to do so - yet after further inspection, it should have been prevented. (Common source of headache in reverse engineering, a slight oversight by the author might make you question whether that is intended).
+rather than using some sort of pairing mechanism. Also, the implementation does not prevent naming the input and output as the same thing, which faintly suggest that it is possible to do so - yet after further inspection, it should have been prevented. (Common source of headache in reverse engineering, a slight  implementation detail that could lead to ambiguity might make you question whether that is intended).
 
 So let me explain this design choice in a way that I can understand it.
 

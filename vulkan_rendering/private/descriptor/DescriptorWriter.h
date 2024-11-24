@@ -20,6 +20,7 @@ struct  DescriptorWriter {
 
     void writeImage(uint32_t binding, const ImageView& image, const TextureSampler &sampler , VkImageLayout layout, VkDescriptorType type);
     void writeBuffer(uint32_t binding,const Buffer& buffer,size_t size, size_t offset,VkDescriptorType type);
+    void writeInputAttachment(uint32_t binding, const ImageView& image);
 
     void clear();
     void updateSet(LogicalDevice& device, DescriptorSet& set);

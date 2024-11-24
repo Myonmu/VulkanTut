@@ -22,8 +22,7 @@ struct DeviceContext;
 
 //-----------------------------------MATERIAL------------------------------------------
 
-class Material: public ObjectNode {
-
+class Material : public ObjectNode {
     /* The descriptors can get complicated here.
      *
      * The shaders can declare usage of multiple descriptor sets.
@@ -45,9 +44,9 @@ class Material: public ObjectNode {
      */
 
     // reflection data from all shader stages
-    DeviceContext& ctx;
+    DeviceContext &ctx;
     ShaderReflectionResult combinedReflectionResult{};
-    std::map<uint32_t, std::unique_ptr<DescriptorSetLayout>> descriptorSetLayouts;
+    std::map<uint32_t, std::unique_ptr<DescriptorSetLayout> > descriptorSetLayouts;
     std::unique_ptr<DescriptorAllocator> descriptorAllocator;
 
     CTX_PROPERTY(VulkanPipeline, pipeline)
@@ -55,9 +54,12 @@ class Material: public ObjectNode {
     CTX_PROPERTY(PipelineLayout, pipelineLayout)
 
 public:
-    Material(DeviceContext& ctx, std::vector<Shader>& shaders,  RenderPass& renderPass);
+    Material(DeviceContext &ctx, std::vector<Shader> &shaders, RenderPass &renderPass, uint32_t subpassId);
+
     ~Material() override = default;
-    MaterialInstance& createInstance();
+
+    MaterialInstance &createInstance();
+
     friend class MaterialInstance;
 };
 
@@ -81,14 +83,16 @@ public:
 
     void updateDescriptorSet(uint32_t setId);
 
-    void setCombinedImageSampler(uint32_t binding, const UnifiedTexture2D &unifiedT2d, const TextureSampler &sampler) ;
+    void setCombinedImageSampler(uint32_t binding, const UnifiedTexture2D &unifiedT2d, const TextureSampler &sampler);
 
     void setCombinedImageSampler(uint32_t binding, const TextureImage &textureImage, const TextureSampler &sampler,
                                  const ImageView &imageView);
 
     DescriptorSet &getDescriptorSet(uint32_t setId) const;
 
-    [[nodiscard]] PipelineLayout& getPipelineLayout() const;
-    [[nodiscard]] VulkanPipeline& getPipeline() const;
-};
+    [[nodiscard]] PipelineLayout &getPipelineLayout() const;
 
+    [[nodiscard]] VulkanPipeline &getPipeline() const;
+
+    Material &getMaterial() const { return srcMaterial; }
+};

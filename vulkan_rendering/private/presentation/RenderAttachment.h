@@ -35,6 +35,7 @@ struct AttachmentRef {
     AttachmentType type;
     VkAttachmentDescription description;
     VkImageLayout layout;
+    VkClearColorValue clearColor{};
 
     AttachmentRef() = default;
     AttachmentRef(uint32_t id, const RenderAttachment& attachment, VkImageLayout layout);

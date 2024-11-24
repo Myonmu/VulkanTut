@@ -6,6 +6,46 @@
 
 #include "DeviceContext.h"
 
+void Subpass::useAttachment(uint32_t id, VkImageLayout layout, ResourceUsageDeclType usageType) {
+    auto &attachment = renderPass.attachments[id];
+    switch (usageType) {
+        case ResourceUsageDeclType::INPUT:
+            if (attachment->getAttachmentType() == AttachmentType::DEPTH_STENCIL) {
+                depthStencilAttachment.emplace(id, layout);
+                return;
+            }
+            inputAttachments.emplace_back(id, layout);
+            break;
+        case ResourceUsageDeclType::OUTPUT:
+            switch (attachment->getAttachmentType()) {
+                case AttachmentType::PRESENT:
+                    if (renderPass.msaaEnabled) {
+                        resolveAttachments.emplace_back(id, layout);
+                    } else {
+                        colorAttachments.emplace_back(id, layout);
+                    }
+                    break;
+                case AttachmentType::MSAA:
+                    colorAttachments.emplace_back(id, layout);
+                    break;
+                case AttachmentType::DEPTH_STENCIL:
+                    depthStencilAttachment.emplace(id, layout);
+                    break;
+                case AttachmentType::TRANSIENT_COLOR:
+                    colorAttachments.emplace_back(id, layout);
+                    break;
+                default: ;
+            }
+            break;
+        default: ;
+    }
+}
+
+void Subpass::preserveAttachment(uint32_t id) {
+    preserveAttachments.emplace_back(id);
+}
+
+
 VkSubpassDescription Subpass::getSubpassDescription() const {
     return {
         .flags = flags,
@@ -21,6 +61,30 @@ VkSubpassDescription Subpass::getSubpassDescription() const {
     };
 }
 
+SubpassDependency &SubpassDependency::setSrc(uint32_t id, VkPipelineStageFlags stageFlags, VkAccessFlags accessFlags) {
+    dependency.srcSubpass = id;
+    dependency.srcAccessMask = accessFlags;
+    dependency.srcStageMask = stageFlags;
+    return *this;
+}
+
+SubpassDependency &SubpassDependency::setDest(uint32_t id, VkPipelineStageFlags stageFlags, VkAccessFlags accessFlags) {
+    dependency.dstSubpass = id;
+    dependency.dstAccessMask = accessFlags;
+    dependency.dstStageMask = stageFlags;
+    return *this;
+}
+
+SubpassDependency &SubpassDependency::setFlags(VkDependencyFlags flags) {
+    dependency.dependencyFlags = flags;
+    return *this;
+}
+
+
+VkSubpassDependency SubpassDependency::getSubpassDependency() const {
+    return dependency;
+}
+
 
 RenderPass::~RenderPass() {
     vkDestroyRenderPass(ctx.getLogicalDevice(), resource, nullptr);
@@ -29,76 +93,21 @@ RenderPass::~RenderPass() {
 // TODO: make render pass configurable
 RenderPass::RenderPass(DeviceContext &context)
     : VulkanResource(context) {
-    /*
-    std::vector<VkAttachmentDescription> attachmentDesc(attachments.size());
-    std::vector<VkAttachmentReference> colorAttachments{};
-    std::vector<VkAttachmentReference> depthStencilAttachments{};
-    std::vector<VkAttachmentReference> resolveAttachments{};
-    bool containsMsaa = false;
-    for (auto &attachmentRef: attachments) {
-        attachmentDesc[attachmentRef.index] = attachmentRef.description;
-        if (attachmentRef.type == AttachmentType::MSAA) {
-            containsMsaa = true;
-        }
+}
+
+void RenderPass::build() {
+    std::vector<VkAttachmentDescription> descriptions{};
+    for (auto &attachment: attachments) {
+        descriptions.push_back(attachment->getAttachmentDescription());
     }
-
-    for (auto &attachmentRef: attachments) {
-        auto ref = VkAttachmentReference{
-            .attachment = attachmentRef.index,
-            .layout = attachmentRef.layout
-        };
-        switch (attachmentRef.type) {
-            case AttachmentType::PRESENT:
-                if (containsMsaa)
-                    resolveAttachments.push_back(ref);
-                else
-                    colorAttachments.push_back(ref);
-                break;
-            case AttachmentType::MSAA:
-                colorAttachments.push_back(ref);
-                break;
-            case AttachmentType::DEPTH_STENCIL:
-                depthStencilAttachments.push_back(ref);
-                break;
-        }
+    std::vector<VkSubpassDescription> subpassDescriptions;
+    for (auto &subpass: subpasses) {
+        subpassDescriptions.push_back(subpass->getSubpassDescription());
     }
-
-    // TODO: dynamic subpass creation
-    VkSubpassDescription subpass{};
-    subpass.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
-    subpass.colorAttachmentCount = colorAttachments.size();
-    subpass.pColorAttachments = colorAttachments.data();
-    subpass.pDepthStencilAttachment = depthStencilAttachments.data();
-    subpass.pResolveAttachments = resolveAttachments.data();
-
-    // This is just the GBuffer pass, NOT the lighting pass. The example splits them into 2 separate render passes.
-    // But it is more optimal to combine them into the same pass but with 2 sub passes.
-    VkSubpassDependency dependency1{};
-    dependency1.srcSubpass = VK_SUBPASS_EXTERNAL;
-    dependency1.dstSubpass = 0;
-    dependency1.srcStageMask = VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT;
-    dependency1.dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
-    dependency1.srcAccessMask = VK_ACCESS_MEMORY_READ_BIT;
-    dependency1.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_READ_BIT | VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
-    dependency1.dependencyFlags = VK_DEPENDENCY_BY_REGION_BIT;
-
-    VkSubpassDependency dependency2{};
-    dependency2.srcSubpass = 0;
-    dependency2.dstSubpass = VK_SUBPASS_EXTERNAL;
-    dependency2.srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
-    dependency2.dstStageMask = VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT;
-    dependency2.srcAccessMask = VK_ACCESS_COLOR_ATTACHMENT_READ_BIT | VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
-    dependency2.dstAccessMask = VK_ACCESS_MEMORY_READ_BIT;
-    dependency2.dependencyFlags = VK_DEPENDENCY_BY_REGION_BIT;
-
-    std::array subPasses = {subpass};
-    std::array dependencies = {dependency1, dependency2};
-    */
-
     VkRenderPassCreateInfo renderPassInfo{};
     renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
-    renderPassInfo.attachmentCount = static_cast<uint32_t>(attachments.size());
-    renderPassInfo.pAttachments = attachments.data();
+    renderPassInfo.attachmentCount = static_cast<uint32_t>(descriptions.size());
+    renderPassInfo.pAttachments = descriptions.data();
     renderPassInfo.subpassCount = subpassDescriptions.size();
     renderPassInfo.pSubpasses = subpassDescriptions.data();
     renderPassInfo.dependencyCount = subpassDependencies.size();
@@ -109,4 +118,21 @@ RenderPass::RenderPass(DeviceContext &context)
                            &resource) != VK_SUCCESS) {
         throw std::runtime_error("failed to create render pass!");
     }
+}
+
+
+Subpass &RenderPass::createSubpass() {
+    return *subpasses.emplace_back(std::make_unique<Subpass>(*this));
+}
+
+uint32_t RenderPass::addAttachment(RenderAttachment *attachment) {
+    if (attachment->getAttachmentDescription().samples != VK_SAMPLE_COUNT_1_BIT) {
+        msaaEnabled = true;
+    }
+    attachments.push_back(attachment);
+    return attachments.size() - 1;
+}
+
+void RenderPass::addDependency(SubpassDependency &dependency) {
+    subpassDependencies.push_back(dependency.getSubpassDependency());
 }
