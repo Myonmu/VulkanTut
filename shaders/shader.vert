@@ -16,6 +16,7 @@ layout(location = 3) in vec2 inTexCoord;
 layout (location = 0) out vec3 outNormal;
 layout (location = 1) out vec3 outColor;
 layout (location = 2) out vec3 outWorldPos;
+layout (location = 3) out vec2 outTexCoord;
 
 void main() {
     vec4 pos = vec4(inPosition, 1.0);
@@ -30,6 +31,7 @@ void main() {
     mat3 mNormal = transpose(inverse(mat3(pushConstants.model)));
     outNormal = mNormal * normalize(inNormal);
 
+    outTexCoord = inTexCoord;
     // Currently just vertex color
     outColor = inColor;
 }

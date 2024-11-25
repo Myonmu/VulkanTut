@@ -52,6 +52,6 @@ FrameInfo VulkanRenderer::getCurrentFrameInfo() const {
     };
 }
 
-VulkanFrame &VulkanRenderer::getCurrentFrame() const {
-    return *frames[currentFrame];
+DescriptorSet &VulkanRenderer::getOrAllocatePerFrameDescriptorSet(DescriptorSetLayout &layout) const {
+    return getCurrentFrame().allocatePerFrameDescriptorSetTemp(layout);
 }

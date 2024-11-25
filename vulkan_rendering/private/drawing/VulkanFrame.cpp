@@ -55,7 +55,8 @@ void PerFrameDescriptorSet::updateSet() const {
 
 VulkanFrame::VulkanFrame(WindowContext &context, VulkanRenderer &renderer)
     : context(context),
-      commandBuffer(context.context, QueueFamily::QUEUE_FAMILY_GRAPHICS) {
+      commandBuffer(context.context, QueueFamily::QUEUE_FAMILY_GRAPHICS),
+      freeformAllocator(context.context) {
     VkSemaphoreCreateInfo semaphoreInfo{};
     semaphoreInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
     VkFenceCreateInfo fenceInfo{};
@@ -104,7 +105,8 @@ void VulkanFrame::drawFrame(uint32_t currentFrameIndex, RenderingContext &render
     vkResetFences(device, 1, &inFlightFence);
     // record command buffer
     vkResetCommandBuffer(commandBuffer, 0);
-
+    tempDescriptors.clear();
+    freeformAllocator.reset();
     renderingCtx.prepareFrame(frameInfo);
 
     //fmt::println("   - - - Start recording main command buffer");
@@ -157,4 +159,10 @@ VulkanFrame::~VulkanFrame() {
     vkDestroySemaphore(device, imageAvailableSemaphore, nullptr);
     vkDestroySemaphore(device, renderFinishedSemaphore, nullptr);
     vkDestroyFence(device, inFlightFence, nullptr);
+}
+
+
+DescriptorSet &VulkanFrame::allocatePerFrameDescriptorSetTemp(DescriptorSetLayout &layout) {
+    auto& result = tempDescriptors.emplace_back(freeformAllocator.allocate(layout));
+    return *result;
 }

@@ -7,6 +7,8 @@
 #include <CommandBufferRecorder.h>
 #include <vector>
 
+class DescriptorSetLayout;
+class DescriptorSet;
 class PerFrameDescriptorAllocator;
 struct RenderingContext;
 struct WindowContext;
@@ -15,6 +17,9 @@ struct VulkanAppContext;
 
 class VulkanRenderer {
 public:
+    bool isPaused { false };
+    std::unique_ptr<CommandBufferRecorder> recorder;
+
     explicit VulkanRenderer(WindowContext& context);
     ~VulkanRenderer();
 
@@ -23,13 +28,11 @@ public:
 
     void recordCommandBuffer(const CommandBuffer & command_buffer, const DeviceContext & context, FrameInfo frame_info) const;
 
-    std::unique_ptr<CommandBufferRecorder> recorder;
-
     FrameInfo getCurrentFrameInfo() const;
 
     VulkanFrame& getCurrentFrame() const;
 
-    bool isPaused { false };
+    DescriptorSet& getOrAllocatePerFrameDescriptorSet(DescriptorSetLayout& layout) const;
 private:
     friend class VulkanFrame;
     WindowContext& ctx;

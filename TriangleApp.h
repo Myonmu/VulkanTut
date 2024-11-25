@@ -170,6 +170,7 @@ private:
         return true;
     }
 
+    // This is actually called in Vulkan Frame preparation (in drawFrame)
     bool prepareRenderLoop() {
         mainPassRecorder->clear();
         mainPassRecorder->enqueueCommand<SetViewport>();
@@ -199,7 +200,13 @@ private:
                 writer.writeInputAttachment(0, pos.get_imageView());
                 writer.writeInputAttachment(1, normal.get_imageView());
                 writer.writeInputAttachment(2, albedo.get_imageView());
-                writer.updateSet(device, r.materialInstance.getDescriptorSet(1));
+
+                auto& layout = r.materialInstance.getMaterial().getDescriptorSetLayout(1);
+                auto &descriptorSet = mainContext->renderer->getOrAllocatePerFrameDescriptorSet(layout);
+
+                writer.updateSet(device, descriptorSet);
+                mainPassRecorder->enqueueCommand<BindDescriptorSet>(
+                    r.materialInstance.getMaterial().get_pipelineLayout(),descriptorSet,1);
                 r.enqueueDrawCall(*mainContext, *mainPassRecorder);
             });
 

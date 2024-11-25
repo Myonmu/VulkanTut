@@ -105,3 +105,34 @@ std::unique_ptr<DescriptorSet> DescriptorAllocator::allocate(DescriptorSetLayout
 		throw;
 	}
 }
+
+
+DescriptorAllocatorCollection::DescriptorAllocatorCollection(DeviceContext &ctx): ctx(ctx) {
+
+}
+
+
+std::unique_ptr<DescriptorSet> DescriptorAllocatorCollection::allocate(DescriptorSetLayout &layout, void *pNext) {
+	for (auto& allocator: allocators) {
+		if (allocator->isCompatible(layout)) {
+			return allocator->allocate(layout, pNext);
+		}
+	}
+	std::vector<DescriptorAllocator::PoolSizeRatio> ratios;
+	for (auto [type, cnt]: layout.requirements) {
+		ratios.emplace_back(type, cnt);
+	}
+	auto& allocator = allocators.emplace_back(std::make_unique<DescriptorAllocator>(ctx));
+	allocator->init(10, ratios);
+	return allocator->allocate(layout, pNext);
+}
+
+void DescriptorAllocatorCollection::reset() const {
+	for (auto& allocator: allocators) {
+		allocator->clear();
+	}
+}
+
+VulkanFrame &VulkanRenderer::getCurrentFrame() const {
+	return *frames[currentFrame];
+}

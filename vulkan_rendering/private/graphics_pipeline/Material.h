@@ -12,6 +12,7 @@
 #include "DescriptorWriter.h"
 #include "ObjectHierarchy.h"
 #include "Shader.h"
+#include "DescriptorSetLayout.h"
 
 
 class PerFrameBufferGroup;
@@ -60,6 +61,10 @@ public:
 
     MaterialInstance &createInstance();
 
+    DescriptorSetLayout& getDescriptorSetLayout(uint32_t setId) {
+        return *descriptorSetLayouts[setId];
+    }
+
     friend class MaterialInstance;
 };
 
@@ -73,13 +78,14 @@ class MaterialInstance : public ObjectNode {
     DescriptorWriter descriptorWriter{};
 
 public:
+    std::map<uint32_t, std::unique_ptr<DescriptorSet> > descriptorSets;
+
     explicit MaterialInstance(Material &material);
 
     ~MaterialInstance() override;
 
     friend class Material;
 
-    std::map<uint32_t, std::unique_ptr<DescriptorSet> > descriptorSets;
 
     void updateDescriptorSet(uint32_t setId);
 

@@ -56,10 +56,14 @@ public:
 
     CTX_PROPERTY(PerFrameDescriptorSet, perFrameDescriptorSet)
 
+    DescriptorSet& allocatePerFrameDescriptorSetTemp(DescriptorSetLayout& layout);
 private:
     WindowContext &context;
     CommandBuffer commandBuffer;
     FrameInfo frameInfo{};
+
+    DescriptorAllocatorCollection freeformAllocator;
+    std::vector<std::unique_ptr<DescriptorSet>> tempDescriptors;
 
     VkSemaphore imageAvailableSemaphore{};
     VkSemaphore renderFinishedSemaphore{};

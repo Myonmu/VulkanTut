@@ -44,7 +44,7 @@ MaterialInstance &Material::createInstance() {
 
 MaterialInstance::MaterialInstance(Material &material) : srcMaterial(material), ctx(material.ctx) {
     for (auto &[id, layout]: material.descriptorSetLayouts) {
-        if(id == 0) continue;
+        if(layout->getAllocPolicy() != DescriptorAllocPolicy::PER_MATERIAL_INSTANCE) continue;
         auto result = material.descriptorAllocator->allocate(*layout);
         descriptorSets.emplace(id, std::move(result));
     }
