@@ -341,6 +341,57 @@ As for subpasses, they are inside render pass and use a subset of the frame buff
 
 It is worth noting that Render Pass does not directly reference an attachment's handle, but only through *Attachment Description* and *Attachment Reference*, which can exist before the attachment is even created. The actual correspondence is done through the frame buffer (or descriptor sets if not managed by render pass).
 
+### Attachment Referencing
+
+The Render Pass system has a rather complex attachment referencing mechanism, and one little misalignment will result in painful bug hunting (one more reason to prefer render graph to ensure proper referencing).
+
+There are several orders that are important:
+ 
+In shader, we have input attachment declared as follows:
+```glsl
+layout (input_attachment_index = 0, set = 1, binding = 0) uniform subpassInput inputPosition;
+```
+This means we expect an input attachment at 0, and the same `VkImageView` is bound at binding 0 of descriptor set 1. Now, "input attachment at 0" is a vague description. What is this "0" exactly?
+
+Turns out it is *the index of the attachment reference in Subpass description* - not the index of the attachment in frame buffer:
+
+```c++
+VkSubpassDescription Subpass::getSubpassDescription() const {
+    return {
+         // other fields are not shown 
+        .inputAttachmentCount = static_cast<uint32_t>(inputAttachments.size()),
+        .pInputAttachments = inputAttachments.data(), //<- corresponds to index in this vector/array
+    };
+}
+```
+
+Even if the attachment reference is `{.attachment = 2}`, if it is the first in the attachment reference array, in shader, `input_attachment_index` should be 0.
+
+Now, the `.attachment` in `VkAttachmentReference` points to the index of the attachment in Frame Buffer ... if configured correctly. It actually points to the `.pAttachments` array index in `VkRenderPassCreateInfo`
+
+```c++
+    VkRenderPassCreateInfo renderPassInfo{};
+    renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
+    renderPassInfo.attachmentCount = static_cast<uint32_t>(descriptions.size());
+    renderPassInfo.pAttachments = descriptions.data();
+    //...
+```
+
+The order of the `.pAttachments` should be used to create the frame buffer, or else you get a mismatch:
+
+```c++
+    VkFramebufferCreateInfo framebufferInfo{};
+    framebufferInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
+    framebufferInfo.renderPass = renderPass;
+    framebufferInfo.attachmentCount = static_cast<uint32_t>(attachments.size());
+    framebufferInfo.pAttachments = attachments.data(); //<- order should be the same as in render pass
+    //...
+```
+
+
+
+
+
 ### Render Graph
 
 When Unity first launched Render Graph to replace the old SRP API, it was quite scary to write. I was never so certain
