@@ -25,9 +25,7 @@ struct VulkanAppContext {
     const char* name;
     CTX_PROPERTY(VulkanInstance, vulkanInstance)
     CTX_PROPERTY(ValidationLayers, validationLayers)
-    std::vector<std::unique_ptr<DeviceContext>> deviceContexts;
-
-    void createDeviceContext(VulkanDeviceSetupProcedure &setupProcedure);
+    CTX_PROPERTY_LIST(DeviceContext, deviceContexts)
 
     VulkanAppContext(const char *appName, VulkanSetupProcedure& setupProcedure);
 

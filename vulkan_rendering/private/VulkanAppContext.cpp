@@ -13,7 +13,3 @@ VulkanAppContext::VulkanAppContext(const char *appName, VulkanSetupProcedure &se
 }
 
 VulkanAppContext::~VulkanAppContext() = default;
-
-void VulkanAppContext::createDeviceContext(VulkanDeviceSetupProcedure &setupProcedure) {
-    deviceContexts.emplace_back(std::make_unique<DeviceContext>(*this, setupProcedure));
-}

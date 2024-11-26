@@ -10,7 +10,7 @@
 #include "UnifiedTexture2D.h"
 #include "PerFrameBufferGroup.h"
 
-Material::Material(DeviceContext& ctx, std::vector<Shader>& shaders, RenderPass& renderPass):
+Material::Material(DeviceContext& ctx, std::vector<Shader>& shaders, RenderPass& renderPass, uint32_t subpassId, bool buildPipelineImmediately):
 ctx(ctx)
 {
     for (auto& shader: shaders) {
@@ -31,20 +31,24 @@ ctx(ctx)
         vkLayouts.push_back(descriptorSetLayouts[set]->getRaw());
     }
     pipelineLayout = std::make_unique<PipelineLayout>(ctx, vkLayouts);
-    pipeline = std::make_unique<VulkanPipeline>(ctx, shaders, *pipelineLayout, renderPass);
+    pipeline = std::make_unique<VulkanPipeline>(ctx, shaders, *pipelineLayout, renderPass, subpassId);
+    if (buildPipelineImmediately) {
+        pipeline->build();
+    }
 }
 
 MaterialInstance &Material::createInstance() {
     return createChildObject<MaterialInstance>(*this);
 }
 
-
-
+void Material::buildPipeline() {
+    pipeline->build();
+}
 
 
 MaterialInstance::MaterialInstance(Material &material) : srcMaterial(material), ctx(material.ctx) {
     for (auto &[id, layout]: material.descriptorSetLayouts) {
-        if(id == 0) continue;
+        if(layout->getAllocPolicy() != DescriptorAllocPolicy::PER_MATERIAL_INSTANCE) continue;
         auto result = material.descriptorAllocator->allocate(*layout);
         descriptorSets.emplace(id, std::move(result));
     }

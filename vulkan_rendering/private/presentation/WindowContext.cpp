@@ -22,8 +22,12 @@ WindowContext::WindowContext(DeviceContext &ctx, const char *name, int width, in
 void WindowContext::init() {
     swapChain = std::make_unique<SwapChain>(*this);
     colorAttachment = std::make_unique<PresentColorAttachment>(*this);
-    msaaAttachment = std::make_unique<ColorAttachment>(*this, get_physicalDevice().getMaxMsaaSampleCount(),
-                                                       AttachmentType::MSAA);
+    gbufferAlbedo = std::make_unique<ColorAttachment>(*this,VK_SAMPLE_COUNT_1_BIT, AttachmentType::TRANSIENT_COLOR);
+    gbufferAlbedo->name = "GBuffer_Albedo";
+    gbufferPosition = std::make_unique<ColorAttachment>(*this,VK_SAMPLE_COUNT_1_BIT, AttachmentType::TRANSIENT_COLOR);
+    gbufferPosition->name = "GBuffer_Position";
+    gbufferNormal = std::make_unique<ColorAttachment>(*this,VK_SAMPLE_COUNT_1_BIT, AttachmentType::TRANSIENT_COLOR);
+    gbufferNormal->name = "GBuffer_Normal";
     depthAttachment = std::make_unique<DepthAttachment>(*this);
 }
 
@@ -43,7 +47,9 @@ void WindowContext::resize() {
     vkDeviceWaitIdle(getLogicalDevice());
     swapChain->recreate();
     colorAttachment->recreate();
-    msaaAttachment->recreate();
+    gbufferAlbedo->recreate();
+    gbufferNormal->recreate();
+    gbufferPosition->recreate();
     depthAttachment->recreate();
     frameBuffers->recreate();
 }

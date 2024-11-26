@@ -3,6 +3,7 @@
 //
 
 #pragma once
+#include <map>
 #include <vector>
 
 #include "ContextMacros.h"
@@ -16,11 +17,14 @@ class SwapChain;
 enum class AttachmentType {
     MSAA,
     DEPTH_STENCIL,
-    PRESENT
+    PRESENT,
+    TRANSIENT_COLOR
 };
 
 class RenderAttachment {
 public:
+    std::string name;
+
     virtual ~RenderAttachment() = default;
 
     virtual VkAttachmentDescription getAttachmentDescription() const = 0;
@@ -30,8 +34,13 @@ public:
 
 struct AttachmentRef {
     uint32_t index;
-    RenderAttachment &attachment;
+    AttachmentType type;
+    VkAttachmentDescription description;
     VkImageLayout layout;
+    VkClearColorValue clearColor{};
+
+    AttachmentRef() = default;
+    AttachmentRef(uint32_t id, const RenderAttachment& attachment, VkImageLayout layout);
 };
 
 class ColorAttachment : public RenderAttachment {
@@ -113,7 +122,7 @@ public:
 
     void recreate();
 
-    AttachmentType getAttachmentType() const override { return type; };
+    [[nodiscard]] AttachmentType getAttachmentType() const override { return type; };
 
     operator VkImageView() const { return *depthImageView; }
 };

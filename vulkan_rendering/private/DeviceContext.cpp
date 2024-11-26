@@ -90,7 +90,8 @@ QueueContext &DeviceContext::getCommonQueueContext(const QueueFamily queueFamily
 }
 
 void DeviceContext::bindRenderPassToWindow(const uint32_t windowId, const uint32_t renderPassId) const {
-    get_windowContext_at(windowId).createFrameBuffers(get_renderPass_at(renderPassId));
+    throw std::runtime_error("Not implemented");
+    //get_windowContext_at(windowId).createFrameBuffers(get_renderPass_at(renderPassId));
 }
 
 void DeviceContext::destroyWindow(uint32_t id) {
@@ -105,6 +106,12 @@ void DeviceContext::destroyWindow(uint32_t id) {
      * This can potentially be inefficient in games like WindowShot where windows are spawned/destroyed frequently
      */
     windowContext.erase(windowContext.begin() + i);
+    // For now, update window id to prevent holes
+    i = 0;
+    for (const auto& window: windowContext) {
+        window->id = i;
+        i++;
+    }
 }
 
 WindowContext &DeviceContext::getWindowContextFromSdlId(const SDL_WindowID &window_id) {

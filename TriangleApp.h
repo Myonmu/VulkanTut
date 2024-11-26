@@ -48,7 +48,8 @@ private:
     std::unique_ptr<VulkanAppContext> context;
     flecs::world ecs{};
     std::vector<Shader> shaders;
-    std::unique_ptr<RenderPassRecorder> mainPass;
+    std::vector<Shader> lightingShaders;
+    std::unique_ptr<RenderPassRecorder> mainPassRecorder;
     EnginePipeline enginePipeline{};
     std::unique_ptr<RenderingContext> mainContext;
     std::unique_ptr<EventSystem> eventSystem;
@@ -63,12 +64,11 @@ private:
         transformPrefab = ecs.prefab("Transform").add<Position>().add<Rotation>().add<Scale>();
 
 
-        auto &deviceCtx = *context->deviceContexts[0];
-        auto f = FileUtility::ReadSpv("./shaders/shader.vert.spv");
-        shaders.emplace_back(f, VK_SHADER_STAGE_VERTEX_BIT);
+        auto &deviceCtx = context->get_deviceContexts_at(0);
+        shaders.emplace_back(FileUtility::ReadSpv("./shaders/shader.vert.spv"), VK_SHADER_STAGE_VERTEX_BIT);
         shaders.emplace_back(FileUtility::ReadSpv("./shaders/shader.frag.spv"), VK_SHADER_STAGE_FRAGMENT_BIT);
 
-        auto &material = deviceCtx.createObject<Material>(deviceCtx, shaders, deviceCtx.get_renderPass_at(0));
+        auto &material = deviceCtx.createObject<Material>(deviceCtx, shaders, deviceCtx.get_renderPass_at(0), 0, true);
         auto &materialInstance = material.createInstance();
 
         auto const &tex =
@@ -92,6 +92,17 @@ private:
         materialInstance.setCombinedImageSampler(0, tex, sampler);
         materialInstance.updateDescriptorSet(1);
 
+        lightingShaders.emplace_back(FileUtility::ReadSpv("./shaders/lighting.vert.spv"), VK_SHADER_STAGE_VERTEX_BIT);
+        lightingShaders.emplace_back(FileUtility::ReadSpv("./shaders/lighting.frag.spv"), VK_SHADER_STAGE_FRAGMENT_BIT);
+        auto &lightingMat = deviceCtx.createObject<Material>(
+            deviceCtx, lightingShaders, deviceCtx.get_renderPass_at(0), 1, false);
+
+        lightingMat.get_pipeline().rasterizer.cullMode = VK_CULL_MODE_NONE;
+        lightingMat.get_pipeline().build();
+
+        auto &lightingMatInstance = lightingMat.createInstance();
+        auto &subpass1 = ecs.entity("Lighting Renderer").emplace<RenderFullScreenQuad>(deviceCtx, lightingMatInstance);
+
         obj.LoadGeometry("./assets/viking_room.obj");
         auto &meshBuffer = deviceCtx.createObject<MeshBuffer>(deviceCtx, obj.vertices, obj.indices);
         //auto &vertexBuffer = deviceCtx.createObject<VertexBuffer>(deviceCtx, obj.vertices);
@@ -103,11 +114,18 @@ private:
                 .is_a(transformPrefab);
 
 
-        mainPass = std::make_unique<RenderPassRecorder>(deviceCtx.get_renderPass_at(0));
+        auto &light = ecs.entity("Main Light")
+                .set(MainLight{
+                    .direction = glm::normalize(glm::vec3{-1.f, -2.f, -1.f}),
+                    .color = {1.f, 1.f, 1.f}
+                });
+
+
+        mainPassRecorder = std::make_unique<RenderPassRecorder>(deviceCtx.get_renderPass_at(0));
         auto &mainRenderer = deviceCtx.get_windowContext_at(0).get_renderer();
-        mainRenderer.recorder->enqueueCommand<EnqueueRenderPass>(*mainPass);
-        auto& otherRenderer = deviceCtx.get_windowContext_at(1).get_renderer();
-        otherRenderer.recorder->enqueueCommand<EnqueueRenderPass>(*mainPass);
+        mainRenderer.recorder->enqueueCommand<EnqueueRenderPass>(*mainPassRecorder);
+        auto &otherRenderer = deviceCtx.get_windowContext_at(1).get_renderer();
+        otherRenderer.recorder->enqueueCommand<EnqueueRenderPass>(*mainPassRecorder);
 
         auto &swapchain = deviceCtx.get_windowContext_at(0).get_swapChain();
         auto &camera = ecs.entity("Camera")
@@ -133,7 +151,7 @@ private:
             // window events
             auto windowId = e.window.windowID;
             try {
-                auto &windowCtx = context->deviceContexts[0]->getWindowContextFromSdlId(windowId);
+                auto &windowCtx = context->get_deviceContexts_at(0).getWindowContextFromSdlId(windowId);
                 switch (e.type) {
                     case SDL_EVENT_WINDOW_CLOSE_REQUESTED:
                         windowCtx.closeWindow();
@@ -156,42 +174,65 @@ private:
         return true;
     }
 
+    // This is actually called in Vulkan Frame preparation (in drawFrame)
     bool prepareRenderLoop() {
-        ecs.system<Position, Rotation, Scale, MeshRenderer>("UpdatePerObjectUBO").kind(flecs::PreStore).each(
-            [](Position &p, Rotation &r, Scale &s, MeshRenderer &renderer) {
-                const auto modelMatrix = Transform::getModelMatrix(p, r, s);
-                renderer.vertexPushConstants.model = modelMatrix;
-            }
-        );
+        mainPassRecorder->clear();
+        mainPassRecorder->enqueueCommand<SetViewport>();
+        mainPassRecorder->enqueueCommand<SetScissors>();
 
-        ecs.system<Position, Rotation, Scale, MeshRendererSplitBuffer>("UpdatePerObjectUBOSplit").kind(flecs::PreStore).
-                each(
-                    [](Position &p, Rotation &r, Scale &s, MeshRendererSplitBuffer &renderer) {
-                        const auto modelMatrix = Transform::getModelMatrix(p, r, s);
-                        renderer.vertexPushConstants.model = modelMatrix;
-                    }
-                );
-
-        mainPass->clear();
-        mainPass->enqueueCommand<SetViewport>();
-        mainPass->enqueueCommand<SetScissors>();
+        // TODO: Move to ECS system (currently they depend on main context and main pass, refactor this dependency)
         ecs.system<MeshRenderer>("RenderMesh").kind(flecs::OnStore).each(
             [this](MeshRenderer &renderer) {
-                renderer.enqueueDrawCall(*mainContext, *mainPass);
+                renderer.enqueueDrawCall(*mainContext, *mainPassRecorder);
             });
 
         ecs.system<MeshRendererSplitBuffer>("RenderMeshSplit").kind(flecs::OnStore).each(
             [this](MeshRendererSplitBuffer &renderer) {
-                renderer.enqueueDrawCall(*mainContext, *mainPass);
+                renderer.enqueueDrawCall(*mainContext, *mainPassRecorder);
             });
+
+        ecs.system<RenderFullScreenQuad>("Lighting").kind(flecs::OnStore).each(
+            [this](RenderFullScreenQuad &r) {
+                // Update input descriptors
+                DescriptorWriter writer{};
+                auto windowId = mainContext->renderer->getCurrentFrameInfo().windowId;
+                auto &device = context->get_deviceContexts_at(0).getLogicalDevice();
+                auto &windowCtx = this->context->get_deviceContexts_at(0).get_windowContext_at(windowId);
+                auto &albedo = windowCtx.get_gbufferAlbedo();
+                auto &normal = windowCtx.get_gbufferNormal();
+                auto &pos = windowCtx.get_gbufferPosition();
+                writer.writeInputAttachment(0, pos.get_imageView());
+                writer.writeInputAttachment(1, normal.get_imageView());
+                writer.writeInputAttachment(2, albedo.get_imageView());
+
+                auto& layout = r.materialInstance.getMaterial().getDescriptorSetLayout(1);
+                auto &descriptorSet = mainContext->renderer->getOrAllocatePerFrameDescriptorSet(layout);
+
+                writer.updateSet(device, descriptorSet);
+                mainPassRecorder->enqueueCommand<BindDescriptorSet>(
+                    r.materialInstance.getMaterial().get_pipelineLayout(),descriptorSet,1);
+                r.enqueueDrawCall(*mainContext, *mainPassRecorder);
+            });
+
 
         ecs.system<Rotation, Position, Camera>("RenderCamera").kind(flecs::OnStore).each(
             [this](Rotation &t, Position &p, Camera &cam) {
-                auto &perSceneData = mainContext->perSceneData;
-                perSceneData.projection = cam.getProjectionMatrix();
-                perSceneData.view = Camera::getViewMatrix(p, t);
+                auto &cameraData = mainContext->cameraUboData;
+                cameraData.projection = cam.getProjectionMatrix();
+                cameraData.view = Camera::getViewMatrix(p, t);
+                cameraData.camProps = cam.getCameraPropertyVector();
             }
         );
+        //TODO: currently only support 1 main light, subsequent main lights overwrite the previous
+        ecs.system<MainLight>("MainLight").kind(flecs::OnStore).each(
+            [this](MainLight &l) {
+                auto &lightData = mainContext->mainLightUboData;
+                lightData.color = glm::vec4(l.color, 1.0f);
+                lightData.direction = glm::vec4(l.direction, 0.0f);
+            }
+        );
+
+
         if (const auto result = ecs.progress(); !result) {
             fmt::println("Failed to progress ECS");
             return false;
@@ -219,6 +260,6 @@ private:
             //fmt::print(fg(fmt::color::aqua) | fmt::emphasis::bold, "^^^^^^ END FRAME {}\n", frameCounter);
             frameCounter++;
         }
-        vkDeviceWaitIdle(context->deviceContexts[0]->getLogicalDevice());
+        vkDeviceWaitIdle(context->get_deviceContexts_at(0).getLogicalDevice());
     }
 };

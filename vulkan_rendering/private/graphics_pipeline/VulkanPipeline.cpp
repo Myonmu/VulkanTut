@@ -69,8 +69,8 @@ VkPipelineColorBlendAttachmentState getColorBlendAttachmentState() {
 VkPipelineMultisampleStateCreateInfo getPipelineMultisampleStateCreateInfo(DeviceContext& ctx) {
     VkPipelineMultisampleStateCreateInfo multisampling{};
     multisampling.sType = VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO;
-    multisampling.sampleShadingEnable = ctx.getLogicalDevice().deviceFeatures.sampleRateShading;
-    multisampling.rasterizationSamples = ctx.get_physicalDevice().getMaxMsaaSampleCount();
+    multisampling.sampleShadingEnable = VK_FALSE;//ctx.getLogicalDevice().deviceFeatures.sampleRateShading;
+    multisampling.rasterizationSamples = VK_SAMPLE_COUNT_1_BIT;
     multisampling.minSampleShading = .2f; // Optional
     multisampling.pSampleMask = nullptr; // Optional
     multisampling.alphaToCoverageEnable = VK_FALSE; // Optional
@@ -101,63 +101,73 @@ VkPipelineDepthStencilStateCreateInfo getDepthStencilStateCreateInfo() {
 VulkanPipeline::VulkanPipeline(DeviceContext &context,
                                const std::vector<Shader>& shaders,
                                const PipelineLayout &layout,
-                               const RenderPass &renderPass)
-    : VulkanResource(context){
-
-    std::vector<VkPipelineShaderStageCreateInfo> shaderStages;
+                               const RenderPass &renderPass,
+                               const uint32_t subpassId)
+    : VulkanResource(context), layout(layout) ,renderPass(renderPass), subpassId(subpassId){
     for (auto& shader: shaders) {
         auto& s = shaderModules.emplace_back(std::make_unique<ShaderModule>(shader, context));
         shaderStages.push_back(s->getShaderStageCreateInfo());
     }
-    VkGraphicsPipelineCreateInfo pipelineInfo{};
-    pipelineInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
-    pipelineInfo.stageCount = shaderStages.size();
-    pipelineInfo.pStages = shaderStages.data();
 
-    VkPipelineDynamicStateCreateInfo dynamicState{};
     dynamicState.sType = VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO;
     dynamicState.dynamicStateCount = static_cast<uint32_t>(dynamicStates.size());
     dynamicState.pDynamicStates = dynamicStates.data();
 
-    VkPipelineVertexInputStateCreateInfo vertexInputInfo{};
-    auto bindingDesc = Vertex::getBindingDescription();
-    auto attrDesc = Vertex::getAttributeDescriptions();
-    vertexInputInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
-    vertexInputInfo.vertexBindingDescriptionCount = 1;
-    vertexInputInfo.pVertexBindingDescriptions = &bindingDesc; // Optional
-    vertexInputInfo.vertexAttributeDescriptionCount = static_cast<uint32_t>(attrDesc.size());
-    vertexInputInfo.pVertexAttributeDescriptions = attrDesc.data(); // Optional
-
-    auto inputAssembly = getInputAssemblyCreateInfo();
-    auto viewport = getFullWindowViewport();
+    inputAssembly = getInputAssemblyCreateInfo();
+    viewport = getFullWindowViewport();
     auto scissor = getFullWindowScissorRect();
 
-    VkPipelineViewportStateCreateInfo viewportState{};
     viewportState.sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO;
     viewportState.viewportCount = 1;
     viewportState.pViewports = &viewport;
     viewportState.scissorCount = 1;
     viewportState.pScissors = &scissor;
 
-    auto rasterizer = getRasterizerStateCreateInfo();
-    auto multisampling = getPipelineMultisampleStateCreateInfo(context);
-    auto colorBlendAttachment = getColorBlendAttachmentState();
+    rasterizer = getRasterizerStateCreateInfo();
+    multisampling = getPipelineMultisampleStateCreateInfo(ctx);
+
+    depthStencil = getDepthStencilStateCreateInfo();
+}
+
+VulkanPipeline::~VulkanPipeline() {
+    vkDestroyPipeline(ctx.getLogicalDevice(),
+                      resource, nullptr);
+}
+
+void VulkanPipeline::build() {
+
+    auto bindingDesc = Vertex::getBindingDescription();
+    auto vertexAttrDesc = Vertex::getAttributeDescriptions();
+    VkPipelineVertexInputStateCreateInfo vertexInput{};
+    vertexInput.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
+    vertexInput.vertexBindingDescriptionCount = 1;
+    vertexInput.pVertexBindingDescriptions = &bindingDesc; // Optional
+    vertexInput.vertexAttributeDescriptionCount = static_cast<uint32_t>(vertexAttrDesc.size());
+    vertexInput.pVertexAttributeDescriptions = vertexAttrDesc.data(); // Optional
+
+    auto colorAttachmentCnt = renderPass.getSubpass(subpassId).colorAttachments.size();
+    std::vector<VkPipelineColorBlendAttachmentState> colorAttachments{};
+    for (uint32_t i = 0; i < colorAttachmentCnt; i++) {
+        colorAttachments.push_back(getColorBlendAttachmentState());
+    }
+
 
     VkPipelineColorBlendStateCreateInfo colorBlending{};
     colorBlending.sType = VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO;
     colorBlending.logicOpEnable = VK_FALSE;
     colorBlending.logicOp = VK_LOGIC_OP_COPY; // Optional
-    colorBlending.attachmentCount = 1;
-    colorBlending.pAttachments = &colorBlendAttachment;
+    colorBlending.attachmentCount = colorAttachmentCnt;
+    colorBlending.pAttachments = colorAttachments.data();
     colorBlending.blendConstants[0] = 0.0f; // Optional
     colorBlending.blendConstants[1] = 0.0f; // Optional
     colorBlending.blendConstants[2] = 0.0f; // Optional
     colorBlending.blendConstants[3] = 0.0f; // Optional
 
 
-    auto depthStencil = getDepthStencilStateCreateInfo();
-
-    pipelineInfo.pVertexInputState = &vertexInputInfo;
+    pipelineInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
+    pipelineInfo.stageCount = shaderStages.size();
+    pipelineInfo.pStages = shaderStages.data();
+    pipelineInfo.pVertexInputState = &vertexInput;
     pipelineInfo.pInputAssemblyState = &inputAssembly;
     pipelineInfo.pViewportState = &viewportState;
     pipelineInfo.pRasterizationState = &rasterizer;
@@ -169,20 +179,15 @@ VulkanPipeline::VulkanPipeline(DeviceContext &context,
     pipelineInfo.layout = layout;
 
     pipelineInfo.renderPass = renderPass;
-    pipelineInfo.subpass = 0;
+    pipelineInfo.subpass = subpassId;
 
     pipelineInfo.basePipelineHandle = VK_NULL_HANDLE; // Optional
     pipelineInfo.basePipelineIndex = -1; // Optional
 
-    if (vkCreateGraphicsPipelines(context.getLogicalDevice()
+    if (vkCreateGraphicsPipelines(ctx.getLogicalDevice()
                                   , VK_NULL_HANDLE, 1,
                                   &pipelineInfo, nullptr,
                                   &resource) != VK_SUCCESS) {
         throw std::runtime_error("failed to create graphics pipeline!");
     }
-}
-
-VulkanPipeline::~VulkanPipeline() {
-    vkDestroyPipeline(ctx.getLogicalDevice(),
-                      resource, nullptr);
 }

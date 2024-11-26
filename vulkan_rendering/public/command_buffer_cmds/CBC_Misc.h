@@ -10,6 +10,7 @@
 
 #include "CommandBufferCmd.h"
 #include "RenderPassRecorder.h"
+#include <functional>
 
 
 class CBC_Misc final : public CommandBufferCmd {
@@ -21,7 +22,7 @@ class CBC_Misc final : public CommandBufferCmd {
 
 public:
     CBC_Misc(Buffer &src, Buffer &dst, VkDeviceSize srcOffset,
-               VkDeviceSize dstOffset, VkDeviceSize size)
+             VkDeviceSize dstOffset, VkDeviceSize size)
         : src(src),
           dst(dst),
           srcOffset(srcOffset),
@@ -46,7 +47,7 @@ class CopyBufferToImage final : public CommandBufferCmd {
 
 public:
     CopyBufferToImage(const Buffer &buffer, const TextureImage &image, uint32_t width, uint32_t height)
-    : image(image), buffer(buffer), width(width), height(height) {
+        : image(image), buffer(buffer), width(width), height(height) {
     }
 
     void execute(const CommandBuffer &commandBuffer, const DeviceContext &context,
@@ -86,20 +87,24 @@ class EnqueueRecorder : public CommandBufferCmd {
 public:
     explicit EnqueueRecorder(CommandBufferRecorder &recorder): recorder(recorder) {
     }
-    void execute(const CommandBuffer &commandBuffer, const DeviceContext &context, const FrameInfo &frameInfo) override {
+
+    void execute(const CommandBuffer &commandBuffer, const DeviceContext &context,
+                 const FrameInfo &frameInfo) override {
         recorder.recordCommandBuffer(commandBuffer, context, frameInfo);
     }
 };
 
 
-class EnqueueRenderPass final : public CommandBufferCmd{
-    RenderPassRecorder& recorder;
-public:
-    explicit EnqueueRenderPass(RenderPassRecorder& recorder): recorder(recorder) {
+class EnqueueRenderPass final : public CommandBufferCmd {
+    RenderPassRecorder &recorder;
 
+public:
+    explicit EnqueueRenderPass(RenderPassRecorder &recorder): recorder(recorder) {
     }
-    void execute(const CommandBuffer &commandBuffer, const DeviceContext &context, const FrameInfo &frameInfo) override {
-        recorder.recordRenderPass(commandBuffer, context,  frameInfo);
+
+    void execute(const CommandBuffer &commandBuffer, const DeviceContext &context,
+                 const FrameInfo &frameInfo) override {
+        recorder.recordRenderPass(commandBuffer, context, frameInfo);
     }
 };
 
@@ -160,5 +165,20 @@ public:
             0, nullptr,
             1, &barrier
         );
+    }
+};
+
+
+class RawCommand final : public CommandBufferCmd {
+    std::function<void(const CommandBuffer &, const DeviceContext &, const FrameInfo &)> func;
+
+public:
+    explicit RawCommand(
+        const std::function<void(const CommandBuffer &, const DeviceContext &, const FrameInfo &)> &func): func(func) {
+    }
+
+    void execute(const CommandBuffer &commandBuffer, const DeviceContext &context,
+                 const FrameInfo &frameInfo) override {
+        func(commandBuffer, context, frameInfo);
     }
 };

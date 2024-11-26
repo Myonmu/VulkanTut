@@ -105,6 +105,16 @@ set(SOURCES
         private/model_loading/GltfLoader.h
         private/model_loading/ObjLoader.cpp
         private/model_loading/ObjLoader.h
+        private/components/Lights.cpp
+        private/components/Lights.h
+        private/descriptor/EngineDescriptorDef.h
+        private/descriptor/EngineDescriptorDef.cpp
+        private/graphics_pipeline/RenderGraph.cpp
+        private/graphics_pipeline/RenderGraph.h
+        private/misc/UtilityMacros.h
+        private/misc/CompoundDataContainers.h
+        private/components/RenderingBase.cpp
+        private/components/RenderingBase.h
 )
 
 # Create static library
@@ -123,7 +133,7 @@ find_package(Stb REQUIRED)
 find_package(spirv_cross_core CONFIG REQUIRED)
 find_package(spirv_cross_util CONFIG REQUIRED)
 find_package(spirv_cross_glsl CONFIG REQUIRED)
-
+find_package(boost_bimap CONFIG REQUIRED)
 
 # Link GLFW, Vulkan, and GLM with the library
 target_link_libraries(Vk
@@ -134,6 +144,7 @@ target_link_libraries(Vk
         spirv-cross-core
         spirv-cross-util
         spirv-cross-glsl
+        Boost::bimap
 )
 target_link_libraries(Vk flecs::flecs)
 

@@ -51,6 +51,21 @@ void DescriptorWriter::writeBuffer(uint32_t binding, const Buffer &buffer, size_
     writes.push_back(write);
 }
 
+void DescriptorWriter::writeInputAttachment(uint32_t binding, const ImageView &image) {
+    VkDescriptorImageInfo const &info = imageInfos.emplace_back(VkDescriptorImageInfo{
+        .imageView = image,
+        .imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL
+    });
+    VkWriteDescriptorSet write = {.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET};
+    write.dstBinding = binding;
+    write.dstSet = VK_NULL_HANDLE; //left empty for now until we need to write it
+    write.descriptorCount = 1;
+    write.descriptorType = VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT;
+    write.pImageInfo = &info;
+    writes.push_back(write);
+}
+
+
 void DescriptorWriter::clear() {
     imageInfos.clear();
     writes.clear();

@@ -49,7 +49,7 @@ void ShaderReflectionResult::merge(ShaderReflectionResult &other) {
                         if (thisBinding != otherBinding) {
                             std::cerr << "Attempting to merge conflicting descriptor sets at set(" << i <<
                                     "), binding(" << j << ")" << std::endl;
-                        }else {
+                        } else {
                             thisBinding.stageFlags |= otherBinding.stageFlags;
                         }
                     }
@@ -63,7 +63,7 @@ std::map<VkDescriptorType, uint32_t> ShaderReflectionResult::getCountByType() {
     auto result = std::map<VkDescriptorType, uint32_t>();
     for (const auto &layouts: descriptorSets | std::views::values) {
         for (const auto &binding: layouts | std::views::values) {
-            if (result.contains(binding.type)) result[binding.type] ++;
+            if (result.contains(binding.type)) result[binding.type]++;
             else {
                 result[binding.type] = 1;
             }
@@ -79,7 +79,7 @@ void Shader::analyzeBinding(const spirv_cross::Compiler &compiler,
     uint32_t set = compiler.get_decoration(resource.id, spv::DecorationDescriptorSet);
     uint32_t binding = compiler.get_decoration(resource.id, spv::DecorationBinding);
     reflectionResult.addBinding({
-        set, binding, resource.name,t.array.empty() ? 1 : t.array.back(),
+        set, binding, resource.name, t.array.empty() ? 1 : t.array.back(),
         type,
         stage, nullptr
     });
@@ -99,6 +99,10 @@ Shader::Shader(std::vector<uint32_t> code, const VkShaderStageFlags stage): stag
 
     for (auto &combinedImageSamplers: resources.sampled_images) {
         analyzeBinding(compiler, combinedImageSamplers, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER);
+    }
+
+    for (auto &inputAttachment: resources.subpass_inputs) {
+        analyzeBinding(compiler, inputAttachment, VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT);
     }
 
     // TODO: Reflection for push constants

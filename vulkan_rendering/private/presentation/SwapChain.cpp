@@ -34,7 +34,8 @@ SwapChain::SwapChainSupportDetails SwapChain::querySwapChainSupport(VkPhysicalDe
 
 VkSurfaceFormatKHR SwapChain::chooseSwapSurfaceFormat(const std::vector<VkSurfaceFormatKHR>& availableFormats){
     for(const auto& availableFormat : availableFormats){
-        if(availableFormat.format == VK_FORMAT_R8G8B8A8_SRGB && availableFormat.colorSpace == VK_COLOR_SPACE_SRGB_NONLINEAR_KHR){
+        if(availableFormat.format == VK_FORMAT_R8G8B8A8_SRGB
+            && availableFormat.colorSpace == VK_COLOR_SPACE_SRGB_NONLINEAR_KHR){
             return availableFormat;
         }
     }
@@ -88,6 +89,7 @@ void SwapChain::createSwapChain(WindowContext& context){
     createInfo.imageExtent = extent;
     createInfo.imageArrayLayers = 1;
     createInfo.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
+    createInfo.compositeAlpha = VK_COMPOSITE_ALPHA_POST_MULTIPLIED_BIT_KHR;
 
     QueueFamilyIndices indices = ctx.context.get_queueFamilyIndices();
     const auto size = indices.getQueueFamilyIndicesCount(surface);

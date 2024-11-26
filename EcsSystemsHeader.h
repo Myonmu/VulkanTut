@@ -5,6 +5,7 @@
 #pragma once
 #include "flecs.h"
 #include "scripts/FlycamSystem.h"
+#include "scripts/MeshRendering.h"
 #include "scripts/MeshRotate.h"
 #include "scripts/SimplePhysics.h"
 
@@ -17,5 +18,6 @@ struct EcsSystemsHeader {
         CREATE_ECS_SYSTEM(FlycamSystem)
         CREATE_ECS_SYSTEM(LinearPositionUpdate)
         CREATE_ECS_SYSTEM(MeshRotate)
+        CREATE_ECS_SYSTEM(MeshRendering)
     }
 };

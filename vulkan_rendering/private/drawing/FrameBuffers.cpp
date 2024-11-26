@@ -11,18 +11,20 @@
 #include "WindowContext.h"
 #include "LogicalDevice.h"
 
-void FrameBuffers::createFrameBuffers(const RenderPass& renderPass) {
-    auto& swapChain = ctx.get_swapChain();
-    auto& colorAttachment = ctx.get_colorAttachment();
+void FrameBuffers::createFrameBuffers(const RenderPass &renderPass) {
+    auto &swapChain = ctx.get_swapChain();
+    auto &colorAttachment = ctx.get_colorAttachment();
     const auto swapChainSize = colorAttachment.getSize();
     resource.resize(swapChainSize);
     for (size_t i = 0; i < swapChainSize; i++) {
-        auto& color = colorAttachment.get_imageView_at(i);
-        auto& depth = ctx.get_depthAttachment();
-        auto& msaaTarget = ctx.get_msaaAttachment();
+        auto &color = colorAttachment.get_imageView_at(i);
+        auto &depth = ctx.get_depthAttachment();
+        auto &pos = ctx.get_gbufferPosition();
+        auto &normal = ctx.get_gbufferNormal();
+        auto &albedo = ctx.get_gbufferAlbedo();
         //TODO: generate this based on renderpass (even better, signal creation of the attachments HERE)
-        std::array<VkImageView,3> attachments = {
-             msaaTarget,depth, color,
+        std::array<VkImageView, 5> attachments = {
+            color, pos, normal, albedo, depth,
         };
 
         VkFramebufferCreateInfo framebufferInfo{};
@@ -35,22 +37,21 @@ void FrameBuffers::createFrameBuffers(const RenderPass& renderPass) {
         framebufferInfo.layers = 1;
 
         if (vkCreateFramebuffer(ctx.getLogicalDevice(), &framebufferInfo,
-            nullptr, &resource[i]) != VK_SUCCESS) {
+                                nullptr, &resource[i]) != VK_SUCCESS) {
             throw std::runtime_error("failed to create framebuffer!");
         }
     }
 }
 
 void FrameBuffers::destroyFrameBuffers() {
-    for (auto framebuffer : resource) {
+    for (auto framebuffer: resource) {
         vkDestroyFramebuffer(ctx.getLogicalDevice(), framebuffer, nullptr);
     }
-
 }
 
 
-FrameBuffers::FrameBuffers(WindowContext &context, const RenderPass& renderPass): VulkanResource(context)
-, renderPass(renderPass){
+FrameBuffers::FrameBuffers(WindowContext &context, const RenderPass &renderPass): VulkanResource(context)
+    , renderPass(renderPass) {
     createFrameBuffers(renderPass);
 }
 
@@ -62,5 +63,3 @@ void FrameBuffers::recreate() {
     destroyFrameBuffers();
     createFrameBuffers(renderPass);
 }
-
-

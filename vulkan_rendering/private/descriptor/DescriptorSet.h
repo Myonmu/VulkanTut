@@ -9,8 +9,6 @@
 
 class DescriptorPool;
 class DescriptorSetLayout;
-class RenderObject;
-struct DescriptorContext;
 
 class DescriptorPoolOutOfMemoryException final : public std::runtime_error {
 public:

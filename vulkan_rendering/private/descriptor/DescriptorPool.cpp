@@ -8,8 +8,8 @@
 
 #include "DeviceContext.h"
 
-DescriptorPool::DescriptorPool(DeviceContext &ctx, uint32_t maxSets, std::vector<VkDescriptorPoolSize>& sizes): VulkanResource(ctx) {
-    auto maxFramesInFlight = ctx.context.MAX_FRAMES_IN_FLIGHT;
+DescriptorPool::DescriptorPool(DeviceContext &ctx, uint32_t maxSets, std::vector<VkDescriptorPoolSize>& sizes)
+: VulkanResource(ctx) {
     VkDescriptorPoolCreateInfo poolInfo{};
     poolInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
     poolInfo.poolSizeCount = static_cast<uint32_t>(sizes.size());

@@ -5,18 +5,9 @@
 #pragma once
 #include <CommandBufferRecorder.h>
 #include <functional>
-#include <map>
+#include "Camera.h"
 #include "DescriptorPoolAllocator.h"
-#include "DescriptorSetLayoutBinding.h"
-#include "PerFrameBufferGroup.h"
-
-struct PerSceneRenderingData {
-    glm::mat4 view;
-    glm::mat4 projection;
-
-    static std::map<uint32_t, DescriptorSetLayoutBinding> bindings;
-    static std::vector<DescriptorAllocator::PoolSizeRatio> poolSizes;
-};
+#include "Lights.h"
 
 
 struct PerObjectVertexPushConstants {
@@ -28,10 +19,8 @@ struct PerObjectVertexPushConstants {
 
 
 struct RenderingContext: public SubContext<DeviceContext> {
-    PerSceneRenderingData perSceneData{};
-    std::unique_ptr<PerFrameBufferGroup> perSceneUbo;
-    std::vector<std::unique_ptr<DescriptorSet>> perFrameSets;
-
+    CameraUboData cameraUboData{};
+    MainLightUboData mainLightUboData{};
     VulkanRenderer* renderer;
 
     explicit RenderingContext(DeviceContext& ctx);

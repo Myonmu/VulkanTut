@@ -47,3 +47,13 @@ DescriptorSetLayout::DescriptorSetLayout(DeviceContext& ctx, uint32_t setId, con
 DescriptorSetLayout::~DescriptorSetLayout() {
     vkDestroyDescriptorSetLayout(ctx.getLogicalDevice(), resource, nullptr);
 }
+
+DescriptorAllocPolicy DescriptorSetLayout::getAllocPolicy() const {
+    if (setId == 0) return DescriptorAllocPolicy::ENGINE_DEFINED;
+    for (auto binding: layoutBindings) {
+        if (binding.descriptorType == VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT) {
+            return DescriptorAllocPolicy::PER_SWAPCHAIN;
+        }
+    }
+    return DescriptorAllocPolicy::PER_MATERIAL_INSTANCE;
+}
