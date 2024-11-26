@@ -388,7 +388,19 @@ The order of the `.pAttachments` should be used to create the frame buffer, or e
     //...
 ```
 
+Since inputs are connected to some outputs, which means the order of the outputs must also follow the next input. This is again specified in Subpass:
 
+```c++
+VkSubpassDescription Subpass::getSubpassDescription() const {
+    return {
+         // other fields are not shown 
+        .colorAttachmentCount = static_cast<uint32_t>(colorAttachments.size()),
+        .pColorAttachments = colorAttachments.data(),
+    };
+}
+```
+
+Finally, the `clearColors` in `VkRenderPassBeginInfo` should also follow the declaration order in `VkRenderPass`, and by extension, the order in frame buffer. If you accidentally give a color texture a depth clear value, then you will see weird things. 
 
 
 
