@@ -420,6 +420,7 @@ VkSubpassDescription Subpass::getSubpassDescription() const {
 
 Finally, the `clearColors` in `VkRenderPassBeginInfo` should also follow the declaration order in `VkRenderPass`, and by extension, the order in frame buffer. If you accidentally give a color texture a depth clear value, then you will see weird things. 
 
+![schema: attachment referencing](https://github.com/user-attachments/assets/3304548c-f0ae-4503-9013-d2e9e4b13253)
 
 
 ### Render Graph
