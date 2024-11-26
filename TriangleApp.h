@@ -68,7 +68,7 @@ private:
         shaders.emplace_back(FileUtility::ReadSpv("./shaders/shader.vert.spv"), VK_SHADER_STAGE_VERTEX_BIT);
         shaders.emplace_back(FileUtility::ReadSpv("./shaders/shader.frag.spv"), VK_SHADER_STAGE_FRAGMENT_BIT);
 
-        auto &material = deviceCtx.createObject<Material>(deviceCtx, shaders, deviceCtx.get_renderPass_at(0), 0);
+        auto &material = deviceCtx.createObject<Material>(deviceCtx, shaders, deviceCtx.get_renderPass_at(0), 0, true);
         auto &materialInstance = material.createInstance();
 
         auto const &tex =
@@ -95,7 +95,11 @@ private:
         lightingShaders.emplace_back(FileUtility::ReadSpv("./shaders/lighting.vert.spv"), VK_SHADER_STAGE_VERTEX_BIT);
         lightingShaders.emplace_back(FileUtility::ReadSpv("./shaders/lighting.frag.spv"), VK_SHADER_STAGE_FRAGMENT_BIT);
         auto &lightingMat = deviceCtx.createObject<Material>(
-            deviceCtx, lightingShaders, deviceCtx.get_renderPass_at(0), 1);
+            deviceCtx, lightingShaders, deviceCtx.get_renderPass_at(0), 1, false);
+
+        lightingMat.get_pipeline().rasterizer.cullMode = VK_CULL_MODE_NONE;
+        lightingMat.get_pipeline().build();
+
         auto &lightingMatInstance = lightingMat.createInstance();
         auto &subpass1 = ecs.entity("Lighting Renderer").emplace<RenderFullScreenQuad>(deviceCtx, lightingMatInstance);
 

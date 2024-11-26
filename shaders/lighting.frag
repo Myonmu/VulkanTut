@@ -18,7 +18,7 @@ void main()
     vec3 normal = subpassLoad(inputNormal).rgb;
     vec4 albedo = subpassLoad(inputAlbedo);
 
-    #define ambient 0.05
+    #define ambient 0.03f
 
     // Ambient part
     vec3 fragcolor  = albedo.rgb * ambient;

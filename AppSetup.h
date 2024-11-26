@@ -41,15 +41,16 @@ public:
 
 
         auto &gbufferPass = pass.createSubpass();
+        gbufferPass.useAttachment(colorId, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, ResourceUsageDeclType::OUTPUT);
         gbufferPass.useAttachment(posId, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, ResourceUsageDeclType::OUTPUT);
-        gbufferPass.useAttachment(albedoId, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, ResourceUsageDeclType::OUTPUT);
         gbufferPass.useAttachment(normalId, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, ResourceUsageDeclType::OUTPUT);
+        gbufferPass.useAttachment(albedoId, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, ResourceUsageDeclType::OUTPUT);
         gbufferPass.useAttachment(depthId, VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL, ResourceUsageDeclType::OUTPUT);
 
         auto &lightingPass = pass.createSubpass();
         lightingPass.useAttachment(posId, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, ResourceUsageDeclType::INPUT);
-        lightingPass.useAttachment(albedoId, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, ResourceUsageDeclType::INPUT);
         lightingPass.useAttachment(normalId, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, ResourceUsageDeclType::INPUT);
+        lightingPass.useAttachment(albedoId, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, ResourceUsageDeclType::INPUT);
         lightingPass.useAttachment(depthId, VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL, ResourceUsageDeclType::INPUT);
         lightingPass.useAttachment(colorId, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, ResourceUsageDeclType::OUTPUT);
 
@@ -76,7 +77,7 @@ public:
 
         SubpassDependency dep01{};
         dep01.setSrc(0, VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT, VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT)
-                .setDest(1, VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT, VK_ACCESS_COLOR_ATTACHMENT_READ_BIT)
+                .setDest(1, VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT, VK_ACCESS_INPUT_ATTACHMENT_READ_BIT)
                 .setFlags(VK_DEPENDENCY_BY_REGION_BIT);
         pass.addDependency(dep01);
 

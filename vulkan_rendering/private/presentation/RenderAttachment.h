@@ -23,6 +23,8 @@ enum class AttachmentType {
 
 class RenderAttachment {
 public:
+    std::string name;
+
     virtual ~RenderAttachment() = default;
 
     virtual VkAttachmentDescription getAttachmentDescription() const = 0;

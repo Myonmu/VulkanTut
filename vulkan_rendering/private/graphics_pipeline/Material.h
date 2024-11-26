@@ -55,13 +55,15 @@ class Material : public ObjectNode {
     CTX_PROPERTY(PipelineLayout, pipelineLayout)
 
 public:
-    Material(DeviceContext &ctx, std::vector<Shader> &shaders, RenderPass &renderPass, uint32_t subpassId);
+    Material(DeviceContext &ctx, std::vector<Shader> &shaders, RenderPass &renderPass, uint32_t subpassId,
+             bool buildPipelineImmediately = true);
 
     ~Material() override = default;
 
     MaterialInstance &createInstance();
+    void buildPipeline();
 
-    DescriptorSetLayout& getDescriptorSetLayout(uint32_t setId) {
+    DescriptorSetLayout &getDescriptorSetLayout(uint32_t setId) {
         return *descriptorSetLayouts[setId];
     }
 

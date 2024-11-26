@@ -24,15 +24,19 @@ public:
 
     ~VulkanPipeline() override;
 
-
     std::vector<VkPipelineShaderStageCreateInfo> shaderStages;
+    VkViewport viewport{};
     VkPipelineDynamicStateCreateInfo dynamicState{};
-    VkPipelineVertexInputStateCreateInfo vertexInputInfo{};
     VkPipelineViewportStateCreateInfo viewportState{};
-    VkPipelineColorBlendStateCreateInfo colorBlending{};
+    VkPipelineMultisampleStateCreateInfo multisampling{};
+    VkPipelineInputAssemblyStateCreateInfo inputAssembly{};
+    VkPipelineRasterizationStateCreateInfo rasterizer{};
+    VkPipelineDepthStencilStateCreateInfo depthStencil{};
     VkGraphicsPipelineCreateInfo pipelineInfo{};
 
+    void build();
 private:
+    const PipelineLayout &layout;
     const RenderPass& renderPass;
     uint32_t subpassId;
     std::vector<VkDynamicState> dynamicStates = {
