@@ -174,3 +174,8 @@ void DepthAttachment::recreate() {
     depthImage.reset();
     create();
 }
+
+
+ImageView &AttachmentManager::getOrCreateAttachment(VkAttachmentDescription description) {
+
+}

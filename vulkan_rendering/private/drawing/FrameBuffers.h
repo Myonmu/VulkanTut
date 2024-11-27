@@ -10,16 +10,22 @@
 #include <VulkanResource.h>
 #include <vulkan/vulkan_core.h>
 
+#include "Polymorphism.h"
+
 
 class RenderPass;
 struct WindowContext;
 
-class FrameBuffers: public VulkanResource<std::vector<VkFramebuffer>, WindowContext>{
+/**
+* VkFramebuffer wrapper.
+* Contains N frame buffers where N = swap chain present attachment count.
+* Allocated per-render-pass
+*/
+class FrameBuffer: public VulkanResource<std::vector<VkFramebuffer>, WindowContext>{
 public:
-    explicit FrameBuffers(WindowContext& context, const RenderPass& renderPass);
-    ~FrameBuffers() override;
+    explicit FrameBuffer(WindowContext& context, const RenderPass& renderPass);
+    ~FrameBuffer() override;
     void recreate();
-private:
     // saved reference to be used during recreation
     const RenderPass& renderPass;
     void createFrameBuffers(const RenderPass& renderPass);

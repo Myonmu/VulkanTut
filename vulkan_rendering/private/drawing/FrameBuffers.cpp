@@ -11,7 +11,7 @@
 #include "WindowContext.h"
 #include "LogicalDevice.h"
 
-void FrameBuffers::createFrameBuffers(const RenderPass &renderPass) {
+void FrameBuffer::createFrameBuffers(const RenderPass &renderPass) {
     auto &swapChain = ctx.get_swapChain();
     auto &colorAttachment = ctx.get_colorAttachment();
     const auto swapChainSize = colorAttachment.getSize();
@@ -43,23 +43,23 @@ void FrameBuffers::createFrameBuffers(const RenderPass &renderPass) {
     }
 }
 
-void FrameBuffers::destroyFrameBuffers() {
+void FrameBuffer::destroyFrameBuffers() {
     for (auto framebuffer: resource) {
         vkDestroyFramebuffer(ctx.getLogicalDevice(), framebuffer, nullptr);
     }
 }
 
 
-FrameBuffers::FrameBuffers(WindowContext &context, const RenderPass &renderPass): VulkanResource(context)
+FrameBuffer::FrameBuffer(WindowContext &context, const RenderPass &renderPass): VulkanResource(context)
     , renderPass(renderPass) {
     createFrameBuffers(renderPass);
 }
 
-FrameBuffers::~FrameBuffers() {
+FrameBuffer::~FrameBuffer() {
     destroyFrameBuffers();
 }
 
-void FrameBuffers::recreate() {
+void FrameBuffer::recreate() {
     destroyFrameBuffers();
     createFrameBuffers(renderPass);
 }

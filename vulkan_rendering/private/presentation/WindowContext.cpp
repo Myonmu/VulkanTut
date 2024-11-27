@@ -33,7 +33,7 @@ void WindowContext::init() {
 
 void WindowContext::createFrameBuffers(const RenderPass &renderPass) {
     if (frameBuffers != nullptr) return;
-    frameBuffers = std::make_unique<FrameBuffers>(*this, renderPass);
+    frameBuffers = std::make_unique<FrameBuffer>(*this, renderPass);
     renderer = std::make_unique<VulkanRenderer>(*this);
 }
 
