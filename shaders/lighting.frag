@@ -2,6 +2,7 @@
 
 #extension GL_GOOGLE_include_directive : require
 #include "input.glsl"
+#include "normal_mapping.glsl"
 
 layout (input_attachment_index = 0, set = 1, binding = 0) uniform subpassInput inputPosition;
 layout (input_attachment_index = 1, set = 1, binding = 1) uniform subpassInput inputNormal;
@@ -14,20 +15,21 @@ layout (location = 0) out vec4 outColor;
 void main()
 {
     // Read G-Buffer values from previous sub pass
-    vec3 fragPos = subpassLoad(inputPosition).rgb;
-    vec3 normal = subpassLoad(inputNormal).rgb;
-    vec4 albedo = subpassLoad(inputAlbedo);
+    vec4 fragPosTex = subpassLoad(inputPosition);
+    vec4 normalTex = subpassLoad(inputNormal);
+    vec4 albedoTex = subpassLoad(inputAlbedo);
+
+    vec3 albedo = albedoTex.rgb;
+    float roughness = albedoTex.a;
+    vec3 normal = unpackNormal(normalTex.rgb);
+    vec3 pos = fragPosTex.rgb;
 
     #define ambient 0.03f
 
     // Ambient part
     vec3 fragcolor  = albedo.rgb * ambient;
 
-    //vec3 L = lights[i].position.xyz - fragPos;
-    //float dist = length(L);
-
     vec3 L = mainLight.direction.rgb;
-    //float atten = lights[i].radius / (pow(dist, 3.0) + 1.0);
 
     vec3 N = normalize(normal);
     float NdotL = max(0.0, dot(N, L));

@@ -72,7 +72,7 @@ private:
         auto &materialInstance = material.createInstance();
 
         auto const &tex =
-                deviceCtx.createObject<UnifiedTexture2D>(deviceCtx, "./assets/viking_room.png", VK_FILTER_LINEAR);
+                deviceCtx.createObject<UnifiedTexture2D>(deviceCtx, "./assets/lemon_diff_4k.png", VK_FILTER_LINEAR);
         auto const &sampler = deviceCtx.createObject<TextureSampler>(
             deviceCtx,
             TextureAddressMode::REPEAT,
@@ -88,8 +88,16 @@ private:
             VK_BORDER_COLOR_INT_OPAQUE_BLACK,
             VK_FALSE);
 
+        auto const &normal =
+            deviceCtx.createObject<UnifiedTexture2D>(deviceCtx, "./assets/lemon_nor_gl_4k.png", VK_FILTER_LINEAR);
+        auto const &rough =
+            deviceCtx.createObject<UnifiedTexture2D>(deviceCtx, "./assets/lemon_rough_4k.png", VK_FILTER_LINEAR);
+
+
 
         materialInstance.setCombinedImageSampler(0, tex, sampler);
+        materialInstance.setCombinedImageSampler(1, normal, sampler);
+        materialInstance.setCombinedImageSampler(2, rough, sampler);
         materialInstance.updateDescriptorSet(1);
 
         lightingShaders.emplace_back(FileUtility::ReadSpv("./shaders/lighting.vert.spv"), VK_SHADER_STAGE_VERTEX_BIT);
@@ -103,7 +111,7 @@ private:
         auto &lightingMatInstance = lightingMat.createInstance();
         auto &subpass1 = ecs.entity("Lighting Renderer").emplace<RenderFullScreenQuad>(deviceCtx, lightingMatInstance);
 
-        obj.LoadGeometry("./assets/viking_room.obj");
+        obj.LoadGeometry("./assets/lemon_4k.obj");
         auto &meshBuffer = deviceCtx.createObject<MeshBuffer>(deviceCtx, obj.vertices, obj.indices);
         //auto &vertexBuffer = deviceCtx.createObject<VertexBuffer>(deviceCtx, obj.vertices);
         //auto &indexBuffer = deviceCtx.createObject<IndexBuffer>(deviceCtx,obj.indices);
@@ -124,8 +132,8 @@ private:
         mainPassRecorder = std::make_unique<RenderPassRecorder>(deviceCtx.get_renderPass_at(0));
         auto &mainRenderer = deviceCtx.get_windowContext_at(0).get_renderer();
         mainRenderer.recorder->enqueueCommand<EnqueueRenderPass>(*mainPassRecorder);
-        auto &otherRenderer = deviceCtx.get_windowContext_at(1).get_renderer();
-        otherRenderer.recorder->enqueueCommand<EnqueueRenderPass>(*mainPassRecorder);
+        //auto &otherRenderer = deviceCtx.get_windowContext_at(1).get_renderer();
+        //otherRenderer.recorder->enqueueCommand<EnqueueRenderPass>(*mainPassRecorder);
 
         auto &swapchain = deviceCtx.get_windowContext_at(0).get_swapChain();
         auto &camera = ecs.entity("Camera")

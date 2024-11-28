@@ -17,9 +17,9 @@ public:
             deviceContext.context.name, 800, 600,
             QueueFamily::QUEUE_FAMILY_GRAPHICS | QueueFamily::QUEUE_FAMILY_PRESENT | QueueFamily::QUEUE_FAMILY_TRANSFER
         );
-        deviceContext.createWindow("extra window", 400, 300,
-                                   QueueFamily::QUEUE_FAMILY_GRAPHICS | QueueFamily::QUEUE_FAMILY_PRESENT |
-                                   QueueFamily::QUEUE_FAMILY_TRANSFER);
+        //deviceContext.createWindow("extra window", 400, 300,
+        //                           QueueFamily::QUEUE_FAMILY_GRAPHICS | QueueFamily::QUEUE_FAMILY_PRESENT |
+        //                           QueueFamily::QUEUE_FAMILY_TRANSFER);
     }
 
     void createRenderPasses(DeviceContext &deviceContext) override {
@@ -91,7 +91,7 @@ public:
         pass.build();
 
         window.createFrameBuffers(pass);
-        deviceContext.get_windowContext_at(1).createFrameBuffers(pass);
+        //deviceContext.get_windowContext_at(1).createFrameBuffers(pass);
         //deviceContext.bindRenderPassToWindow(0, passId);
         //deviceContext.bindRenderPassToWindow(1, passId);
     }

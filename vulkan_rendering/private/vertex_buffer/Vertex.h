@@ -15,6 +15,8 @@ struct Vertex {
     glm::vec3 pos;
     glm::vec3 color;
     glm::vec3 normal;
+    glm::vec3 tangent;
+    glm::vec3 bitangent;
     glm::vec2 texCoord;
 
     static VkVertexInputBindingDescription getBindingDescription() {
@@ -25,7 +27,7 @@ struct Vertex {
         return bindingDescription;
     }
 
-    static std::array<VkVertexInputAttributeDescription, 4> getAttributeDescriptions() {
+    static std::array<VkVertexInputAttributeDescription, 6> getAttributeDescriptions() {
         /* NOTE:
          *
          * Unlike HLSL that has POSITION, TEXCOORD0 semantics,
@@ -40,7 +42,7 @@ struct Vertex {
          *  Optionally, for further implementation:
          *  use embedded yaml to determine the intended use of the bindings.
          */
-        std::array<VkVertexInputAttributeDescription, 4> attributeDescriptions{};
+        std::array<VkVertexInputAttributeDescription, 6> attributeDescriptions{};
         attributeDescriptions[0].binding = 0;
         attributeDescriptions[0].format = VK_FORMAT_R32G32B32_SFLOAT;
         attributeDescriptions[0].location = 0;
@@ -58,15 +60,21 @@ struct Vertex {
 
         attributeDescriptions[3].binding = 0;
         attributeDescriptions[3].location = 3;
-        attributeDescriptions[3].format = VK_FORMAT_R32G32_SFLOAT;
-        attributeDescriptions[3].offset = offsetof(Vertex, texCoord);
+        attributeDescriptions[3].format = VK_FORMAT_R32G32B32_SFLOAT;
+        attributeDescriptions[3].offset = offsetof(Vertex, tangent);
+
+        attributeDescriptions[4].binding = 0;
+        attributeDescriptions[4].location = 4;
+        attributeDescriptions[4].format = VK_FORMAT_R32G32B32_SFLOAT;
+        attributeDescriptions[4].offset = offsetof(Vertex, bitangent);
+
+        attributeDescriptions[5].binding = 0;
+        attributeDescriptions[5].location = 5;
+        attributeDescriptions[5].format = VK_FORMAT_R32G32_SFLOAT;
+        attributeDescriptions[5].offset = offsetof(Vertex, texCoord);
 
         return attributeDescriptions;
     }
-
-    static const std::vector<Vertex> testVerts;
-
-    static const std::vector<uint32_t> testIndices;
 
     bool operator==(const Vertex &other) const {
         return pos == other.pos && color == other.color && texCoord == other.texCoord;

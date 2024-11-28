@@ -42,7 +42,6 @@ set(SOURCES
         public/CommandBufferCmd.h
         private/VulkanAppContext.cpp
         private/vertex_buffer/Vertex.h
-        private/vertex_buffer/Vertex.cpp
         private/vertex_buffer/Buffer.cpp
         private/vma/VmaInstance.cpp
         private/descriptor/DescriptorSetLayout.cpp
