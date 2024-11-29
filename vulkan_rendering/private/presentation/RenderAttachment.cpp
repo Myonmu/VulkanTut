@@ -14,6 +14,8 @@ AttachmentRef::AttachmentRef(uint32_t id, const RenderAttachment &attachment, Vk
 }
 
 
+// vvvvvvvvvvvvvvvvvvvvvvvvvvvv Color Attachment
+
 void ColorAttachment::create() {
     auto &swapChain = ctx.get_swapChain();
     format = swapChain.swapChainImageFormat;
@@ -53,6 +55,9 @@ VkAttachmentDescription ColorAttachment::getAttachmentDescription() const {
     return colorAttachment;
 }
 
+// ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Color Attachment
+
+//vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv Present Color Attachment
 
 void PresentColorAttachment::create() {
     auto &swapChain = ctx.get_swapChain();
@@ -108,6 +113,9 @@ void PresentColorAttachment::recreate() {
     create();
 }
 
+// ^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Present Color Attachment
+
+// vvvvvvvvvvvvvvvvvvvvvvvvvvvv Depth Attachment
 
 VkFormat DepthAttachment::findDepthFormat(std::vector<VkFormat> candidates) const {
     return ctx.get_physicalDevice().findSupportedImageFormat(
@@ -176,6 +184,9 @@ void DepthAttachment::recreate() {
 }
 
 
-ImageView &AttachmentManager::getOrCreateAttachment(VkAttachmentDescription description) {
+// ^^^^^^^^^^^^^^^^^^^^^^^^^^  Depth Attachment
+
+
+ImageView &AttachmentManager::getOrCreateAttachment(const AttachmentRef& attachmentRef) {
 
 }

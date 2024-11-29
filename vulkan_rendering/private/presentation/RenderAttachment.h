@@ -136,5 +136,5 @@ class AttachmentManager {
     poly_vector<RenderAttachment> attachments;
 public:
     void recreate();
-    ImageView& getOrCreateAttachment(VkAttachmentDescription description);
+    ImageView& getOrCreateAttachment(const AttachmentRef& attachmentRef);
 };

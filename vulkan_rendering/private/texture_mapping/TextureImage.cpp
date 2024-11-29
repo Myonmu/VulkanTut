@@ -10,6 +10,32 @@
 #include "DeviceContext.h"
 #include "FrameInfo.h"
 
+// must be multiple of 2, max 64
+TextureImageInfo &TextureImageInfo::setSampleCount(uint32_t count) {
+    switch (count) {
+        case 1: msaaSamples = VK_SAMPLE_COUNT_1_BIT; break;
+        case 2: msaaSamples = VK_SAMPLE_COUNT_2_BIT; break;
+        case 4: msaaSamples = VK_SAMPLE_COUNT_4_BIT; break;
+        case 8: msaaSamples = VK_SAMPLE_COUNT_8_BIT; break;
+        case 16: msaaSamples = VK_SAMPLE_COUNT_16_BIT; break;
+        case 32: msaaSamples = VK_SAMPLE_COUNT_32_BIT; break;
+        case 64: msaaSamples = VK_SAMPLE_COUNT_64_BIT; break;
+        default:
+            throw std::invalid_argument("sample count must be 1, 2, 4, 8, 16, 32, or 64");
+    }
+    if (count > 1) {
+        usage |= VK_BUFFER_USAGE_TRANSFER_DST_BIT;
+    }
+}
+
+TextureImageInfo &TextureImageInfo::setMipLevels(uint32_t count) {
+    if (count <= 1) {
+        mipLevels = 1;
+        //remove implicit transfer source (assuming mip level is the only implicit usage that requires transfer source)
+        implicitUsageFlags &= ~VK_IMAGE_USAGE_TRANSFER_SRC_BIT;
+    }
+}
+
 TextureImage::TextureImage(DeviceContext &ctx,
                            const int &width, const int &height, const int &channels,
                            VkFormat textureFormat,
