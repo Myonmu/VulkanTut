@@ -9,6 +9,7 @@
 #include "ContextMacros.h"
 #include "TextureImage.h"
 #include "ImageView.h"
+#include "Polymorphism.h"
 
 
 struct WindowContext;
@@ -27,9 +28,9 @@ public:
 
     virtual ~RenderAttachment() = default;
 
-    virtual VkAttachmentDescription getAttachmentDescription() const = 0;
+    [[nodiscard]] virtual VkAttachmentDescription getAttachmentDescription() const = 0;
 
-    virtual AttachmentType getAttachmentType() const = 0;
+    [[nodiscard]] virtual AttachmentType getAttachmentType() const = 0;
 };
 
 struct AttachmentRef {
@@ -77,19 +78,19 @@ class PresentColorAttachment : public RenderAttachment {
     void create();
 
 public:
-    ImageView &get_imageView_at(uint32_t i) const;
+    [[nodiscard]] ImageView &get_imageView_at(uint32_t i) const;
 
     explicit PresentColorAttachment(const WindowContext &ctx);
 
-    size_t getSize() const;
+    [[nodiscard]] size_t getSize() const;
 
-    ~PresentColorAttachment() = default;
+    ~PresentColorAttachment() override = default;
 
-    VkFormat get_format() const;
+    [[nodiscard]] VkFormat get_format() const;
 
-    VkAttachmentDescription getAttachmentDescription() const override;
+    [[nodiscard]] VkAttachmentDescription getAttachmentDescription() const override;
 
-    AttachmentType getAttachmentType() const override { return type; };
+    [[nodiscard]] AttachmentType getAttachmentType() const override { return type; };
 
     void recreate();
 };
@@ -103,7 +104,7 @@ class DepthAttachment : public RenderAttachment {
     std::unique_ptr<TextureImage> depthImage;
     std::unique_ptr<ImageView> depthImageView;
 
-    VkFormat findDepthFormat(std::vector<VkFormat> candidates) const;
+    [[nodiscard]] VkFormat findDepthFormat(std::vector<VkFormat> candidates) const;
 
     static bool hasStencilComponent(const VkFormat format) {
         return format == VK_FORMAT_D32_SFLOAT_S8_UINT || format == VK_FORMAT_D24_UNORM_S8_UINT;
@@ -116,7 +117,7 @@ public:
 
     DepthAttachment(WindowContext &ctx, VkFormat depthFormat, VkSampleCountFlagBits msaaSamples);
 
-    VkAttachmentDescription getAttachmentDescription() const override;
+    [[nodiscard]] VkAttachmentDescription getAttachmentDescription() const override;
 
     [[nodiscard]] VkFormat get_format() const;
 
@@ -125,4 +126,15 @@ public:
     [[nodiscard]] AttachmentType getAttachmentType() const override { return type; };
 
     operator VkImageView() const { return *depthImageView; }
+};
+
+
+/**
+ * Centralized attachment manager.
+ */
+class AttachmentManager {
+    poly_vector<RenderAttachment> attachments;
+public:
+    void recreate();
+    ImageView& getOrCreateAttachment(VkAttachmentDescription description);
 };

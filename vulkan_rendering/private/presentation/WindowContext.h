@@ -38,7 +38,7 @@ struct WindowContext : public SubContext<DeviceContext>{
     CTX_PROPERTY(ColorAttachment, gbufferPosition)
     CTX_PROPERTY(DepthAttachment, depthAttachment)
     // requires render pass
-    CTX_PROPERTY(FrameBuffers, frameBuffers)
+    CTX_PROPERTY(FrameBuffer, frameBuffers)
 
     CTX_PROPERTY(VulkanRenderer, renderer)
 
