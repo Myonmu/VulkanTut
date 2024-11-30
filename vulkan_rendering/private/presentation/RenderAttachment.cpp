@@ -26,7 +26,7 @@ void ColorAttachment::create() {
         VK_IMAGE_TILING_OPTIMAL,
         VK_IMAGE_USAGE_TRANSIENT_ATTACHMENT_BIT | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_INPUT_ATTACHMENT_BIT,
         VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
-        1, msaaSamples, false
+        1, msaaSamples, StagingBufferMode::NO_STAGING_BUFFER
     );
     imageView = std::make_unique<ImageView>(ctx.context, *image, format, VK_IMAGE_ASPECT_COLOR_BIT);
 }
@@ -151,7 +151,7 @@ void DepthAttachment::create() {
         VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT,
         VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, 1,
         msaaSamples,
-        false);
+        StagingBufferMode::NO_STAGING_BUFFER);
     VkImageAspectFlags aspect = VK_IMAGE_ASPECT_DEPTH_BIT;
     if (format >= VK_FORMAT_D16_UNORM_S8_UINT) aspect |= VK_IMAGE_ASPECT_STENCIL_BIT;
     depthImageView = std::make_unique<ImageView>(ctx.context, *depthImage, format, aspect);
@@ -188,5 +188,5 @@ void DepthAttachment::recreate() {
 
 
 ImageView &AttachmentManager::getOrCreateAttachment(const AttachmentRef& attachmentRef) {
-
+    throw std::runtime_error("Not implemented");
 }

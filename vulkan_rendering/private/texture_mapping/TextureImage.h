@@ -12,13 +12,13 @@
 struct DeviceContext;
 
 // bootstrapping VkImageCreateInfo wrapper, implicitly converts to VkImageCreateInfo
-struct TextureImageInfo {
-    int width, height;
+struct TextureImageInfo: VmaAllocatedResourceInfo<TextureImageInfo> {
+    // theoretically, we could just get channels from format, but it is tedious
+    unsigned width, height, channels;
     VkFormat format;
     VkImageUsageFlags usage;
-
     // flags added implicitly when setting other fields
-    VkImageUsageFlags implicitUsageFlags;
+    VkImageUsageFlags implicitUsageFlags = 0;
     VkSampleCountFlagBits msaaSamples = VK_SAMPLE_COUNT_1_BIT;
     VkImageTiling tiling = VK_IMAGE_TILING_OPTIMAL;
     uint32_t mipLevels = 1;
@@ -26,12 +26,17 @@ struct TextureImageInfo {
     VkImageCreateFlags flags = 0;
 
     // By default, creates a simple 2D image without mip nor msaa
-    TextureImageInfo(int width, int height, VkFormat format, VkImageUsageFlags usage)
-        : width(width), height(height), format(format), usage(usage) {
+    TextureImageInfo(int width, int height, int channels, VkFormat format, VkImageUsageFlags usage)
+        : width(width), height(height), channels(channels), format(format), usage(usage) {
     }
-    ~TextureImageInfo() = default;
+
+    ~TextureImageInfo() override = default;
+
     TextureImageInfo &setSampleCount(uint32_t count);
+
     TextureImageInfo &setMipLevels(uint32_t count);
+
+    TextureImageInfo &setLayers(uint32_t count);
 
     operator VkImageCreateInfo() const {
         VkImageCreateInfo imageInfo = {};
@@ -58,11 +63,13 @@ struct TextureImageInfo {
  */
 class TextureImage : public VulkanResource<VkImage, DeviceContext>, public ObjectNode {
 public:
+    TextureImage(DeviceContext &ctx, TextureImageInfo &info);
+
     TextureImage(DeviceContext &ctx,
                  Texture2D &t2d,
                  bool generateMipMap = false,
                  VkSampleCountFlagBits msaaSamples = VK_SAMPLE_COUNT_1_BIT,
-                 bool requiresBuffer = true);
+                 StagingBufferMode stagingBufferMode = StagingBufferMode::MAP_PER_CALL);
 
     TextureImage(DeviceContext &ctx, const int &width, const int &height, const int &channels,
                  VkFormat textureFormat,
@@ -70,7 +77,7 @@ public:
                  VkMemoryPropertyFlags memoryProperties,
                  uint32_t mipLevels = 1,
                  VkSampleCountFlagBits msaaSamples = VK_SAMPLE_COUNT_1_BIT,
-                 bool requiresBuffer = true);
+                 StagingBufferMode stagingBufferMode = StagingBufferMode::MAP_PER_CALL);
 
     [[nodiscard]] uint32_t findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties) const;
 
@@ -85,17 +92,17 @@ public:
     [[nodiscard]] inline VkImageLayout getCurrentLayout() const {
         return currentLayout;
     };
-    uint32_t getMipLevels() const { return mipLevels; };
+    uint32_t getMipLevels() const { return info.mipLevels; };
 
     static uint32_t calculateMaxMipLevels(uint32_t width, uint32_t height);
 
 private:
+    void create();
+
     VkImageLayout currentLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-    int width, height, channels;
-    VkFormat format;
-    VkDeviceSize imageSize;
-    uint32_t mipLevels = 1;
-    uint32_t layers = 1;
+    TextureImageInfo info;
+    VkDeviceSize imageSize{};
     std::unique_ptr<Buffer> stagingBuffer;
     VkDeviceMemory textureImageMemory{};
+    VmaAllocation vmaAllocation{};
 };

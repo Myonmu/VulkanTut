@@ -119,7 +119,7 @@ private:
                 .emplace<MeshRenderer>(deviceCtx, meshBuffer, materialInstance)
                 //.emplace<MeshRendererSplitBuffer>(deviceCtx, vertexBuffer, indexBuffer, materialInstance)
                 //.add<MeshRotate>()
-                .is_a(transformPrefab);
+                .is_a(transformPrefab).set(Scale{{10.f,10,10}});
 
 
         auto &light = ecs.entity("Main Light")
