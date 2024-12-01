@@ -12,14 +12,14 @@
 #include "Polymorphism.h"
 
 
+struct AttachmentInfo;
 struct WindowContext;
 class SwapChain;
 
 enum class AttachmentType {
-    MSAA,
     DEPTH_STENCIL,
     PRESENT,
-    TRANSIENT_COLOR
+    COLOR
 };
 
 class RenderAttachment {
@@ -31,17 +31,16 @@ public:
     [[nodiscard]] virtual VkAttachmentDescription getAttachmentDescription() const = 0;
 
     [[nodiscard]] virtual AttachmentType getAttachmentType() const = 0;
+
+    bool isCompatibleWith(AttachmentInfo& ref);
 };
 
-struct AttachmentRef {
-    uint32_t index;
-    AttachmentType type;
-    VkAttachmentDescription description;
-    VkImageLayout layout;
+struct AttachmentInfo: public TextureImageInfo {
+    uint32_t index{};
+    AttachmentType type{};
+    VkAttachmentDescription description{};
+    VkImageLayout layout{};
     VkClearColorValue clearColor{};
-
-    AttachmentRef() = default;
-    AttachmentRef(uint32_t id, const RenderAttachment& attachment, VkImageLayout layout);
 };
 
 class ColorAttachment : public RenderAttachment {
@@ -60,7 +59,7 @@ public:
 
     void recreate();
 
-    VkAttachmentDescription getAttachmentDescription() const override;
+    [[nodiscard]] VkAttachmentDescription getAttachmentDescription() const override;
 
     AttachmentType getAttachmentType() const override { return type; };
     operator VkImage() const { return *image; }
@@ -133,8 +132,10 @@ public:
  * Centralized attachment manager.
  */
 class AttachmentManager {
+    WindowContext& ctx;
     poly_vector<RenderAttachment> attachments;
 public:
     void recreate();
-    ImageView& getOrCreateAttachment(const AttachmentRef& attachmentRef);
+    RenderAttachment& getOrCreateAttachment(const AttachmentInfo& attachmentRef);
+    explicit AttachmentManager(WindowContext &ctx);
 };

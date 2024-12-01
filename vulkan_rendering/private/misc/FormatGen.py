@@ -52,6 +52,16 @@ def parse_vulkan_formats(header_file):
 
     return resolved_formats
 
+
+class VkFormatInfo:
+    channels = 0
+    channelMask = 0,
+    bitsCount = 0,
+    isCompressionFormat = False,
+    isSigned = False
+
+
+
 def get_format_properties(format_name):
     """Estimate properties of the Vulkan format."""
     # Initialize default properties
@@ -59,8 +69,12 @@ def get_format_properties(format_name):
         "channels": 0,
         "channelMask": 0,
         "bitsCount": 0,
-
     }
+
+    if "_ASTC_" in format_name:
+        properties["channels"] = 4
+        properties["channelMask"] = 0b1111
+        properties["bitsCount"] = 128
 
     # Heuristic-based approach to extract channel info based on the format name
     if "R" in format_name or "G" in format_name or "B" in format_name or "A" in format_name:

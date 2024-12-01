@@ -8,37 +8,37 @@
 
 #include "DeviceContext.h"
 
-ImageView::ImageView(DeviceContext &ctx, const VkImage &image, const VkFormat format, const VkImageAspectFlags aspectFlags)
-: VulkanResource(ctx) {
-    VkImageViewCreateInfo viewInfo{};
-    viewInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
-    viewInfo.image = image;
-    viewInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
-    viewInfo.format = format;
-    viewInfo.subresourceRange.aspectMask = aspectFlags;
-    viewInfo.subresourceRange.baseMipLevel = 0;
-    viewInfo.subresourceRange.levelCount = 1;
-    viewInfo.subresourceRange.baseArrayLayer = 0;
-    viewInfo.subresourceRange.layerCount = 1;
+ImageViewInfo::ImageViewInfo(const TextureImageInfo &textureImageInfo, ImageViewType viewType) {
+    type = viewType;
+    format = textureImageInfo.format;
+    baseMipLevel = 0;
+    levelCount = textureImageInfo.mipLevels;
+    baseArrayLayer = 0;
+    layerCount = textureImageInfo.layers;
+    if (textureImageInfo.usage & VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT) {
+        aspectFlags |= VK_IMAGE_ASPECT_DEPTH_BIT;
+        if (format >= VK_FORMAT_D16_UNORM_S8_UINT) aspectFlags |= VK_IMAGE_ASPECT_STENCIL_BIT;
+    }
+    else if (textureImageInfo.usage & VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT) {
+        aspectFlags |= VK_IMAGE_ASPECT_COLOR_BIT;
+    }
+    else if (textureImageInfo.usage & VK_IMAGE_USAGE_SAMPLED_BIT) { //TODO: always true?
+        aspectFlags |= VK_IMAGE_ASPECT_COLOR_BIT;
+    }
+}
 
+
+ImageView::ImageView(DeviceContext &ctx, ImageViewInfo &info, TextureImage &image): VulkanResource(ctx), info(info) {
+    VkImageViewCreateInfo viewInfo = info;
+    viewInfo.image = image;
     if (vkCreateImageView(ctx.getLogicalDevice(), &viewInfo, nullptr, &resource) != VK_SUCCESS) {
         throw std::runtime_error("failed to create texture image view!");
     }
 }
 
-ImageView::ImageView(DeviceContext &ctx, const TextureImage &image, const VkFormat format, const VkImageAspectFlags aspectFlags)
-: VulkanResource(ctx) {
-    VkImageViewCreateInfo viewInfo{};
-    viewInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
+ImageView::ImageView(DeviceContext &ctx, ImageViewInfo &info, VkImage &image): VulkanResource(ctx), info(info) {
+    VkImageViewCreateInfo viewInfo = info;
     viewInfo.image = image;
-    viewInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
-    viewInfo.format = format;
-    viewInfo.subresourceRange.aspectMask = aspectFlags;
-    viewInfo.subresourceRange.baseMipLevel = 0;
-    viewInfo.subresourceRange.levelCount = image.getMipLevels();
-    viewInfo.subresourceRange.baseArrayLayer = 0;
-    viewInfo.subresourceRange.layerCount = 1;
-
     if (vkCreateImageView(ctx.getLogicalDevice(), &viewInfo, nullptr, &resource) != VK_SUCCESS) {
         throw std::runtime_error("failed to create texture image view!");
     }

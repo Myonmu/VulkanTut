@@ -16,3 +16,5 @@
 
 // Obtain polymorphic reference from a unique pointer (unique_ptr<T> -> U&)
 #define UNIQUE_PTR_GET_REF(ptr, type) *dynamic_cast<type *>(ptr.get())
+
+#define REFERENCE_CAST(ref, type) *dynamic_cast<type *>(&ref)

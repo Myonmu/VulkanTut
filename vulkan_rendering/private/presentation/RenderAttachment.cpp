@@ -7,10 +7,8 @@
 #include "WindowContext.h"
 #include "LogicalDevice.h"
 
-
-AttachmentRef::AttachmentRef(uint32_t id, const RenderAttachment &attachment, VkImageLayout layout)
-    : index(id), type(attachment.getAttachmentType())
-      , description(attachment.getAttachmentDescription()), layout(layout) {
+bool RenderAttachment::isCompatibleWith(AttachmentInfo &ref) {
+    throw std::runtime_error("RenderAttachment::isCompatibleWith not implemented");
 }
 
 
@@ -19,16 +17,19 @@ AttachmentRef::AttachmentRef(uint32_t id, const RenderAttachment &attachment, Vk
 void ColorAttachment::create() {
     auto &swapChain = ctx.get_swapChain();
     format = swapChain.swapChainImageFormat;
+    TextureImageInfo info{
+        swapChain.swapChainExtent.width, swapChain.swapChainExtent.height, 4, format,
+        VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT
+    };
+
+    info.setSampleCount(msaaSamples).isGpuOnly().isInputAttachment().isTransientAttachment(); //TODO: not always
+
     image = std::make_unique<TextureImage>(
-        ctx.context,
-        swapChain.swapChainExtent.width, swapChain.swapChainExtent.height,
-        4, format,
-        VK_IMAGE_TILING_OPTIMAL,
-        VK_IMAGE_USAGE_TRANSIENT_ATTACHMENT_BIT | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_INPUT_ATTACHMENT_BIT,
-        VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
-        1, msaaSamples, StagingBufferMode::NO_STAGING_BUFFER
+        ctx.context, info, StagingBufferMode::NO_STAGING_BUFFER
     );
-    imageView = std::make_unique<ImageView>(ctx.context, *image, format, VK_IMAGE_ASPECT_COLOR_BIT);
+
+    ImageViewInfo viewInfo{info};
+    imageView = std::make_unique<ImageView>(ctx.context, viewInfo, *image);
 }
 
 ColorAttachment::ColorAttachment(const WindowContext &ctx, VkSampleCountFlagBits msaaSamples, AttachmentType type)
@@ -67,9 +68,12 @@ void PresentColorAttachment::create() {
     swapChainImages.resize(count);
     vkGetSwapchainImagesKHR(ctx.getLogicalDevice(), swapChain, &count, swapChainImages.data());
 
+    ImageViewInfo viewInfo{format};
+    viewInfo.aspectFlags |= VK_IMAGE_ASPECT_COLOR_BIT;
+
     for (auto &swapChainImage: swapChainImages) {
         swapChainImageViews.emplace_back(
-            std::make_unique<ImageView>(ctx.context, swapChainImage, format, VK_IMAGE_ASPECT_COLOR_BIT)
+            std::make_unique<ImageView>(ctx.context, viewInfo, swapChainImage)
         );
     }
 }
@@ -144,17 +148,14 @@ DepthAttachment::DepthAttachment(WindowContext &ctx, VkFormat depthFormat, VkSam
 
 void DepthAttachment::create() {
     auto [width, height] = ctx.get_swapChain().swapChainExtent;
-    depthImage = std::make_unique<TextureImage>(
-        ctx.context, width,
-        height, 1,
-        format, VK_IMAGE_TILING_OPTIMAL,
-        VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT,
-        VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, 1,
-        msaaSamples,
-        StagingBufferMode::NO_STAGING_BUFFER);
-    VkImageAspectFlags aspect = VK_IMAGE_ASPECT_DEPTH_BIT;
-    if (format >= VK_FORMAT_D16_UNORM_S8_UINT) aspect |= VK_IMAGE_ASPECT_STENCIL_BIT;
-    depthImageView = std::make_unique<ImageView>(ctx.context, *depthImage, format, aspect);
+    TextureImageInfo info{
+        width, height, 1, format, VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT
+    };
+    info.setSampleCount(msaaSamples).isGpuOnly();
+    depthImage = std::make_unique<TextureImage>(ctx.context, info);
+
+    ImageViewInfo viewInfo{info};
+    depthImageView = std::make_unique<ImageView>(ctx.context, viewInfo, *depthImage);
 }
 
 VkAttachmentDescription DepthAttachment::getAttachmentDescription() const {
@@ -187,6 +188,22 @@ void DepthAttachment::recreate() {
 // ^^^^^^^^^^^^^^^^^^^^^^^^^^  Depth Attachment
 
 
-ImageView &AttachmentManager::getOrCreateAttachment(const AttachmentRef& attachmentRef) {
+AttachmentManager::AttachmentManager(WindowContext &ctx): ctx(ctx) {
+
+}
+
+
+RenderAttachment &AttachmentManager::getOrCreateAttachment(const AttachmentInfo &attachmentRef) {
+    /*
+    switch (attachmentRef.type) {
+        case AttachmentType::DEPTH_STENCIL:
+            return REFERENCE_CAST(attachments.emplace_back<DepthAttachment>(ctx), RenderAttachment);
+        case AttachmentType::PRESENT:
+            return REFERENCE_CAST(attachments.emplace_back<PresentColorAttachment>(ctx), RenderAttachment);
+            break;
+        case AttachmentType::COLOR:
+            return REFERENCE_CAST(attachments.emplace_back<ColorAttachment>(ctx), RenderAttachment);
+            break;
+    }*/
     throw std::runtime_error("Not implemented");
 }

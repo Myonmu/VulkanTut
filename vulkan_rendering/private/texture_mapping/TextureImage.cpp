@@ -54,6 +54,17 @@ TextureImageInfo &TextureImageInfo::setLayers(uint32_t count) {
     return *this;
 }
 
+TextureImageInfo &TextureImageInfo::isInputAttachment() {
+    usage |= VK_IMAGE_USAGE_INPUT_ATTACHMENT_BIT;
+    return *this;
+}
+
+TextureImageInfo &TextureImageInfo::isTransientAttachment() {
+    usage |= VK_IMAGE_USAGE_TRANSIENT_ATTACHMENT_BIT;
+    return *this;
+}
+
+
 
 void TextureImage::create() {
     VkImageCreateInfo createInfo = info;
@@ -68,9 +79,15 @@ void TextureImage::create() {
 }
 
 
-TextureImage::TextureImage(DeviceContext &ctx, TextureImageInfo &info)
+TextureImage::TextureImage(DeviceContext &ctx, TextureImageInfo &info, StagingBufferMode stagingBufferMode)
     : VulkanResource(ctx), info(info), imageSize(info.width * info.height * info.channels) {
+    if (stagingBufferMode != StagingBufferMode::NO_STAGING_BUFFER) {
+        auto stagingBufferInfo = BufferInfo::createStagingBufferInfo(imageSize,
+            stagingBufferMode == StagingBufferMode::PERSISTENT);
+        stagingBuffer = std::make_unique<Buffer>(ctx, stagingBufferInfo);
+    }
     create();
+
     /* replaced with VMA
     VkMemoryRequirements memRequirements;
     vkGetImageMemoryRequirements(ctx.getLogicalDevice(), resource, &memRequirements);
@@ -99,12 +116,11 @@ TextureImage::TextureImage(DeviceContext &ctx,
                            VkSampleCountFlagBits msaaSamples,
                            StagingBufferMode stagingBufferMode
 ): VulkanResource(ctx),
-   imageSize(width * height * channels),
-    info(TextureImageInfo{width, height, channels, textureFormat, usage})
+   info(static_cast<uint32_t>(width), static_cast<uint32_t>(height), static_cast<uint32_t>(channels), textureFormat, usage),
+    imageSize(width * height * channels)
 {
     info.tiling = tiling;
-    info.setMipLevels(mipLevels);
-    info.setSampleCount(msaaSamples);
+    info.setMipLevels(mipLevels).setSampleCount(msaaSamples);
     if (memoryProperties & VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT == 1) {
         info.isGpuOnly();
     }

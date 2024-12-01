@@ -25,13 +25,10 @@ void Subpass::useAttachment(uint32_t id, VkImageLayout layout, ResourceUsageDecl
                         colorAttachments.emplace_back(id, layout);
                     }
                     break;
-                case AttachmentType::MSAA:
-                    colorAttachments.emplace_back(id, layout);
-                    break;
                 case AttachmentType::DEPTH_STENCIL:
                     depthStencilAttachment.emplace(id, layout);
                     break;
-                case AttachmentType::TRANSIENT_COLOR:
+                case AttachmentType::COLOR:
                     colorAttachments.emplace_back(id, layout);
                     break;
                 default: ;

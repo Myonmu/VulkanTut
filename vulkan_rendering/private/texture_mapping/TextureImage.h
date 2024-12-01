@@ -14,7 +14,8 @@ struct DeviceContext;
 // bootstrapping VkImageCreateInfo wrapper, implicitly converts to VkImageCreateInfo
 struct TextureImageInfo: VmaAllocatedResourceInfo<TextureImageInfo> {
     // theoretically, we could just get channels from format, but it is tedious
-    unsigned width, height, channels;
+    uint32_t width, height, channels;
+    VkImageType type = VK_IMAGE_TYPE_2D;
     VkFormat format;
     VkImageUsageFlags usage;
     // flags added implicitly when setting other fields
@@ -26,7 +27,7 @@ struct TextureImageInfo: VmaAllocatedResourceInfo<TextureImageInfo> {
     VkImageCreateFlags flags = 0;
 
     // By default, creates a simple 2D image without mip nor msaa
-    TextureImageInfo(int width, int height, int channels, VkFormat format, VkImageUsageFlags usage)
+    TextureImageInfo(uint32_t width, uint32_t height, uint32_t channels, VkFormat format, VkImageUsageFlags usage)
         : width(width), height(height), channels(channels), format(format), usage(usage) {
     }
 
@@ -38,10 +39,14 @@ struct TextureImageInfo: VmaAllocatedResourceInfo<TextureImageInfo> {
 
     TextureImageInfo &setLayers(uint32_t count);
 
+    TextureImageInfo &isInputAttachment();
+
+    TextureImageInfo &isTransientAttachment();
+
     operator VkImageCreateInfo() const {
         VkImageCreateInfo imageInfo = {};
         imageInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
-        imageInfo.imageType = VK_IMAGE_TYPE_2D;
+        imageInfo.imageType = type;
         imageInfo.extent.width = width;
         imageInfo.extent.height = height;
         imageInfo.extent.depth = 1;
@@ -63,7 +68,8 @@ struct TextureImageInfo: VmaAllocatedResourceInfo<TextureImageInfo> {
  */
 class TextureImage : public VulkanResource<VkImage, DeviceContext>, public ObjectNode {
 public:
-    TextureImage(DeviceContext &ctx, TextureImageInfo &info);
+    TextureImage(DeviceContext &ctx, TextureImageInfo &info,
+                 StagingBufferMode stagingBufferMode = StagingBufferMode::MAP_PER_CALL);
 
     TextureImage(DeviceContext &ctx,
                  Texture2D &t2d,
@@ -89,12 +95,15 @@ public:
 
     void generateMipmap(uint32_t mipLevels, VkFilter filter);
 
-    [[nodiscard]] inline VkImageLayout getCurrentLayout() const {
+    [[nodiscard]] VkImageLayout getCurrentLayout() const {
         return currentLayout;
     };
-    uint32_t getMipLevels() const { return info.mipLevels; };
+
+    [[nodiscard]] uint32_t getMipLevels() const { return info.mipLevels; };
 
     static uint32_t calculateMaxMipLevels(uint32_t width, uint32_t height);
+
+    const TextureImageInfo& get_info() const {return info;}
 
 private:
     void create();

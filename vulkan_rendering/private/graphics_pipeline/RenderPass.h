@@ -12,7 +12,7 @@
 #include "RenderGraph.h"
 
 class RenderAttachment;
-struct AttachmentRef;
+struct AttachmentInfo;
 struct DeviceContext;
 
 class RenderPass;
