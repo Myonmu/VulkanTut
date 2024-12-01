@@ -11,10 +11,36 @@
 
 struct DeviceContext;
 
+struct TexturePxDimensions {
+    uint32_t width = 0;
+    uint32_t height = 0;
+    // only makes sense for 3d textures.
+    uint32_t depth = 1;
+
+    TexturePxDimensions();
+    TexturePxDimensions(uint32_t width, uint32_t height, uint32_t depth):width(width), height(height), depth(depth) {}
+    TexturePxDimensions(uint32_t width, uint32_t height):width(width), height(height) {}
+
+    bool operator==(const TexturePxDimensions &texture_dimensions) const = default;
+
+    // Calculates the maximum mip levels
+    [[nodiscard]] uint32_t getLevels() const{
+        uint32_t levels = 0;
+        uint32_t max_dim = std::max(std::max(width, height), depth);
+        while (max_dim) {
+            levels++;
+            max_dim >>= 1;
+        }
+        return levels;
+    };
+};
+
+
 // bootstrapping VkImageCreateInfo wrapper, implicitly converts to VkImageCreateInfo
 struct TextureImageInfo: VmaAllocatedResourceInfo<TextureImageInfo> {
+    TexturePxDimensions dimensions;
     // theoretically, we could just get channels from format, but it is tedious
-    uint32_t width, height, channels;
+    uint32_t channels;
     VkImageType type = VK_IMAGE_TYPE_2D;
     VkFormat format;
     VkImageUsageFlags usage;
@@ -28,7 +54,11 @@ struct TextureImageInfo: VmaAllocatedResourceInfo<TextureImageInfo> {
 
     // By default, creates a simple 2D image without mip nor msaa
     TextureImageInfo(uint32_t width, uint32_t height, uint32_t channels, VkFormat format, VkImageUsageFlags usage)
-        : width(width), height(height), channels(channels), format(format), usage(usage) {
+        : dimensions(width, height),channels(channels), format(format), usage(usage) {
+    }
+
+    TextureImageInfo(TexturePxDimensions &dimensions, uint32_t channels, VkFormat format, VkImageUsageFlags usage)
+        :dimensions(dimensions), channels(channels), format(format), usage(usage) {
     }
 
     ~TextureImageInfo() override = default;
@@ -37,19 +67,23 @@ struct TextureImageInfo: VmaAllocatedResourceInfo<TextureImageInfo> {
 
     TextureImageInfo &setMipLevels(uint32_t count);
 
+    TextureImageInfo &setMaxMipLevels();
+
     TextureImageInfo &setLayers(uint32_t count);
 
     TextureImageInfo &isInputAttachment();
 
     TextureImageInfo &isTransientAttachment();
 
+    uint32_t getSize() const;
+
     operator VkImageCreateInfo() const {
         VkImageCreateInfo imageInfo = {};
         imageInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
         imageInfo.imageType = type;
-        imageInfo.extent.width = width;
-        imageInfo.extent.height = height;
-        imageInfo.extent.depth = 1;
+        imageInfo.extent.width = dimensions.width;
+        imageInfo.extent.height = dimensions.height;
+        imageInfo.extent.depth = dimensions.depth;
         imageInfo.mipLevels = mipLevels;
         imageInfo.arrayLayers = layers;
         imageInfo.samples = msaaSamples;

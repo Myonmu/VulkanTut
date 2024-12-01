@@ -148,7 +148,7 @@ void RenderGraph::validate() {
 }
 
 ResourceDimensions RenderGraph::getResourceDimensions(const RenderBufferResource &resource) const {
-    ResourceDimensions dim;
+    ResourceDimensions dim{};
     auto &info = resource.decl;
     dim.buffer_info = info;
     dim.buffer_info.usage |= resource.decl.usage;
@@ -200,7 +200,7 @@ TexturePxDimensions RenderGraph::resolveTexturePxDimensions(const TextureRelativ
 
 
 ResourceDimensions RenderGraph::getResourceDimensions(const RenderTextureResource &resource) {
-    ResourceDimensions dim;
+    ResourceDimensions dim{};
     auto &decl = resource.decl;
     dim.layers = decl.layers;
     dim.samples = decl.samples;

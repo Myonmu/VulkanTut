@@ -49,6 +49,12 @@ TextureImageInfo &TextureImageInfo::setMipLevels(uint32_t count) {
     return *this;
 }
 
+TextureImageInfo &TextureImageInfo::setMaxMipLevels() {
+    mipLevels = dimensions.getLevels();
+    return *this;
+}
+
+
 TextureImageInfo &TextureImageInfo::setLayers(uint32_t count) {
     layers = count <= 1 ? 1 : count;
     return *this;
@@ -62,6 +68,11 @@ TextureImageInfo &TextureImageInfo::isInputAttachment() {
 TextureImageInfo &TextureImageInfo::isTransientAttachment() {
     usage |= VK_IMAGE_USAGE_TRANSIENT_ATTACHMENT_BIT;
     return *this;
+}
+
+uint32_t TextureImageInfo::getSize() const {
+    // TODO: array type? haven't tried to allocate one
+    return dimensions.width*dimensions.height*dimensions.depth*channels;
 }
 
 
@@ -80,7 +91,7 @@ void TextureImage::create() {
 
 
 TextureImage::TextureImage(DeviceContext &ctx, TextureImageInfo &info, StagingBufferMode stagingBufferMode)
-    : VulkanResource(ctx), info(info), imageSize(info.width * info.height * info.channels) {
+    : VulkanResource(ctx), info(info), imageSize(info.getSize()) {
     if (stagingBufferMode != StagingBufferMode::NO_STAGING_BUFFER) {
         auto stagingBufferInfo = BufferInfo::createStagingBufferInfo(imageSize,
             stagingBufferMode == StagingBufferMode::PERSISTENT);
@@ -168,7 +179,7 @@ void TextureImage::stage() {
     CommandBuffer cmd{ctx, QueueFamily::QUEUE_FAMILY_GRAPHICS};
     CommandBufferRecorder recorder{};
 
-    recorder.enqueueCommand<CopyBufferToImage>(*stagingBuffer, *this, info.width, info.height
+    recorder.enqueueCommand<CopyBufferToImage>(*stagingBuffer, *this, info.dimensions.width, info.dimensions.height
     );
 
     recorder.recordCommandBuffer(cmd, ctx, FrameInfo::DONT_CARE);
@@ -207,8 +218,8 @@ void TextureImage::generateMipmap(uint32_t mipLevels, VkFilter filter) {
     barrier.subresourceRange.baseArrayLayer = 0;
     barrier.subresourceRange.layerCount = 1;
     barrier.subresourceRange.levelCount = 1;
-    int mipWidth = info.width;
-    int mipHeight = info.height;
+    int mipWidth = info.dimensions.width;
+    int mipHeight = info.dimensions.height;
     for (uint32_t i = 1; i < mipLevels; i++) {
         barrier.subresourceRange.baseMipLevel = i - 1;
         barrier.oldLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;

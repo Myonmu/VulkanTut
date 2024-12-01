@@ -3,6 +3,8 @@
 //
 
 #include "RenderAttachment.h"
+
+#include <spirv_common.hpp>
 #include <TextureImage.h>
 #include "WindowContext.h"
 #include "LogicalDevice.h"
@@ -22,7 +24,7 @@ void ColorAttachment::create() {
         VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT
     };
 
-    info.setSampleCount(msaaSamples).isGpuOnly().isInputAttachment().isTransientAttachment(); //TODO: not always
+    info.setSampleCount(1).isGpuOnly().isInputAttachment().isTransientAttachment(); //TODO: not always
 
     image = std::make_unique<TextureImage>(
         ctx.context, info, StagingBufferMode::NO_STAGING_BUFFER
@@ -32,8 +34,8 @@ void ColorAttachment::create() {
     imageView = std::make_unique<ImageView>(ctx.context, viewInfo, *image);
 }
 
-ColorAttachment::ColorAttachment(const WindowContext &ctx, VkSampleCountFlagBits msaaSamples, AttachmentType type)
-    : ctx(ctx), type(type), msaaSamples(msaaSamples) {
+ColorAttachment::ColorAttachment(const WindowContext &ctx)
+    : ctx(ctx), type(AttachmentType::COLOR) {
     create();
 }
 
@@ -46,7 +48,7 @@ void ColorAttachment::recreate() {
 VkAttachmentDescription ColorAttachment::getAttachmentDescription() const {
     VkAttachmentDescription colorAttachment{};
     colorAttachment.format = format;
-    colorAttachment.samples = msaaSamples;
+    colorAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
     colorAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
     colorAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
     colorAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
@@ -130,28 +132,29 @@ VkFormat DepthAttachment::findDepthFormat(std::vector<VkFormat> candidates) cons
 }
 
 DepthAttachment::DepthAttachment(const WindowContext &ctx)
-    : ctx(ctx)
-      , format(findDepthFormat({
-          VK_FORMAT_D32_SFLOAT,
-          VK_FORMAT_D32_SFLOAT_S8_UINT,
-          VK_FORMAT_D24_UNORM_S8_UINT
-      })), msaaSamples(VK_SAMPLE_COUNT_1_BIT) {
+    : ctx(ctx),
+      info(ctx.get_swapChain().swapChainExtent.width,
+           ctx.get_swapChain().swapChainExtent.height,
+           1,
+           findDepthFormat({
+               VK_FORMAT_D32_SFLOAT,
+               VK_FORMAT_D32_SFLOAT_S8_UINT,
+               VK_FORMAT_D24_UNORM_S8_UINT
+           }),
+           VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT) {
     create();
 }
 
-DepthAttachment::DepthAttachment(WindowContext &ctx, VkFormat depthFormat, VkSampleCountFlagBits msaaSamples)
-    : ctx(ctx),
-      format(findDepthFormat({depthFormat})),
-      msaaSamples(ctx.get_physicalDevice().getClampedMsaaSampleCount(msaaSamples)) {
-    create();
+DepthAttachment::DepthAttachment(const WindowContext &ctx, AttachmentInfo &info): ctx(ctx), info(info) {
+    depthImage = std::make_unique<TextureImage>(ctx.context, info);
+    ImageViewInfo viewInfo{info};
+    depthImageView = std::make_unique<ImageView>(ctx.context, viewInfo, *depthImage);
 }
 
 void DepthAttachment::create() {
     auto [width, height] = ctx.get_swapChain().swapChainExtent;
-    TextureImageInfo info{
-        width, height, 1, format, VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT
-    };
-    info.setSampleCount(msaaSamples).isGpuOnly();
+    TextureImageInfo info = this->info;
+    info.isGpuOnly();
     depthImage = std::make_unique<TextureImage>(ctx.context, info);
 
     ImageViewInfo viewInfo{info};
@@ -161,8 +164,8 @@ void DepthAttachment::create() {
 VkAttachmentDescription DepthAttachment::getAttachmentDescription() const {
     VkAttachmentDescription depthAttachment{};
 
-    depthAttachment.format = format;
-    depthAttachment.samples = msaaSamples;
+    depthAttachment.format = info.format;
+    depthAttachment.samples = info.msaaSamples;
     depthAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
     depthAttachment.storeOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
     depthAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
@@ -175,7 +178,7 @@ VkAttachmentDescription DepthAttachment::getAttachmentDescription() const {
 
 
 VkFormat DepthAttachment::get_format() const {
-    return format;
+    return info.format;
 }
 
 void DepthAttachment::recreate() {
@@ -189,21 +192,18 @@ void DepthAttachment::recreate() {
 
 
 AttachmentManager::AttachmentManager(WindowContext &ctx): ctx(ctx) {
-
 }
 
 
 RenderAttachment &AttachmentManager::getOrCreateAttachment(const AttachmentInfo &attachmentRef) {
-    /*
     switch (attachmentRef.type) {
         case AttachmentType::DEPTH_STENCIL:
             return REFERENCE_CAST(attachments.emplace_back<DepthAttachment>(ctx), RenderAttachment);
         case AttachmentType::PRESENT:
             return REFERENCE_CAST(attachments.emplace_back<PresentColorAttachment>(ctx), RenderAttachment);
-            break;
         case AttachmentType::COLOR:
             return REFERENCE_CAST(attachments.emplace_back<ColorAttachment>(ctx), RenderAttachment);
-            break;
-    }*/
-    throw std::runtime_error("Not implemented");
+        default:
+            throw std::runtime_error("Invalid attachment type");
+    }
 }

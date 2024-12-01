@@ -22,6 +22,24 @@ enum class AttachmentType {
     COLOR
 };
 
+struct AttachmentInfo : public TextureImageInfo {
+    uint32_t index{};
+    AttachmentType type{};
+    VkAttachmentDescription description{};
+    VkImageLayout layout{};
+    VkClearColorValue clearColor{};
+
+    AttachmentInfo();
+
+    AttachmentInfo(uint32_t w, uint32_t h, uint32_t channels, VkFormat format, VkImageUsageFlags usage)
+        : TextureImageInfo(w, h, channels, format, usage) {
+    };
+
+    AttachmentInfo(TexturePxDimensions &dimensions, uint32_t channels, VkFormat format, VkImageUsageFlags usage)
+        : TextureImageInfo(dimensions, channels, format, usage) {
+    };
+};
+
 class RenderAttachment {
 public:
     std::string name;
@@ -32,22 +50,14 @@ public:
 
     [[nodiscard]] virtual AttachmentType getAttachmentType() const = 0;
 
-    bool isCompatibleWith(AttachmentInfo& ref);
+    bool isCompatibleWith(AttachmentInfo &ref);
 };
 
-struct AttachmentInfo: public TextureImageInfo {
-    uint32_t index{};
-    AttachmentType type{};
-    VkAttachmentDescription description{};
-    VkImageLayout layout{};
-    VkClearColorValue clearColor{};
-};
 
 class ColorAttachment : public RenderAttachment {
     const WindowContext &ctx;
     AttachmentType type;
     VkFormat format{};
-    VkSampleCountFlagBits msaaSamples{};
     CTX_PROPERTY(TextureImage, image)
     CTX_PROPERTY(ImageView, imageView)
 
@@ -55,7 +65,7 @@ private:
     void create();
 
 public:
-    ColorAttachment(const WindowContext &ctx, VkSampleCountFlagBits msaaSamples, AttachmentType type);
+    ColorAttachment(const WindowContext &ctx);
 
     void recreate();
 
@@ -97,9 +107,8 @@ public:
 
 class DepthAttachment : public RenderAttachment {
     const WindowContext &ctx;
+    AttachmentInfo info{};
     AttachmentType type = AttachmentType::DEPTH_STENCIL;
-    VkFormat format;
-    VkSampleCountFlagBits msaaSamples;
     std::unique_ptr<TextureImage> depthImage;
     std::unique_ptr<ImageView> depthImageView;
 
@@ -114,7 +123,7 @@ class DepthAttachment : public RenderAttachment {
 public:
     explicit DepthAttachment(const WindowContext &ctx);
 
-    DepthAttachment(WindowContext &ctx, VkFormat depthFormat, VkSampleCountFlagBits msaaSamples);
+    DepthAttachment(const WindowContext &ctx, AttachmentInfo &info);
 
     [[nodiscard]] VkAttachmentDescription getAttachmentDescription() const override;
 
@@ -132,10 +141,13 @@ public:
  * Centralized attachment manager.
  */
 class AttachmentManager {
-    WindowContext& ctx;
+    WindowContext &ctx;
     poly_vector<RenderAttachment> attachments;
+
 public:
     void recreate();
-    RenderAttachment& getOrCreateAttachment(const AttachmentInfo& attachmentRef);
+
+    RenderAttachment &getOrCreateAttachment(const AttachmentInfo &attachmentRef);
+
     explicit AttachmentManager(WindowContext &ctx);
 };

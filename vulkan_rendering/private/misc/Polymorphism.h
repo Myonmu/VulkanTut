@@ -16,8 +16,8 @@ struct poly_vector {
 
     template<typename ActualT, typename... Args>
     ActualT &emplace_back(Args &&... args) {
-        auto o = std::make_unique<T>(std::forward<Args>(args)...);
-        T *rawPtr = o.get();
+        auto o = std::make_unique<ActualT>(std::forward<Args>(args)...);
+        ActualT *rawPtr = o.get();
         list.push_back(std::move(o));
         return *rawPtr;
     }

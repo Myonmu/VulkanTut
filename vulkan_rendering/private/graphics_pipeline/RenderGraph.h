@@ -12,6 +12,7 @@
 #pragma once
 #include <memory>
 #include <string>
+#include <TextureImage.h>
 #include <unordered_set>
 #include <utility>
 #include <vulkan/vulkan_core.h>
@@ -124,24 +125,6 @@ struct BufferDecl {
     bool operator!=(const BufferDecl &other) const {
         return !(*this == other);
     }
-};
-
-struct TexturePxDimensions {
-    uint32_t width = 0;
-    uint32_t height = 0;
-    uint32_t depth = 1;
-
-    bool operator==(const TexturePxDimensions &texture_dimensions) const = default;
-
-    [[nodiscard]] uint32_t getLevels() const{
-        uint32_t levels = 0;
-        uint32_t max_dim = std::max(std::max(width, height), depth);
-        while (max_dim) {
-            levels++;
-            max_dim >>= 1;
-        }
-        return levels;
-    };
 };
 
 struct ResourceDimensions {
