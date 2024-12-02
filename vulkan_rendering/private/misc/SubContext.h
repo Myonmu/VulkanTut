@@ -11,6 +11,7 @@ class LogicalDevice;
 template <typename T>
 struct SubContext {
     virtual ~SubContext() = default;
+    SubContext(const SubContext &) = delete;
     explicit SubContext(T& parent):context(parent) {
 
     }

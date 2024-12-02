@@ -72,9 +72,34 @@ TextureImageInfo &TextureImageInfo::isTransientAttachment() {
 
 uint32_t TextureImageInfo::getSize() const {
     // TODO: array type? haven't tried to allocate one
-    return dimensions.width*dimensions.height*dimensions.depth*channels;
+    return dimensions.width * dimensions.height * dimensions.depth * channels;
 }
 
+TextureImageInfo::operator VkImageCreateInfo() const {
+    VkImageCreateInfo imageInfo = {};
+    imageInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
+    imageInfo.imageType = type;
+    imageInfo.extent.width = dimensions.width;
+    imageInfo.extent.height = dimensions.height;
+    imageInfo.extent.depth = dimensions.depth;
+    imageInfo.mipLevels = mipLevels;
+    imageInfo.arrayLayers = layers;
+    imageInfo.samples = msaaSamples;
+    imageInfo.usage = usage | implicitUsageFlags;
+    imageInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+    imageInfo.tiling = tiling;
+    imageInfo.format = format;
+    imageInfo.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+    imageInfo.flags = flags;
+    return imageInfo;
+}
+
+bool TextureImageInfo::operator==(const TextureImageInfo &other) const {
+    return format == other.format &&
+        dimensions == other.dimensions &&
+            mipLevels == other.mipLevels &&
+                layers == other.layers;
+}
 
 
 void TextureImage::create() {
@@ -94,7 +119,8 @@ TextureImage::TextureImage(DeviceContext &ctx, TextureImageInfo &info, StagingBu
     : VulkanResource(ctx), info(info), imageSize(info.getSize()) {
     if (stagingBufferMode != StagingBufferMode::NO_STAGING_BUFFER) {
         auto stagingBufferInfo = BufferInfo::createStagingBufferInfo(imageSize,
-            stagingBufferMode == StagingBufferMode::PERSISTENT);
+                                                                     stagingBufferMode ==
+                                                                     StagingBufferMode::PERSISTENT);
         stagingBuffer = std::make_unique<Buffer>(ctx, stagingBufferInfo);
     }
     create();
@@ -127,9 +153,9 @@ TextureImage::TextureImage(DeviceContext &ctx,
                            VkSampleCountFlagBits msaaSamples,
                            StagingBufferMode stagingBufferMode
 ): VulkanResource(ctx),
-   info(static_cast<uint32_t>(width), static_cast<uint32_t>(height), static_cast<uint32_t>(channels), textureFormat, usage),
-    imageSize(width * height * channels)
-{
+   info(static_cast<uint32_t>(width), static_cast<uint32_t>(height), static_cast<uint32_t>(channels), textureFormat,
+        usage),
+   imageSize(width * height * channels) {
     info.tiling = tiling;
     info.setMipLevels(mipLevels).setSampleCount(msaaSamples);
     if (memoryProperties & VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT == 1) {
@@ -137,7 +163,8 @@ TextureImage::TextureImage(DeviceContext &ctx,
     }
     if (stagingBufferMode != StagingBufferMode::NO_STAGING_BUFFER) {
         auto stagingBufferInfo = BufferInfo::createStagingBufferInfo(imageSize,
-            stagingBufferMode == StagingBufferMode::PERSISTENT);
+                                                                     stagingBufferMode ==
+                                                                     StagingBufferMode::PERSISTENT);
         stagingBuffer = std::make_unique<Buffer>(ctx, stagingBufferInfo);
     }
     create();

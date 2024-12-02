@@ -56,16 +56,22 @@ public:
 
 class ColorAttachment : public RenderAttachment {
     const WindowContext &ctx;
-    AttachmentType type;
-    VkFormat format{};
+    const AttachmentType type = AttachmentType::COLOR;
     CTX_PROPERTY(TextureImage, image)
     CTX_PROPERTY(ImageView, imageView)
 
 private:
     void create();
-
+    AttachmentInfo info;
 public:
-    ColorAttachment(const WindowContext &ctx);
+    ColorAttachment(const WindowContext &ctx, AttachmentInfo& info);
+
+    /**
+     * @deprecated Pass AttachmentInfo explicitly instead
+     * Creates a color attachment having the same specs as a swapchain present attachment
+     * @param ctx
+     */
+    explicit ColorAttachment(const WindowContext &ctx);
 
     void recreate();
 
@@ -79,7 +85,7 @@ public:
 
 class PresentColorAttachment : public RenderAttachment {
     const WindowContext &ctx;
-    AttachmentType type = AttachmentType::PRESENT;
+    const AttachmentType type = AttachmentType::PRESENT;
     VkFormat format{};
     std::vector<VkImage> swapChainImages;
     std::vector<std::unique_ptr<ImageView> > swapChainImageViews;
@@ -108,7 +114,7 @@ public:
 class DepthAttachment : public RenderAttachment {
     const WindowContext &ctx;
     AttachmentInfo info{};
-    AttachmentType type = AttachmentType::DEPTH_STENCIL;
+    const AttachmentType type = AttachmentType::DEPTH_STENCIL;
     std::unique_ptr<TextureImage> depthImage;
     std::unique_ptr<ImageView> depthImageView;
 
@@ -121,6 +127,10 @@ class DepthAttachment : public RenderAttachment {
     void create();
 
 public:
+    /**
+     * @deprecated Pass explicit Attachment Info instead.
+     * @param ctx
+     */
     explicit DepthAttachment(const WindowContext &ctx);
 
     DepthAttachment(const WindowContext &ctx, AttachmentInfo &info);

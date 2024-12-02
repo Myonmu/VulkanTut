@@ -17,15 +17,6 @@ bool RenderAttachment::isCompatibleWith(AttachmentInfo &ref) {
 // vvvvvvvvvvvvvvvvvvvvvvvvvvvv Color Attachment
 
 void ColorAttachment::create() {
-    auto &swapChain = ctx.get_swapChain();
-    format = swapChain.swapChainImageFormat;
-    TextureImageInfo info{
-        swapChain.swapChainExtent.width, swapChain.swapChainExtent.height, 4, format,
-        VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT
-    };
-
-    info.setSampleCount(1).isGpuOnly().isInputAttachment().isTransientAttachment(); //TODO: not always
-
     image = std::make_unique<TextureImage>(
         ctx.context, info, StagingBufferMode::NO_STAGING_BUFFER
     );
@@ -34,8 +25,16 @@ void ColorAttachment::create() {
     imageView = std::make_unique<ImageView>(ctx.context, viewInfo, *image);
 }
 
+ColorAttachment::ColorAttachment(const WindowContext &ctx, AttachmentInfo &info): ctx(ctx), info(info) {
+    create();
+}
+
 ColorAttachment::ColorAttachment(const WindowContext &ctx)
-    : ctx(ctx), type(AttachmentType::COLOR) {
+    : ctx(ctx), info(ctx.get_swapChain().swapChainExtent.width,
+                     ctx.get_swapChain().swapChainExtent.height,
+                     4, ctx.get_swapChain().swapChainImageFormat,
+                     VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT) {
+    info.setSampleCount(1).isGpuOnly().isInputAttachment().isTransientAttachment(); //TODO: not always
     create();
 }
 
@@ -47,8 +46,8 @@ void ColorAttachment::recreate() {
 
 VkAttachmentDescription ColorAttachment::getAttachmentDescription() const {
     VkAttachmentDescription colorAttachment{};
-    colorAttachment.format = format;
-    colorAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
+    colorAttachment.format = info.format;
+    colorAttachment.samples = info.msaaSamples;
     colorAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
     colorAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
     colorAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;

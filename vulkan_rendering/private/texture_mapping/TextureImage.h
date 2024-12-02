@@ -77,24 +77,9 @@ struct TextureImageInfo: VmaAllocatedResourceInfo<TextureImageInfo> {
 
     uint32_t getSize() const;
 
-    operator VkImageCreateInfo() const {
-        VkImageCreateInfo imageInfo = {};
-        imageInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
-        imageInfo.imageType = type;
-        imageInfo.extent.width = dimensions.width;
-        imageInfo.extent.height = dimensions.height;
-        imageInfo.extent.depth = dimensions.depth;
-        imageInfo.mipLevels = mipLevels;
-        imageInfo.arrayLayers = layers;
-        imageInfo.samples = msaaSamples;
-        imageInfo.usage = usage | implicitUsageFlags;
-        imageInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
-        imageInfo.tiling = tiling;
-        imageInfo.format = format;
-        imageInfo.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-        imageInfo.flags = flags;
-        return imageInfo;
-    }
+    inline operator VkImageCreateInfo() const;
+
+    inline bool operator==(const TextureImageInfo &other) const;
 };
 
 /*
