@@ -16,7 +16,7 @@ namespace ResourceTypeUtils {
     }
 
     VkImageUsageFlags convertToVulkanImageUsageFlags(ResourceType type, ResourceUsageDeclType usage,
-                                                     const AttachmentDecl &decl) {
+                                                     const AttachmentInfo &decl) {
         return 0; //TODO
 #define BRANCH_BY_USAGE(inputFlag, outputFlag)\
     switch(usage) { case ResourceUsageDeclType::INPUT: return inputFlag; case ResourceUsageDeclType::OUTPUT: return outputFlag;}
@@ -45,10 +45,10 @@ namespace ResourceTypeUtils {
     }
 }
 
-RenderTextureResource &RenderGraphNode::addTextureResource(const std::string &name, const AttachmentDecl &decl,
+RenderTextureResource &RenderGraphNode::addTextureResource(const std::string &name, const AttachmentInfo &decl,
                                                            ResourceType resourceType, ResourceUsageDeclType usageType) {
     auto &res = renderGraph.getOrCreateResource<RenderTextureResource>(name);
-    res.decl = decl;
+    res.info = decl;
     res.writtenInPasses.insert(id);
     res.queueFlags |= queueFlags;
     throw std::runtime_error("Not implemented"); //TODO

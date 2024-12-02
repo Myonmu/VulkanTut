@@ -9,16 +9,19 @@
 #include <VulkanResource.h>
 #include <vulkan/vulkan_core.h>
 
+#include "ResourceDescriptor.h"
 #include "vk_mem_alloc.h"
 
 struct DeviceContext;
 struct VulkanAppContext;
 class CommandPool;
 
-struct BufferInfo : public VmaAllocatedResourceInfo<BufferInfo>{
+struct BufferInfo : public VmaAllocatedResourceInfo<BufferInfo>, public ResourceDescriptor{
     VkDeviceSize size;
     VkBufferUsageFlags usageFlags;
     VkSharingMode sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+
+    BufferInfo() = default;
 
     BufferInfo(VkDeviceSize size, VkBufferUsageFlags usageFlags): size(size), usageFlags(usageFlags) {}
     operator VkBufferCreateInfo() const {
@@ -30,7 +33,19 @@ struct BufferInfo : public VmaAllocatedResourceInfo<BufferInfo>{
         return bufferInfo;
     }
 
+    bool operator==(const BufferInfo& other) const {
+        return size == other.size && usageFlags == other.usageFlags;
+    }
+
+    bool operator!=(const BufferInfo& other) const {
+        return !(*this == other);
+    }
+
     static BufferInfo createStagingBufferInfo(VkDeviceSize size, bool isPersistent);
+
+    ResourceArchType get_archType() override {
+        return ResourceArchType::BUFFER;
+    }
 };
 
 class Buffer: public VulkanResource<VkBuffer, DeviceContext> {

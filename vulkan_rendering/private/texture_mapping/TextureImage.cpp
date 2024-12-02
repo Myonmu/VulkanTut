@@ -101,6 +101,10 @@ bool TextureImageInfo::operator==(const TextureImageInfo &other) const {
                 layers == other.layers;
 }
 
+bool TextureImageInfo::operator!=(const TextureImageInfo &other) const {
+    return !(*this == other);
+}
+
 
 void TextureImage::create() {
     VkImageCreateInfo createInfo = info;

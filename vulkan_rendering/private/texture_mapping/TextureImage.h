@@ -37,7 +37,7 @@ struct TexturePxDimensions {
 
 
 // bootstrapping VkImageCreateInfo wrapper, implicitly converts to VkImageCreateInfo
-struct TextureImageInfo: VmaAllocatedResourceInfo<TextureImageInfo> {
+struct TextureImageInfo: VmaAllocatedResourceInfo<TextureImageInfo> , public ResourceDescriptor{
     TexturePxDimensions dimensions;
     // theoretically, we could just get channels from format, but it is tedious
     uint32_t channels;
@@ -52,6 +52,8 @@ struct TextureImageInfo: VmaAllocatedResourceInfo<TextureImageInfo> {
     uint32_t layers = 1;
     VkImageCreateFlags flags = 0;
 
+    TextureImageInfo() = default;
+
     // By default, creates a simple 2D image without mip nor msaa
     TextureImageInfo(uint32_t width, uint32_t height, uint32_t channels, VkFormat format, VkImageUsageFlags usage)
         : dimensions(width, height),channels(channels), format(format), usage(usage) {
@@ -60,6 +62,8 @@ struct TextureImageInfo: VmaAllocatedResourceInfo<TextureImageInfo> {
     TextureImageInfo(TexturePxDimensions &dimensions, uint32_t channels, VkFormat format, VkImageUsageFlags usage)
         :dimensions(dimensions), channels(channels), format(format), usage(usage) {
     }
+
+    TextureImageInfo(const TextureImageInfo &other) = default;
 
     ~TextureImageInfo() override = default;
 
@@ -80,6 +84,12 @@ struct TextureImageInfo: VmaAllocatedResourceInfo<TextureImageInfo> {
     inline operator VkImageCreateInfo() const;
 
     inline bool operator==(const TextureImageInfo &other) const;
+
+    inline bool operator!=(const TextureImageInfo &other) const;
+
+    ResourceArchType get_archType() override {
+        return ResourceArchType::TEXTURE;
+    }
 };
 
 /*

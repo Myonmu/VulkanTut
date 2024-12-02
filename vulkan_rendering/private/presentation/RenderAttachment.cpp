@@ -13,6 +13,44 @@ bool RenderAttachment::isCompatibleWith(AttachmentInfo &ref) {
     throw std::runtime_error("RenderAttachment::isCompatibleWith not implemented");
 }
 
+TexturePxDimensions TextureRelativeDimensions::resolve(const TexturePxDimensions &swapchainDimensions) {
+    switch (sizeMode) {
+        case AttachmentSizeMode::ABSOLUTE:
+            return TexturePxDimensions{
+                static_cast<uint32_t>(width),
+                static_cast<uint32_t>(height),
+                static_cast<uint32_t>(depth)
+            };
+        case AttachmentSizeMode::INPUT_RELATIVE:
+            if (relativeTo.has_value()) {
+                auto dim = relativeTo->resolveDimensions(swapchainDimensions);
+                return TexturePxDimensions{
+                    static_cast<uint32_t>(std::round(dim.width * width)),
+                    static_cast<uint32_t>(std::round(dim.height * height)),
+                    static_cast<uint32_t>(std::round(dim.depth * depth)),
+                };
+            }else {
+                throw std::runtime_error("Must provide a reference texture when resolving dimensions in INPUT_RELATIVE mode");
+            }
+        case AttachmentSizeMode::SWAPCHAIN_RELATIVE:
+            return TexturePxDimensions{
+                static_cast<uint32_t>(std::round(swapchainDimensions.width * width)),
+                static_cast<uint32_t>(std::round(swapchainDimensions.height * height)),
+                static_cast<uint32_t>(std::round(swapchainDimensions.depth * depth)),
+            };
+        default: throw std::runtime_error("Unknown sizeMode during attachment size resolution");
+    }
+}
+
+TexturePxDimensions AttachmentInfo::resolveDimensions(const TexturePxDimensions &swapchainDimensions) {
+    if (isDimensionResolved) return dimensions;
+    if (relativeDimensions.has_value()) {
+        dimensions = relativeDimensions->resolve(swapchainDimensions);
+    }
+    isDimensionResolved = true;
+    return dimensions;
+}
+
 
 // vvvvvvvvvvvvvvvvvvvvvvvvvvvv Color Attachment
 

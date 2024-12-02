@@ -115,6 +115,7 @@ set(SOURCES
         private/components/RenderingBase.cpp
         private/components/RenderingBase.h
         private/misc/Polymorphism.h
+        private/misc/ResourceDescriptor.h
 )
 
 # Create static library

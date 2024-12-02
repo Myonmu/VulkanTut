@@ -4,6 +4,7 @@
 
 #pragma once
 #include <map>
+#include <optional>
 #include <vector>
 
 #include "ContextMacros.h"
@@ -22,14 +23,33 @@ enum class AttachmentType {
     COLOR
 };
 
-struct AttachmentInfo : public TextureImageInfo {
+enum class AttachmentSizeMode {
+    SWAPCHAIN_RELATIVE,
+    ABSOLUTE,
+    INPUT_RELATIVE
+};
+
+struct TextureRelativeDimensions {
+    AttachmentSizeMode sizeMode = AttachmentSizeMode::SWAPCHAIN_RELATIVE;
+    float width = 1.f;
+    float height = 1.f;
+    float depth = 0.f;
+    // If size mode is relative, this points to the texture that serves as a reference
+    std::optional<AttachmentInfo> relativeTo;
+
+    TexturePxDimensions resolve(const TexturePxDimensions& swapchainDimensions);
+};
+
+struct AttachmentInfo : public TextureImageInfo{
+
+    std::optional<TextureRelativeDimensions> relativeDimensions;
     uint32_t index{};
     AttachmentType type{};
     VkAttachmentDescription description{};
     VkImageLayout layout{};
     VkClearColorValue clearColor{};
 
-    AttachmentInfo();
+    AttachmentInfo() = default;
 
     AttachmentInfo(uint32_t w, uint32_t h, uint32_t channels, VkFormat format, VkImageUsageFlags usage)
         : TextureImageInfo(w, h, channels, format, usage) {
@@ -38,7 +58,16 @@ struct AttachmentInfo : public TextureImageInfo {
     AttachmentInfo(TexturePxDimensions &dimensions, uint32_t channels, VkFormat format, VkImageUsageFlags usage)
         : TextureImageInfo(dimensions, channels, format, usage) {
     };
+
+    AttachmentInfo(const AttachmentInfo &other) = default;
+
+    TexturePxDimensions resolveDimensions(const TexturePxDimensions &swapchainDimensions);
+
+private:
+    bool isDimensionResolved = false;
 };
+
+
 
 class RenderAttachment {
 public:

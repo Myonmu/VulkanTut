@@ -17,9 +17,8 @@
 #include <utility>
 #include <vulkan/vulkan_core.h>
 #include "CompoundDataContainers.h"
+#include "RenderAttachment.h"
 #include "UtilityMacros.h"
-
-struct AttachmentDecl;
 
 enum RenderGraphQueueFlagBits {
     RENDER_GRAPH_QUEUE_GRAPHICS_BIT = 1 << 0,
@@ -29,11 +28,7 @@ enum RenderGraphQueueFlagBits {
 
 using RenderGraphQueueFlags = uint32_t;
 
-enum class AttachmentSizeMode {
-    SWAPCHAIN_RELATIVE,
-    ABSOLUTE,
-    INPUT_RELATIVE
-};
+
 
 enum class ResourceUsageDeclType {
     INPUT = 0,
@@ -44,12 +39,6 @@ enum class ResourceUsageType {
     READ_ONLY,
     WRITE,
     READ_WRITE
-};
-
-enum class ResourceArchType {
-    TEXTURE,
-    BUFFER,
-    PROXY
 };
 
 enum class ResourceType {
@@ -74,7 +63,7 @@ namespace ResourceTypeUtils {
     bool isOfArchType(ResourceType type, ResourceArchType archType);
 
     VkImageUsageFlags convertToVulkanImageUsageFlags(ResourceType type, ResourceUsageDeclType usage,
-                                                     const AttachmentDecl &decl);
+                                                     const AttachmentInfo &decl);
 }
 
 enum AttachmentInfoFlagBits {
@@ -91,100 +80,10 @@ enum AttachmentInfoInternalFlagBits {
 
 using AttachmentInfoFlags = uint32_t;
 
-struct TextureRelativeDimensions {
-    AttachmentSizeMode sizeMode = AttachmentSizeMode::SWAPCHAIN_RELATIVE;
-    float width = 1.f;
-    float height = 1.f;
-    float depth = 0.f;
-    // If size mode is relative, this points to the texture that serves as a reference
-    std::string sizeReferenceTextureName;
-};
-// "Virtual" attachment handle (not "Virtual Texture", just an attachment placeholder)
-// Contains enough information to generate an alloc info
-struct AttachmentDecl {
-    TextureRelativeDimensions dimensions;
-    VkFormat format = VK_FORMAT_UNDEFINED;
-    uint32_t samples = 1;
-    uint32_t levels = 1;
-    uint32_t layers = 1;
-    VkImageUsageFlags usage = 0;
-    AttachmentInfoFlags flags = ATTACHMENT_INFO_PERSISTENT_BIT;
-};
-
-struct BufferDecl {
-    VkDeviceSize size = 0;
-    VkBufferUsageFlags usage = 0;
-    AttachmentInfoFlags flags = 0;
-
-    bool operator==(const BufferDecl &other) const {
-        return size == other.size &&
-               usage == other.usage &&
-               flags == other.flags;
-    }
-
-    bool operator!=(const BufferDecl &other) const {
-        return !(*this == other);
-    }
-};
-
-struct ResourceDimensions {
-    VkFormat format = VK_FORMAT_UNDEFINED;
-    BufferDecl buffer_info;
-    TexturePxDimensions dimensions;
-    uint32_t layers = 1;
-    uint32_t levels = 1;
-    uint32_t samples = 1;
-    AttachmentInfoFlags flags = ATTACHMENT_INFO_PERSISTENT_BIT;
-    VkSurfaceTransformFlagBitsKHR transform = VK_SURFACE_TRANSFORM_IDENTITY_BIT_KHR;
-    RenderGraphQueueFlags queues = 0;
-    VkImageUsageFlags image_usage = 0;
-
-    bool operator==(const ResourceDimensions &other) const {
-        return format == other.format &&
-               dimensions == other.dimensions &&
-               layers == other.layers &&
-               levels == other.levels &&
-               buffer_info == other.buffer_info &&
-               flags == other.flags &&
-               transform == other.transform;
-        // image_usage is deliberately not part of this test.
-        // queues is deliberately not part of this test.
-    }
-
-    bool operator!=(const ResourceDimensions &other) const {
-        return !(*this == other);
-    }
-
-    bool uses_semaphore() const {
-        if ((flags & ATTACHMENT_INFO_INTERNAL_PROXY_BIT) != 0)
-            return true;
-
-        // If more than one queue is used for a resource, we need to use semaphores.
-        auto physical_queues = queues;
-
-        // Regular compute uses regular graphics queue.
-        if (physical_queues & RENDER_GRAPH_QUEUE_COMPUTE_BIT)
-            physical_queues |= RENDER_GRAPH_QUEUE_GRAPHICS_BIT;
-        physical_queues &= ~RENDER_GRAPH_QUEUE_COMPUTE_BIT;
-        return (physical_queues & (physical_queues - 1)) != 0;
-    }
-
-    bool is_storage_image() const {
-        return (image_usage & VK_IMAGE_USAGE_STORAGE_BIT) != 0;
-    }
-
-    bool is_buffer_like() const {
-        return is_storage_image() || (buffer_info.size != 0) || (flags & ATTACHMENT_INFO_INTERNAL_PROXY_BIT) != 0;
-    }
-
-    std::string name;
-};
 
 struct RenderResource {
-    ResourceArchType archType{ResourceArchType::PROXY};
     const uint32_t id;
     const std::string name;
-
     uint32_t physicalId = -1;
     std::unordered_set<uint32_t> writtenInPasses;
     std::unordered_set<uint32_t> readInPasses;
@@ -196,26 +95,28 @@ struct RenderResource {
     virtual ~RenderResource() = default;
 };
 
+template<ResourceDescriptorType T>
+struct RenderResourceT: public RenderResource {
+    T info{};
+    RenderResourceT(const uint32_t id, std::string name): RenderResource(id, std::move(name)) {
+    }
+};
+
 template<typename T>
 concept RenderResourceType = std::is_base_of_v<RenderResource, T>;
 
-struct RenderTextureResource : public RenderResource {
-    AttachmentDecl decl;
+struct RenderTextureResource : public RenderResourceT<AttachmentInfo> {
     VkImageUsageFlags usage = 0;
     bool isTransient = false;
-
-    RenderTextureResource(const uint32_t id, std::string name): RenderResource(id, std::move(name)) {
-        archType = ResourceArchType::TEXTURE;
+    RenderTextureResource(const uint32_t id, std::string name): RenderResourceT(id, std::move(name)) {
     }
 };
 
-struct RenderBufferResource : public RenderResource {
-    BufferDecl decl;
-
-    RenderBufferResource(const uint32_t id, std::string name): RenderResource(id, std::move(name)) {
-        archType = ResourceArchType::BUFFER;
+struct RenderBufferResource : public RenderResourceT<BufferInfo> {
+    RenderBufferResource(const uint32_t id, std::string name): RenderResourceT(id, std::move(name)) {
     }
 };
+
 
 class RenderGraph;
 
@@ -224,8 +125,7 @@ class RenderGraphNode {
     RenderGraph &renderGraph;
     RenderGraphQueueFlagBits queueFlags;
     //Resource Type -> usage type -> resources
-    cascade_unordered_map<ResourceType, ResourceUsageDeclType, std::vector<RenderTextureResource *> > textureResources
-            {};
+    cascade_unordered_map<ResourceType, ResourceUsageDeclType, std::vector<RenderTextureResource *> > textureResources{};
     cascade_unordered_map<ResourceType, ResourceUsageDeclType, std::vector<RenderBufferResource *> > bufferResources{};
 
 public:
@@ -246,12 +146,12 @@ public:
     }
 
     RenderTextureResource &addTextureResource(const std::string &name,
-                                              const AttachmentDecl &decl,
+                                              const AttachmentInfo &decl,
                                               ResourceType resourceType,
                                               ResourceUsageDeclType usageType);
 
     RenderTextureResource &addBufferResource(const std::string &name,
-                                             const BufferDecl &decl,
+                                             const BufferInfo &decl,
                                              ResourceType resourceType,
                                              ResourceUsageDeclType usageType);
 };
@@ -268,14 +168,13 @@ class RenderGraph {
 
     TexturePxDimensions resolveTexturePxDimensions(const TextureRelativeDimensions &decl);
 
-    ResourceDimensions getResourceDimensions(const RenderBufferResource &resource) const;
+    [[nodiscard]] ResourceDescriptor getResourceDimensions(const RenderBufferResource &resource) const;
 
     static bool surfaceTransformSwapsXy(VkSurfaceTransformFlagBitsKHR transform);
 
-    ResourceDimensions getResourceDimensions(const RenderTextureResource &resource);
+    ResourceDescriptor getResourceDimensions(const RenderTextureResource &resource);
 
 public:
-    ResourceDimensions swapchainDimensions;
 
     RenderGraphNode &getOrCreateNode(RenderGraphQueueFlagBits queue, const std::string &name);
 
