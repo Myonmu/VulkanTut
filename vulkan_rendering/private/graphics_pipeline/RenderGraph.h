@@ -29,16 +29,14 @@ enum RenderGraphQueueFlagBits {
 using RenderGraphQueueFlags = uint32_t;
 
 
-
-enum class ResourceUsageDeclType {
-    INPUT = 0,
-    OUTPUT = 1
-};
-
 enum class ResourceUsageType {
-    READ_ONLY,
+    /**
+     * "NONE" is valid when a resource is PRESERVED
+     */
+    NONE,
+    READ,
     WRITE,
-    READ_WRITE
+    READ_WRITE,
 };
 
 enum class ResourceType {
@@ -59,28 +57,6 @@ enum class ResourceType {
     PROXY = 12
 };
 
-namespace ResourceTypeUtils {
-    bool isOfArchType(ResourceType type, ResourceArchType archType);
-
-    VkImageUsageFlags convertToVulkanImageUsageFlags(ResourceType type, ResourceUsageDeclType usage,
-                                                     const AttachmentInfo &decl);
-}
-
-enum AttachmentInfoFlagBits {
-    ATTACHMENT_INFO_PERSISTENT_BIT = 1 << 0,
-    ATTACHMENT_INFO_UNORM_SRGB_ALIAS_BIT = 1 << 1,
-    ATTACHMENT_INFO_SUPPORTS_PREROTATE_BIT = 1 << 2,
-    ATTACHMENT_INFO_MIPGEN_BIT = 1 << 3
-};
-
-enum AttachmentInfoInternalFlagBits {
-    ATTACHMENT_INFO_INTERNAL_TRANSIENT_BIT = 1 << 16,
-    ATTACHMENT_INFO_INTERNAL_PROXY_BIT = 1 << 17
-};
-
-using AttachmentInfoFlags = uint32_t;
-
-
 struct RenderResource {
     const uint32_t id;
     const std::string name;
@@ -91,6 +67,8 @@ struct RenderResource {
 
     RenderResource(const uint32_t id, std::string name): id(id), name(std::move(name)) {
     }
+
+    void recordUsage(uint32_t passId, ResourceUsageType usage);
 
     virtual ~RenderResource() = default;
 };
@@ -125,8 +103,8 @@ class RenderGraphNode {
     RenderGraph &renderGraph;
     RenderGraphQueueFlagBits queueFlags;
     //Resource Type -> usage type -> resources
-    cascade_unordered_map<ResourceType, ResourceUsageDeclType, std::vector<RenderTextureResource *> > textureResources{};
-    cascade_unordered_map<ResourceType, ResourceUsageDeclType, std::vector<RenderBufferResource *> > bufferResources{};
+    cascade_unordered_map<ResourceType, ResourceUsageType, std::vector<RenderTextureResource *> > textureResources{};
+    cascade_unordered_map<ResourceType, ResourceUsageType, std::vector<RenderBufferResource *> > bufferResources{};
 
 public:
     PROPERTY(std::string, name, public, public)
@@ -136,24 +114,24 @@ public:
     }
 
     [[nodiscard]] std::vector<RenderTextureResource *> &getTextureResources(
-        const ResourceType type, const ResourceUsageDeclType usageType) {
+        const ResourceType type, const ResourceUsageType usageType) {
         return textureResources[type][usageType];
     }
 
     [[nodiscard]] std::vector<RenderBufferResource *> &getBufferResources(
-        const ResourceType type, const ResourceUsageDeclType usageType) {
+        const ResourceType type, const ResourceUsageType usageType) {
         return bufferResources[type][usageType];
     }
 
     RenderTextureResource &addTextureResource(const std::string &name,
                                               const AttachmentInfo &decl,
                                               ResourceType resourceType,
-                                              ResourceUsageDeclType usageType);
+                                              ResourceUsageType usageType);
 
-    RenderTextureResource &addBufferResource(const std::string &name,
+    RenderBufferResource &addBufferResource(const std::string &name,
                                              const BufferInfo &decl,
                                              ResourceType resourceType,
-                                             ResourceUsageDeclType usageType);
+                                             ResourceUsageType usageType);
 };
 
 
@@ -166,13 +144,7 @@ class RenderGraph {
 
     void validate();
 
-    TexturePxDimensions resolveTexturePxDimensions(const TextureRelativeDimensions &decl);
-
-    [[nodiscard]] ResourceDescriptor getResourceDimensions(const RenderBufferResource &resource) const;
-
     static bool surfaceTransformSwapsXy(VkSurfaceTransformFlagBitsKHR transform);
-
-    ResourceDescriptor getResourceDimensions(const RenderTextureResource &resource);
 
 public:
 

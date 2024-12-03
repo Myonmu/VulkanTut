@@ -35,7 +35,7 @@ struct TextureRelativeDimensions {
     float height = 1.f;
     float depth = 0.f;
     // If size mode is relative, this points to the texture that serves as a reference
-    std::optional<AttachmentInfo> relativeTo;
+    AttachmentInfo* relativeTo;
 
     TexturePxDimensions resolve(const TexturePxDimensions& swapchainDimensions);
 };

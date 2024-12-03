@@ -22,7 +22,7 @@ TexturePxDimensions TextureRelativeDimensions::resolve(const TexturePxDimensions
                 static_cast<uint32_t>(depth)
             };
         case AttachmentSizeMode::INPUT_RELATIVE:
-            if (relativeTo.has_value()) {
+            if (relativeTo != nullptr) {
                 auto dim = relativeTo->resolveDimensions(swapchainDimensions);
                 return TexturePxDimensions{
                     static_cast<uint32_t>(std::round(dim.width * width)),
