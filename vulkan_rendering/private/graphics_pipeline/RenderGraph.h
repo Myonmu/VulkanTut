@@ -68,7 +68,7 @@ struct RenderResource {
     RenderResource(const uint32_t id, std::string name): id(id), name(std::move(name)) {
     }
 
-    void recordUsage(uint32_t passId, ResourceUsageType usage);
+    void recordUsage(uint32_t passId, ResourceUsageType usage, RenderGraphQueueFlags queueFlags);
 
     virtual ~RenderResource() = default;
 };

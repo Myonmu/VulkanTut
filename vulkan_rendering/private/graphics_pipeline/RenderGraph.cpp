@@ -16,7 +16,8 @@ namespace ResourceTypeUtils {
     }
 }
 
-void RenderResource::recordUsage(uint32_t passId, ResourceUsageType usage) {
+void RenderResource::recordUsage(uint32_t passId, ResourceUsageType usage, RenderGraphQueueFlags queueFlags) {
+    this->queueFlags|=queueFlags;
     switch (usage) {
         case ResourceUsageType::NONE:
             return;
@@ -43,8 +44,7 @@ RenderTextureResource &RenderGraphNode::addTextureResource(const std::string &na
                                                            ResourceType resourceType, ResourceUsageType usageType) {
     auto &res = renderGraph.getOrCreateResource<RenderTextureResource>(name);
     res.info = decl;
-    res.recordUsage(id, usageType);
-    res.queueFlags |= queueFlags;
+    res.recordUsage(id, usageType, queueFlags);
     textureResources[resourceType][usageType].push_back(&res);
     return res;
 }
@@ -53,7 +53,7 @@ RenderBufferResource &RenderGraphNode::addBufferResource(const std::string &name
                                                           ResourceType resourceType, ResourceUsageType usageType) {
     auto &res = renderGraph.getOrCreateResource<RenderBufferResource>(name);
     res.info = decl;
-    res.recordUsage(id, usageType);
+    res.recordUsage(id, usageType, queueFlags);
     bufferResources[resourceType][usageType].push_back(&res);
     return res;
 }
