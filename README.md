@@ -2,20 +2,17 @@
 
 TL;DR: The bumpy ride of Vulkan Learning.
 
-The *classic* tutorial, named Vulkan Tutorial, is a semi-great place to code in Vulkan, but it comes with a  
-horrific code structure: *everything in one file*.
+The *classic* tutorial, named Vulkan Tutorial, is a semi-great place to code in Vulkan, but it comes with a horrific code structure: *everything in one file*.
 
 Hence, the repo tries to mitigate this:
 
-- Vulkan objects will be encapsulated in custom wrappers, and usually they have implicit conversion toward the raw  
-  Vulkan object. The wrappers follow RAII.
+- Vulkan objects will be encapsulated in custom wrappers, and usually they have implicit conversion toward the raw Vulkan object. The wrappers follow RAII.
 - Long methods are chopped into smaller chunks
 - Better interdependencies between objects
 
 We also use Vulkan Guide as a supplementary reference.
 
-A homebrew OOP version (more specifically, custom RAII wrappers from scratch), is potentially not optimal compared to  
-the official RAII but should allow us to understand better the inner workings of the API.
+A homebrew OOP version (more specifically, custom RAII wrappers from scratch), is potentially not optimal compared to the official RAII but should allow us to understand better the inner workings of the API.
 
 The repo goes slightly beyond the tutorials by also implementing:
 
@@ -25,14 +22,11 @@ The repo goes slightly beyond the tutorials by also implementing:
 
 ## Installation
 
-The primary IDE used during the development is *CLion*, but *Visual Studio 2022* should work as well. We have only  
-tested building with **MSVC**.
+The primary IDE used during the development is *CLion*, but *Visual Studio 2022* should work as well. We have only tested building with **MSVC**.
 
 We use *CMake* as our build system.
 
-The repo has changed to use **vcpkg** for package management.  
-Follow [Tutorial: Install and use packages with CMake](https://learn.microsoft.com/en-us/vcpkg/get_started/get-started?pivots=shell-powershell)  
-to configure vcpkg on your system.
+The repo has changed to use **vcpkg** for package management. Follow [Tutorial: Install and use packages with CMake](https://learn.microsoft.com/en-us/vcpkg/get_started/get-started?pivots=shell-powershell) to configure vcpkg on your system.
 
 ## Architecture
 
