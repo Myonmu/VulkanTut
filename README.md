@@ -399,7 +399,7 @@ To sum up:
 - All attachments in a Render Pass must have the same dimensions (width, height, layers).
 - No random access to the attachments is allowed.
 
-Note that I avoided the term "Subpass Merging" despite that seems to be an appropriate name. This is because *Merging* refers to another drive-level optimization which combines subpasses into... something lower level. Refer to [this](https://github.com/KhronosGroup/Vulkan-Samples/tree/main/samples/performance/subpasses#merging) article in the Vulkan samples.
+Note that I avoided the term "Subpass Merging" despite that seems to be an appropriate name. This is because *Merging* refers to another driver-level optimization which combines subpasses into... something lower level. Refer to [this](https://github.com/KhronosGroup/Vulkan-Samples/tree/main/samples/performance/subpasses#merging) article in the Vulkan samples.
 
 ##### Input-Output Pairing and Submission Order
 
@@ -586,6 +586,10 @@ Since we already have the physical resource here, the graph builder will directl
 
 The actual process is tedious and I will only go through the basics here.
 
+RDG calls `CollectAllocations` on each unculled pass, and
+
+Each resource store a `FirstPass` and a `LastPass` reference, these represent the first pass in render graph where the resource is used, and the last. This information is **filled during the allocation collection steps**. The resource's scope, if not external, is clamped between these two passes. This information will come in handy when deciding resource aliasing (using the same physical resource for two different logical resources, when those two logical resource's scopes do not overlap).
+
 In `RenderGraphBuilder::Execute()`, before scheduling pooled resource allocations, there is a collection step that determines what should be allocated. The collection step essentially transforms the access information stored in each pass into `FCollectResourceOp`. The struct references the originated pass as well as the resource index.
 
 After collection, the allocation task is scheduled as follows:
@@ -598,3 +602,25 @@ AllocatePooledTexturesTask = AddCommandListSetupTask([this, PooledTextures = Mov
 }, TaskPriority);
 ```
 
+##### The Graph
+
+Unreal has some unique concepts that are daunting at first.
+
+- Prologue/Epilogue : Unreal uses these two terms frequently inside RDG, and they don't seem to relate to any render graph concept immediately. In a nutshell, *Prologue* means prepare to do something for the following pass, and *Epilogue* means cleaning things up. The RDG itself has one *Prologue Pass* and one *Epilogue Pass*, all created automatically by the RDG builder and are empty. In pass merging, there are also *Prologue Barrier Pass* and *Epilogue Barrier Pass*, these passes are simply extra roles assigned to the first and last passes in a merge, and manages pipeline barriers (because whatever resource transition is required in the middle, must now be done in the first and last passes). Think about top of the pipe and bottom of the pipe execution stages in Vulkan, they essentially do nothing, just convenient places at the start and the end of an execution.
+- To Begin/To End : *To Begin* means something that has to be prepared before executing a pass, and *To End* means something that has to be finalized. These can be conveniently translated into pipeline/resource barriers.
+
+This local function in `Compile()` shows how merging causes *To Begin* responsibility shift to the last pass of the merge, with added comments:
+
+```c++
+const auto SetEpilogueBarrierPass = [&](FRDGPass* Pass, FRDGPassHandle EpilogueBarrierPassHandle)  
+{  
+    Pass->EpilogueBarrierPass = EpilogueBarrierPassHandle;  
+    // this pass no longer cares what resources to end since it is in the middle
+	Pass->ResourcesToEnd.Reset();
+	// shifts the responsibility to the epilogue pass (last pass in merge sequence)  
+    Passes[EpilogueBarrierPassHandle]->ResourcesToEnd.Add(Pass);  
+};
+```
+###### Pass Merging
+
+Pass merging in unreal is similar to how pass merging work in Vulkan: if they share the same set of frame buffers.
