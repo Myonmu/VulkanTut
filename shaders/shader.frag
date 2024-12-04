@@ -9,7 +9,6 @@ layout (location = 1) in vec3 inColor;
 layout (location = 2) in vec3 inWorldPos;
 layout (location = 3) in vec2 inTexCoord;
 layout (location = 4) in vec3 inTangent;
-layout (location = 5) in vec3 inBitangent;
 
 
 layout (location = 0) out vec4 outColor;
@@ -33,8 +32,11 @@ void main()
 {
     outPosition = vec4(inWorldPos, 1.0);
 
+    vec3 t = normalize(inTangent);
+    vec3 n = normalize(inNormal);
+    vec3 b = normalize(cross(inNormal, inTangent));
     // Construct the TBN matrix
-    mat3 TBN = mat3(normalize(inTangent), normalize(inBitangent), normalize(inNormal));
+    mat3 TBN = mat3(t, b, n);
 
     // Sample the normal map (tangent space normal)
     vec3 tangentSpaceNormal = normalize(unpackNormal(texture(normalSampler, inTexCoord).xyz));

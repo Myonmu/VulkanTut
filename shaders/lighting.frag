@@ -24,7 +24,7 @@ void main()
     vec3 normal = unpackNormal(normalTex.rgb);
     vec3 pos = fragPosTex.rgb;
 
-    #define ambient 0.03f
+    #define ambient 0.1f
 
     // Ambient part
     vec3 fragcolor  = albedo.rgb * ambient;

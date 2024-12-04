@@ -49,20 +49,20 @@ void ObjLoader::computeTangent() {
         vertices[idx1].tangent += tangent;
         vertices[idx2].tangent += tangent;
 
-        vertices[idx0].bitangent += bitangent;
-        vertices[idx1].bitangent += bitangent;
-        vertices[idx2].bitangent += bitangent;
+        //vertices[idx0].bitangent += bitangent;
+        //vertices[idx1].bitangent += bitangent;
+        //vertices[idx2].bitangent += bitangent;
     }
 
     // Normalize tangents and bitangents
     for (auto & vertex : vertices) {
         vertex.normal = glm::normalize(vertex.normal);
-        vertex.bitangent = glm::normalize(vertex.bitangent);
+        //vertex.bitangent = glm::normalize(vertex.bitangent);
 
         // Ensure tangent space is orthogonal
         glm::vec3 normal = vertex.normal;
         vertex.tangent = glm::normalize(vertex.tangent - glm::dot(vertex.tangent, normal) * normal);
-        vertex.bitangent = glm::normalize(glm::cross(normal, vertex.bitangent));
+        //vertex.bitangent = glm::normalize(glm::cross(normal, vertex.bitangent));
     }
 }
 

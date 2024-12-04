@@ -16,7 +16,6 @@ struct Vertex {
     glm::vec3 color;
     glm::vec3 normal;
     glm::vec3 tangent;
-    glm::vec3 bitangent;
     glm::vec2 texCoord;
 
     static VkVertexInputBindingDescription getBindingDescription() {
@@ -27,7 +26,7 @@ struct Vertex {
         return bindingDescription;
     }
 
-    static std::array<VkVertexInputAttributeDescription, 6> getAttributeDescriptions() {
+    static std::array<VkVertexInputAttributeDescription, 5> getAttributeDescriptions() {
         /* NOTE:
          *
          * Unlike HLSL that has POSITION, TEXCOORD0 semantics,
@@ -42,7 +41,7 @@ struct Vertex {
          *  Optionally, for further implementation:
          *  use embedded yaml to determine the intended use of the bindings.
          */
-        std::array<VkVertexInputAttributeDescription, 6> attributeDescriptions{};
+        std::array<VkVertexInputAttributeDescription, 5> attributeDescriptions{};
         attributeDescriptions[0].binding = 0;
         attributeDescriptions[0].format = VK_FORMAT_R32G32B32_SFLOAT;
         attributeDescriptions[0].location = 0;
@@ -65,13 +64,8 @@ struct Vertex {
 
         attributeDescriptions[4].binding = 0;
         attributeDescriptions[4].location = 4;
-        attributeDescriptions[4].format = VK_FORMAT_R32G32B32_SFLOAT;
-        attributeDescriptions[4].offset = offsetof(Vertex, bitangent);
-
-        attributeDescriptions[5].binding = 0;
-        attributeDescriptions[5].location = 5;
-        attributeDescriptions[5].format = VK_FORMAT_R32G32_SFLOAT;
-        attributeDescriptions[5].offset = offsetof(Vertex, texCoord);
+        attributeDescriptions[4].format = VK_FORMAT_R32G32_SFLOAT;
+        attributeDescriptions[4].offset = offsetof(Vertex, texCoord);
 
         return attributeDescriptions;
     }

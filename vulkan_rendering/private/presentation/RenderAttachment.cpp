@@ -71,7 +71,7 @@ ColorAttachment::ColorAttachment(const WindowContext &ctx)
     : ctx(ctx), info(ctx.get_swapChain().swapChainExtent.width,
                      ctx.get_swapChain().swapChainExtent.height,
                      4, ctx.get_swapChain().swapChainImageFormat,
-                     VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT) {
+                     VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT) {
     info.setSampleCount(1).isGpuOnly().isInputAttachment().isTransientAttachment(); //TODO: not always
     create();
 }

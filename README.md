@@ -2,22 +2,22 @@
 
 TL;DR: The bumpy ride of Vulkan Learning.
 
-The *classic* tutorial, named Vulkan Tutorial is a semi-great place to start coding in Vulkan, but it comes with a
+The *classic* tutorial, named Vulkan Tutorial, is a semi-great place to code in Vulkan, but it comes with a  
 horrific code structure: *everything in one file*.
 
 Hence, the repo tries to mitigate this:
 
-- Vulkan objects will be encapsulated in custom wrappers, and usually they have implicit conversion toward the raw
+- Vulkan objects will be encapsulated in custom wrappers, and usually they have implicit conversion toward the raw  
   Vulkan object. The wrappers follow RAII.
 - Long methods are chopped into smaller chunks
 - Better interdependencies between objects
 
-We also use Vulkan Guide as supplementary reference.
+We also use Vulkan Guide as a supplementary reference.
 
-A homebrew OOP version (more specifically, custom RAII wrappers from scratch), is potentially not optimal compared to
+A homebrew OOP version (more specifically, custom RAII wrappers from scratch), is potentially not optimal compared to  
 the official RAII but should allow us to understand better the inner workings of the API.
 
-Moreover, the repo goes slightly beyond the tutorials by also implementing:
+The repo goes slightly beyond the tutorials by also implementing:
 
 - Player loop updates driven by flecs ECS
 - Shader reflection
@@ -25,41 +25,34 @@ Moreover, the repo goes slightly beyond the tutorials by also implementing:
 
 ## Installation
 
-The primary IDE used during the development is *CLion*, but *Visual Studio 2022* should work as well. We have only
+The primary IDE used during the development is *CLion*, but *Visual Studio 2022* should work as well. We have only  
 tested building with **MSVC**.
 
 We use *CMake* as our build system.
 
-The repo has changed to use **vcpkg** for package management.
-Follow [Tutorial: Install and use packages with CMake](https://learn.microsoft.com/en-us/vcpkg/get_started/get-started?pivots=shell-powershell)
+The repo has changed to use **vcpkg** for package management.  
+Follow [Tutorial: Install and use packages with CMake](https://learn.microsoft.com/en-us/vcpkg/get_started/get-started?pivots=shell-powershell)  
 to configure vcpkg on your system.
 
 ## Architecture
 
 ### Engine-defined Descriptor Allocation
 
-The first descriptor set (set = 0) is engine-defined, meaning whatever is written in shader **must** match the c++ side
-definition. All engine defined descriptor sets could be found in `EngineDescriptorDef.cpp`.
+The first descriptor set (set = 0) is engine-defined, meaning whatever is written in shader **must** match the c++ side definition. All engine defined descriptor sets could be found in `EngineDescriptorDef.cpp`.
 
 *By "engine-defined", it means the data filled in these descriptor sets are automatically managed by the engine.*
 
-To add a new engine defined descriptor binding (an ubo in most cases):
+To add a new engine defined descriptor binding (an ubo most times):
 
-1. Create a data struct declaring its fields, this will be your descriptor. e.g. `struct { glm::vec4 someField; };`
-2. Determine which set, which binding it is. Write accordingly in `EngineDescriptorDef.cpp`. In
-   `EngineDescriptorSetCreateInfo` you need to specify its binding, its contribution to allocator ratio, and the size of
-   the associated buffer. Reminder: descriptor pool allocator allocates descriptors by types, so "contribution to
-   allocator ratio" means increasing the ratio of a specific type of descriptor if the type is already present.
-3. Decide how often is the buffer updated. Due to frame overlap (or frames in flight), a per-frame updated resource will
-   need to use `PerFrameDescriptorSet`.
-4. Find the appropriate moment to memcpy into the buffer. For per-frame descriptor set (set = 0), the update is driven
-   by ecs systems (refer to how camera view projection matrix is transferred to the buffer). You might need to create an
-   ecs component type.
-5. Modify descriptor set binding call. Currently, it is part of the `MeshRenderer` class.
+1. Create a data struct declaring its fields. This will be your descriptor. e.g. `struct { glm::vec4 someField; };`
+2. Determine which set, which binding it is. Write accordingly in `EngineDescriptorDef.cpp`. In `EngineDescriptorSetCreateInfo` you need to specify its binding, its contribution to allocator ratio, and the size of the associated buffer. Reminder: descriptor pool allocator allocates descriptors by types, so "contribution to allocator ratio" means increasing the ratio of a specific type of descriptor if the type is already present.
+3. Decide how often is the buffer updated. Because of frame overlap (or frames in flight), a per-frame updated resource will need to use `PerFrameDescriptorSet`.
+4. Decide when to memcpy into the buffer. For the per-frame descriptor set (set = 0), the update is driven by ecs systems (refer to how camera view projection matrix is transferred to the buffer). You might need to create an ecs component type.
+5. Change descriptor set binding call. Currently, it is part of the `MeshRenderer` class.
 
 ## Coding Style
 
-The style generally follows the tutorial, which is different from C++ default stype:
+The style follows the tutorial, which differs from C++ default stype:
 
 - Classes and Structs are UpperCamelCase
 - Members (fields, functions) are lowerCamelCase (with an exceptional house rule)
@@ -67,7 +60,7 @@ The style generally follows the tutorial, which is different from C++ default st
 
 House rules:
 
-- get methods generated by macros (especially `CTX_PROPERTY`) always follow `get_someField()` syntax. This helps when you try to search for usages as the IDE don't necessarily collect them - search for "someField" instead
+- get methods generated by macros (especially `CTX_PROPERTY`) always follow `get_someField()` syntax. This helps when you try to search for usages as the IDE doesn't collect them - search for "someField" instead
 - sometimes, the before-mentionned "get_" syntax may apply to fields that are not generated by macros. This is reserved for a future refactoring.
 
 *example: `get_logicalDevice()` is generated by `CTX_PROPERTY(LogicalDevice, logicalDevice)`, while `getLogicalDevice()` does the same thing but is explicitly implemented as part of the `SubContext` class.*
@@ -76,399 +69,303 @@ House rules:
 
 ### Vulkan Initialization and Surfaces
 
-There is a slightly complex dependency between `VkInstance`, `VkPhysicalDevice`, `VkSurface`, and `VkDevice`, which I
-believe is not well pronounced in the tutorial. In the tutorial, these are all treated as singletons. However, the only
-*true singleton* among these objects is `VkInstance`.
+There is a slightly complex dependency between `VkInstance`, `VkPhysicalDevice`, `VkSurface`, and `VkDevice`, which I believe is not well pronounced in the tutorial. In the tutorial, these are all treated as singletons. However, the only *true singleton* among these objects is `VkInstance`.
 
 Here's how these objects are created in the tutorial:
 
-```
-VkInstance  =>  VkSurface  =>  VkPhysicalDevice  =>  VkDevice
-```
+```  
+VkInstance  =>  VkSurface  =>  VkPhysicalDevice  =>  VkDevice  
+```  
 
-This illustration would potentially cause confusion if we were rendering to multiple windows, since for each window, we
-would need a separate `VkSurface` instance, yet physical device should be shared among these windows, and logical device
-is one per physical device. But recall *why* we need to use VkSurface in physical device creation in the first place:
-*querying queue family indices*, and queue family isn't tied to any specific surface, but rather all the surfaces as a
-whole. In other words, it is the distinct types of queue family used by all surfaces.
+This illustration might cause confusion if we were rendering to multiple windows, since for each window, we would need a separate `VkSurface` instance, yet a physical device should be shared among these windows, and a logical device is one per physical device. But recall *why* we need to use VkSurface in physical device creation in the first place: *querying queue family indices*, and queue family isn't tied to any specific surface, but to all the surfaces. It is the distinct queue family used by all surfaces.
 
-e.g. Surface A requires `VK_QUEUE_GRAPHICS_BIT` and `VK_QUEUE_VIDEO_DECODE_BIT_KHR`, Surface B requires
-`VK_QUEUE_GRAPHICS_BIT` and `VK_QUEUE_COMPUTE_BIT`, then what we need to pass to physical device selection is the
-distinct types : `VK_QUEUE_GRAPHICS_BIT`,`VK_QUEUE_VIDEO_DECODE_BIT_KHR` and `VK_QUEUE_COMPUTE_BIT`.
+e.g. Surface A requires `VK_QUEUE_GRAPHICS_BIT` and `VK_QUEUE_VIDEO_DECODE_BIT_KHR`, Surface B requires `VK_QUEUE_GRAPHICS_BIT` and `VK_QUEUE_COMPUTE_BIT`, then what we need to pass to physical device selection is the distinct types : `VK_QUEUE_GRAPHICS_BIT`,`VK_QUEUE_VIDEO_DECODE_BIT_KHR` and `VK_QUEUE_COMPUTE_BIT`.
 
-This provides us with a first insight: allocate all the surfaces we might use before physical device selection, so that
-we know what queue famillies we expect.
+This provides us with a first insight: allocate all the surfaces we might use before physical device selection, so that we know what queue famillies we expect.
 
-```
-                VkSurface a  \
-                VkSurface b  |         distinct queue family indices
-VkInstance  =>      ...      |---------\
-                    ...      |          |
-                VkSurface n  /          |
-                                        |
-            ---------------- =>  VkPhysicalDevice  =>  VkDevice
-```
+```  
+                VkSurface a  \  
+                VkSurface b  |         distinct queue family indices  
+VkInstance  =>      ...      |---------\  
+                    ...      |          |  
+                VkSurface n  /          |  
+                                        |  
+            ---------------- =>  VkPhysicalDevice  =>  VkDevice  
+```  
 
 Yet there is another problem. What if we want to spawn a new window after logical device creation?
 
-Theoretically, the newly spawned window (with its own `VkSurface`) might require another queue family that wasn't
-present in physical device selection or logical device creation. And this would be catastrophic, as there is no way we
-can dynamically modify physical device nor logical device after their creation. Therefore we would need to reconstruct
+Theoretically, the newly spawned window (with its own `VkSurface`) might require another queue family that wasn't present in physical device selection or logical device creation. And this would be catastrophic, as there is no way we can dynamically modify physical device nor logical device after their creation. Therefore, we would need to reconstruct  
 everything from physical device selection, almost as if you are restarting the whole application.
 
-But how likely would that happen? In most cases, we would expect a dynamically created surface to have queue family
-requirements already satisfied by the surfaces created before physical device selection. Unless, for example, you
-*suddenly, unexpectedly* want to encode/decode video in a space shooter. It is very unlikely that you are not sure what
-you want to do in an application, thus in almost any case, you should be able to determine the queue family indices
-beforehand.
+But how likely would that happen? In most cases, we would expect a dynamically created surface to have queue family requirements already satisfied by the surfaces created before physical device selection. Unless, for example, you *suddenly, unexpectedly* want to encode/decode video in a space shooter. It is very unlikely that you are not sure what  
+you want to do in an application, thus in almost any case, you should be able to determine the queue family indices beforehand.
 
-Given that a dynamically spawned window is almost certain to have the same queue family requirements as previous
-windows, the newly spawned window will not impact existing physical device and logical device. Though it is always
-better to be prepared for the worst. Adding an error handling mechanism to validate the queue families required by the
-new window should suffice, and when there is indeed a new queue family that isn't present, well, we have no choice but
-to recreate everything from physical device.
+Given that a dynamically spawned window is almost certain to have the same queue family requirements as previous windows, the newly spawned window will not affect existing physical device and logical device. Though it is always better to be prepared for the worst. Adding an error handling mechanism to validate the queue families required by the  
+new window should suffice, and when there is indeed a new queue family that isn't present, well, we have no choice but to recreate everything from physical device.
 
-As a generic engine, even if we do not need video encoding/decoding at the moment, we could allocate a surface
-pre-emptively to avoid the hassle when end-user suddenly wants to do so.
+As a generic engine, even if we do not need video encoding/decoding at the moment, we could allocate a surface pre-emptively to avoid the hassle when the end-user suddenly wants to do so.
 
-A final note, it is actually possible to not recreate everything, *if we are able to find another physical device that
-suits the needs*. We could simply run the window on another GPU... But that can cause significant headache afterwards as
-you might want to synchronize between different devices.
+A final note, it is actually possible to not recreate everything, *if we can find another physical device that suits the needs*. We could simply run the window on another GPU... But that can cause significant headache afterwards as you might want to synchronize between different devices.
 
 ### VkSwapchainKHR, VkRenderPass, and VkFrameBuffer
 
 This is perhaps another understated relationship in the tutorial.
 
-`VkSwapchainKHR` is effectively per-window, and in the tutorial, `VkRenderPass` is created with a swapchain's image
-format, and `VkFrameBuffer` requires both a swapchain's image attachments and be bound to **a single render pass**. And
-this would create a strong dependency chain on our first sight, though uppon closer inspection, not necessarily.
+`VkSwapchainKHR` is effectively per-window, and in the tutorial, `VkRenderPass` is created with a swapchain's image format, and `VkFrameBuffer` requires both a swapchain's image attachments and be bound to **a single render pass**. And this would create a strong dependency chain on our first sight, though upon closer inspection, not necessarily.
 
-In the tutorial,`VkRenderPass` only requires an image format, but it doesn't state that the image format should come
-from a swapchain. (Well, actually yes, you *would* use the swapchain's image format, but you don't need to access the
-swapchain during render pass creation. ) Thus insteand of accessing swapchain's member field, using a constructor
-injection would decouple the strong relationship between swapchain and render pass. (Note: constructor injection is just
-a fancy way to say pass the image format as constructor argument)
+In the tutorial, `VkRenderPass` only requires an image format, but it doesn't state that the image format should come from a swapchain. (Well, actually yes, you *would* use the swapchain's image format, but you don't need to access the swapchain during render pass creation.) Thus instead of accessing swapchain's member field, using a constructor  
+Injection would decouple the strong relationship between swapchain and render pass. (Note: constructor injection is just a fancy way to say pass the image format as constructor argument)
 
-This means that multiple swapchains can effectively be using the same render pass, if their image format and other bits
-are compatible.
+This means that multiple swapchains can effectively use the same render pass if their image format and other bits are compatible.
 
-Well, not exactly. since swapchains do not *use* a render pass directly. This relationship comes with `VkFrameBuffer` as
-it uses both a swapchain and a render pass - we must ensure that the swapchain and the render pass are compatible when
-creating frame buffers, or else, we first need to create a compatible render pass. By "compatible", in general it isn't
-just the image format, but also store/load operations, etc.
+Actually, that's not quite right. since swapchains do not *use* a render pass directly. This relationship comes with `VkFrameBuffer` as it uses both a swapchain and a render pass - we ensure that the swapchain and the render pass are compatible when creating frame buffers, or else we first need to create a compatible render pass. By "compatible, " it isn't just the image format, but also store/load operations, etc.
 
-```
-VkSwapchainKHR
-      \1            VkRenderPass
-       \            /1
-        \*         /*
-        VkFrameBuffer 
-```
+```  
+VkSwapchainKHR  
+      \1            VkRenderPass  
+       \            /1  
+        \*         /*  
+        VkFrameBuffer   
+```  
 
-The compatibility requirements seem strict, but consider the following scenario: a scene is being rendered with multiple
-windows, using the same device and likely the same render pipeline. For consistency, there's no reason to fiddle with
-the render pass parameters, thus it is very likely that we can use the same render pass for all these windows.
+The compatibility requirements seem strict, but consider the following scenario: a scene is being rendered with multiple windows, using the same device and likely the same render pipeline. For consistency, there's no reason to fiddle with the render pass parameters, thus, it is likely that we can use the same render pass for all these windows.
 
-*Multi-window rendering reusing the same render pass:*
-  ![image](https://github.com/user-attachments/assets/26518b13-2121-4658-9564-cda472b0c583)
+*Multi-window rendering reusing the same render pass:*  
+![image](https://github.com/user-attachments/assets/26518b13-2121-4658-9564-cda472b0c583)
 
 ### Descriptor Set Layout, Descriptor Pool, Descriptor Set
 
 Descriptor related concepts was rather tricky (for us) to understand.
 
-Like Pipelines, *Descriptor Set Layout* act as the mold for *Descriptor Set*. *Descriptor Pool* is where descriptor sets
-are allocated from.
+Like Pipelines, *Descriptor Set Layout* act as the mold for *Descriptor Set*. *Descriptor Pool* is where descriptor sets are allocated from.
 
-Yet, a descriptor pool isn't tied to a descriptor set layout... different descriptor sets with different layouts can be
-allocated from the same descriptor pool. This is, as if you are baking cakes - you can pick the same ingredients (flour,
-sugar, yeast...) from your cupboard and use them to bake different types of cakes (or breads), *as long as you can find
-the required ingredients in the cupboard*. In this case, your cupboard is the descriptor pool, and the material list of
-your recipe acts as Descriptor Set Layout.
+Yet, a descriptor pool isn't tied to a descriptor set layout... different descriptor sets with different layouts can be allocated from the same descriptor pool. This is, as if you are baking cakes - you can pick the same ingredients (flour, sugar, yeast...) from your cupboard and use them to bake different cakes (or breads), *as long as you can find the required ingredients in the cupboard*. Here, your cupboard is the descriptor pool, and the material list of your recipe acts as the Descriptor Set Layout.
 
-*For example: A shader requires 1 UBO at `layout(set=0,binding=0)`, and 1 combined image sampler
-at `layout(set=0,binding=1)`. The pool used to allocate the descriptor set for this shader can also be used to allocate
-a shader with 1 UBO at `layout(set=0,binding=7)` and 1 combined image sampler at `layout(set=0,binding=13)`, because the
-pool only sees that they both require 1 UBO and 1 combined image sampler.*
+*For example: A shader requires 1 UBO at `layout(set=0,binding=0)`, and 1 combined image sampler at `layout(set=0,binding=1)`. The pool used to allocate the descriptor set for this shader can also allocate a shader with 1 UBO at `layout(set=0,binding=7)` and 1 combined image sampler at `layout(set=0,binding=13)`, because the pool only sees that they both require 1 UBO and 1 combined image sampler.*
 
-Descriptor pools have per-type sizes, and this is supplied with `VkDescriptorPoolSize`. The value of `descriptorCount`
-means *the pool can only allocate up to this amount of **descriptors** of this type*. Practically, it means the maximum
-number of descriptor sets you want to allocate multiplied by the sum of the specific type of descriptors in that set.
+Descriptor pools have per-type sizes, and this is supplied with `VkDescriptorPoolSize`. The value of `descriptorCount` means *the pool can only allocate up to this amount of **descriptors** of this type*. Practically, it means the maximum number of descriptor sets you want to allocate multiplied by the sum of the specific type of descriptors in that set.  
 *e.g. a set with 2 UBO, and you expect 10 instances, then you supply `.descriptorCount = 2*10;`*
 
-Note the difference between **descriptor** and **descriptor sets**: take UBO as example, an UBO is a **descriptor**, and
-corresponds to a **descriptor binding** you declare in shader (`layout(set=0,binding=0)`), and multiple UBOs bound at
-specific positions in a specific set form a **descriptor set** (all `layout` that has `set=0` are part of descriptor set
-0).
+Note the difference between **descriptor** and **descriptor sets**: take UBO as example, an UBO is a **descriptor**, and corresponds to a **descriptor binding** you declare in shader (`layout(set=0,binding=0)`), and multiple UBOs bound at specific positions in a specific set form a **descriptor set** (all `layout` that has `set=0` are part of descriptor set 0).
 
-However, note that not all sets have the same sum per type. Technically, it is possible to allocate a descriptor set
-with 3 UBOs from a pool that was created with `.descriptorCount = 2*10` UBOs, but you would eventually see, for example,
-after allocating 8 sets of 2 UBOs and 1 set of 3 UBOs, the pool will be left with only 1 UBO descriptor, and you can no
-longer allocate either of them. This might not be terrible, but imagine thousands of these pools with "holes", it would
-be a waste of memory.
+However, note that not all sets have the same sum per type. Technically, it is possible to allocate a descriptor set with 3 UBOs from a pool that was created with `.descriptorCount = 2*10` UBOs, but you would eventually see, for example, after allocating 8 sets of 2 UBOs and 1 set of 3 UBOs, the pool will be left with only 1 UBO descriptor, and you can no longer allocate either of them. This might not be terrible, but imagine thousands of these pools with "holes", it would be a waste of memory.
 
 We could therefore determine whether a pool is compatible with a specific descriptor set layout:
 
-- A descriptor pool is **compatible** with descriptor set layout if it contains all **types** of descriptors required by
-  descriptor set layout.
+- A descriptor pool is **compatible** with descriptor set layout if it contains all **types** of descriptors required by descriptor set layout.
 
 And A descriptor pool is **suitable** if:
 
-- For each type of descriptor required by descriptor set layout, the sum of this type of descriptors in the layout is
-  multiple of the pool's corresponding pool size divided by the maximum set count. (Or else causes fragmentation)
-- For each type of descriptor required by descriptor set layout, the sum of this type of descriptors is less or equal to
-  the free descriptor count of the pool. (Or else would be out of memory).
+- For each type of descriptor required by descriptor set layout, the sum of this type of descriptors in the layout is multiple of the pool's corresponding pool size divided by the maximum set count. (Or else, it causes fragmentation).
+- For each type of descriptor required by descriptor set layout, the sum of this type of descriptors is less or equal to the free descriptor count of the pool. (Or else would be out of memory).
 
-The first suitable condition looks complex but we can reformulate it: Consider for type $T$, a pool is created
-with $s*N$ descriptors of this type, where $s$ is the sum of descriptors of this type in a single set, and $N$ the
-maximum number of descriptor sets. A layout with $n*s$ descriptors of type $T$ would guarantee not leaving a hole in the
-pool, where $n$ is an arbitrary natural number.
+The first suitable condition looks complex but we can reformulate it: Consider for type $T$, a pool is created with $s*N$ descriptors of this type, where $s$ is the sum of descriptors of this type in a single set, and $N$ the maximum number of descriptor sets. A layout with $n*s$ descriptors of type $T$ would guarantee not leaving a hole in the pool, where $n$ is an arbitrary natural number.
 
-The second condition could be mitigated by simply allocating a new pool. (Though with the pool allocation overhead)
+The second condition could be mitigated by simply allocating a new pool. (Though it comes with the pool allocation overhead)
 
-There's an extra parameter that appears in `VkDescriptorPoolCreateInfo`, that is `.maxSets`. This is the maximum number
-of descriptor sets that can be allocated from the descriptor pool. As you might have noticed, the pool might be out of
-*descriptors* before reaching the `.maxSets` limit, if we have allocated bigger sets (see the *suitable* condition).
-But, again, out of memory can be mitigated by creating a new pool.
+There's an extra parameter that appears in `VkDescriptorPoolCreateInfo`, that is `.maxSets`. This is the maximum number of descriptor sets that can be allocated from the descriptor pool. As you might have noticed, the pool might be out of *descriptors* before reaching the `.maxSets` limit, if we have allocated bigger sets (see the *suitable* condition). But, again, out of memory can be mitigated by creating a new pool.
 
 To sum up the relationship between descriptor pools and descriptor set layouts:
 
-- When using shader reflection, we construct descriptor pools after we determine the descriptor set layouts. The pool
-  sizes are constructed with the *unique types* and *sum of each types* as well as the expected descriptor set count.
-- It is preferable to reuse the same descriptor pool if a descriptor layout has the same *type-sum* pairs as the layout
-  from which the pool was created from.
-- It is possible to reuse the same descriptor pool for a *compatible* and optionally *suitable* descriptor set layout
-  without strictly matching the *type-sum* pairs. But doing so would likely result in out of memory or pool
-  fragmentation.
-- Though it is tempting to say that a pool is associated with one `VkPipelineLayout`, but recall that a pipeline can
-  have multiple different set layouts, and set layouts from different pipelines can be the same, therefore this
-  simplified statement is true for simple cases, but not true in general.
-- The general rule of determine the relationship between descriptor set layouts and descriptor pools, would be to ask
-  *when can I reuse an existing descriptor set layout?*, following the compatibility and suitability conditions.
+- When using shader reflection, we construct descriptor pools after we determine the descriptor set layouts. The pool sizes are constructed with the *unique types* and *sum of each type and the expected descriptor set count.
+- It is preferable to reuse the same descriptor pool if a descriptor layout has the same *type-sum* pairs as the layout from which the pool was created from.
+- It is possible to reuse the same descriptor pool for a *compatible* and optionally *suitable* descriptor set layout without strictly matching the *type-sum* pairs. But doing so would likely result in out of memory or pool fragmentation.
+- Though it is tempting to say that a pool is associated with one `VkPipelineLayout`, but recall that a pipeline can have multiple different set layouts, and set layouts from different pipelines can be the same, therefore this simplified statement is true for simple cases.
+- The general rule of determine the relationship between descriptor set layouts and descriptor pools, would be to ask *when can I reuse an existing descriptor set layout?*, following the compatibility and suitability conditions.
 
 #### How UE does it
 
 Descriptor pool in UE has this structure:
 
-```c++
-class FVulkanDescriptorPool
-{
-public:
-	FVulkanDescriptorPool(FVulkanDevice* InDevice, const FVulkanDescriptorSetsLayout& Layout, uint32 MaxSetsAllocations);
-	~FVulkanDescriptorPool();
-	// the rest is ignored
-};
-
-```
+```c++  
+class FVulkanDescriptorPool  
+{  
+public:  
+    FVulkanDescriptorPool(FVulkanDevice* InDevice, const FVulkanDescriptorSetsLayout& Layout, uint32 MaxSetsAllocations);  
+    ~FVulkanDescriptorPool();  
+    // the rest is ignored  
+};  
+  
+```  
 
 And `FVulkanDescriptorSetsLayout` has declaration:
 
-```c++
-struct FVulkanDescriptorSetLayoutEntry
-{
-	VkDescriptorSetLayout Handle = 0;
-	uint32 HandleId = 0;
-};
-
-using FVulkanDescriptorSetLayoutMap = TMap<FVulkanDescriptorSetsLayoutInfo::FSetLayout, FVulkanDescriptorSetLayoutEntry>;
-
-class FVulkanDescriptorSetsLayout : public FVulkanDescriptorSetsLayoutInfo
-{
-public:
-	FVulkanDescriptorSetsLayout(FVulkanDevice* InDevice);
-	~FVulkanDescriptorSetsLayout();
-	void Compile(FVulkanDescriptorSetLayoutMap& DSetLayoutMap);
-	// the rest is ignored
-}
-```
+```c++  
+struct FVulkanDescriptorSetLayoutEntry  
+{  
+    VkDescriptorSetLayout Handle = 0;  
+    uint32 HandleId = 0;  
+};  
+  
+using FVulkanDescriptorSetLayoutMap = TMap<FVulkanDescriptorSetsLayoutInfo::FSetLayout, FVulkanDescriptorSetLayoutEntry>;  
+  
+class FVulkanDescriptorSetsLayout : public FVulkanDescriptorSetsLayoutInfo  
+{  
+public:  
+    FVulkanDescriptorSetsLayout(FVulkanDevice* InDevice);  
+    ~FVulkanDescriptorSetsLayout();  
+    void Compile(FVulkanDescriptorSetLayoutMap& DSetLayoutMap);  
+    // the rest is ignored  
+}  
+```  
 
 Finally, `FSetLayout` is
 
-```c++
-struct FSetLayout
-{
-	TArray<VkDescriptorSetLayoutBinding> LayoutBindings;
-	uint32 Hash;
-	// the rest is ignored
-}
-```
+```c++  
+struct FSetLayout  
+{  
+    TArray<VkDescriptorSetLayoutBinding> LayoutBindings;  
+    uint32 Hash;  
+    // the rest is ignored  
+}  
+```  
 
 From these declarations we can see the following procedure:
 
-1. `FSetLayout` is constructed from layout bindings, this info can be retrieved by using shader reflection.
+1. `FSetLayout` is constructed from layout bindings. This info can be retrieved by using shader reflection.
 2. The bindings can be combined (sum per type) to create `VkDescriptorSetLayout`
-3. Multiple layouts (e.g. from different shader stages) can be combined to create `VkDescriptorPool`. The implementation
-   is in `VulkanPendingState.cpp`, and it shows how UE sums descriptors by type and fill the descriptor pool sizes
-   with $setCount * descriptorSumOfType$ per type.
+3. Multiple layouts (e.g. from different shader stages) can be combined to create `VkDescriptorPool`. The implementation is in `VulkanPendingState.cpp`, and it shows how UE sums descriptors by type and fills the descriptor pool sizes with $setCount * descriptorSumOfType$ per type.
 
-### Pipeline Layout, Pipeline, Descriptor Sets
+### Pipeline Layout, Pipeline, Descriptor Sets  (WIP)
 
-Consider this scenario in *Unity*: When we want to create a *Material*, we first right-click on a shader and then click
-Create Material. This will add a Material asset in the project. And then, we could assign textures, change numbers - all in
-the inspector of that material asset. Finally, when the material is dragged on a renderer, it exposes a *Material
+Consider this scenario in *Unity*: When we want to create a *Material*, we first right-click on a shader and then click Create Material. This will add a Material asset in the project. And then, we could assign textures, change numbers - all in the inspector of that material asset. Finally, when the material is dragged on a renderer, it exposes a *Material  
 Property Block* that can be used to further override the properties.
 
-Despite the lack of source code evidence, we could make an analogy between the Unity terms and Vulkan terms, or, how we
-can use Vulkan concepts to mimic this behavior.
+Despite the lack of source code evidence, we could make an analogy between the Unity terms and Vulkan terms, or how we can use Vulkan concepts to mimic this behavior.
 
-- **Shader Asset**: the inspector of the shader asset suggests a serialized version of shader's reflection data (
-  *Descriptor Bindings*). This data would allow us to construct a *Descriptor Set Layout* and a *Pipeline Layout*.
+- **Shader Asset**: the inspector of the shader asset suggests a serialized version of shader's reflection data (*Descriptor Bindings*). This data would allow us to construct a *Descriptor Set Layout* and a *Pipeline Layout*.
 - **Material Asset**: *Pipeline* and shared *descriptor sets*.
 - **Material Property Block**: per-instance *descriptor sets*.
 
-Though, it isn't always true that between *Shader Asset* and *Descriptor Set Layout/Pipeline Layout* is a one-to-one
-relationship. The only thing that can be directly created from shader code is *Shader Modules*.
+Though, it isn't always true that between *Shader Asset* and *Descriptor Set Layout/Pipeline Layout* is a one-to-one relationship. The only thing that can be directly created from shader code is *Shader Modules*.
 
-Different shaders can have the same *Descriptor Set Layout* if they have the same layout declarations (we don't care the
-variable names except for vertex input), and *Pipeline Layout* can be shared if they only differ in the content of the descriptor sets or push constants we
-provide. This means shader code that only differ in execution, can use the same pipeline layout.
+Different shades can have the same *Descriptor Set Layout* if they have the same layout declarations (we don't care the variable names except for vertex input), and *Pipeline Layout* can be shared if they only differ in the descriptor's content sets or push constants we  
+Provide. This means shader code that only differs in execution can use the same pipeline layout.
 
-Now recall that binding pipeline and binding descriptor sets are two distinct function calls: `vkCmdBindPipeline` and
-`vkCmdBindDescriptorSets`. Moreover, descriptor sets are bound to *pipeline layout* rather than pipeline (we bind them
-according to descriptor set layout, and the descriptor set layout is stored in pipeline layout). This further enhances
-that `VkPipeline` should be shared, because you could bind a pipeline, and then issue different pipelines with different
-draw calls
+Now recall that binding pipeline and binding descriptor sets are two distinct function calls: `vkCmdBindPipeline` and `vkCmdBindDescriptorSets`. descriptor sets are bound to *pipeline layout* rather than pipeline (we bind them according to descriptor set layout, and the descriptor set layout is stored in pipeline layout). This further enhances that `VkPipeline` should be shared, because you could bind a pipeline, and then issue different pipelines with different draw calls
 
 ### Render Pass and Associated Resources
 
-The original tutorial has only one render pass with only one subpass. The detailed breakdown of these different components are detailed below in the Render Graph section, here I would only outline the top-level relationships between Render Pass related concepts.
+The original tutorial has only one render pass with only one subpass. The detailed breakdown of these different components is detailed below in the Render Graph section. Here I would only outline the top-level relationships between Render Pass related concepts.
 
-For each window, we have only one swapchain. This means we can only have a single color output that gets rendered to that window (surface, to be exact). Due to frame overlaps, we have multiple swapchain images, and during each render loop, we acquire one from the swapchain. Now, these swapchian-specific VkImage(s) are created differently, by calling `vkGetSwapchainImagesKHR` (see `PresentColorAttachment`). We then need to write to this specific image during render loop to actually show something on the window.
+For each window, we have only one swapchain. This means we can only have a single color output that gets rendered to that window (surface, to be exact). Because of frame overlaps, we have multiple swapchain images, and during each render loop, we acquire one from the swapchain. Now, these swapchian-specific VkImage(s) are created differently, by calling `vkGetSwapchainImagesKHR` (see `PresentColorAttachment`). We then need to write to this specific image during render loop to actually show something on the window.
 
-To use this swapchain image, two things need to be done: 
+To use this swapchain image, two things need to be done:
 
 - Reference it in a frame buffer.
 - Use the frame buffer in a render pass.
 
-The swapchain image is like any other color attachments, except being used to present the result. Frame buffer is per-Render Pass, so it means when we have multiple render passes, we don't necessarily write to a swapchain image, it all depends on the declaration of the frame buffer and whether the image is passed to color attachment during render pass and subpass creation.
+The swapchain image is like any other color attachments, except for being used to present the result. Frame buffer is per-Render Pass, so it means when we have multiple render passes, we don't necessarily write to a swapchain image, it all depends on the declaration of the frame buffer and whether the image is passed to color attachment during render pass and subpass creation.
 
-Well, render pass is created earlier than frame buffers (because we need a render pass reference in frame buffer create info), so logically we create frame buffers based on the declared usages in a render pass. This is one of the essences that we use in render graph. 
+Well, render pass is created earlier than frame buffers (because we need a render pass reference in frame buffer create info), so logically we create frame buffers based on the declared usages in a render pass. This is an important concept that we use in render graph.
 
 As for subpasses, they are inside render pass and use a subset of the frame buffers. The details are in the Render Graph section.
 
-```
-  Window
-    \                                 RenderPass 1------* Subpass
-     \                                    |         
-  Swapchain   ColorAttachments 0*---1 FrameBuffer
-       \1                            /     /
-        \                         01/     /
-         \     DepthStencilAttachment    /
-          \*                            /
-          PresentColorAttachment 01----/
-```
+```  
+  Window  
+    \                                 RenderPass 1------* Subpass  
+     \                                    |           
+  Swapchain   ColorAttachments 0*---1 FrameBuffer  
+       \1                            /     /  
+        \                         01/     /  
+         \     DepthStencilAttachment    /  
+          \*                            /  
+          PresentColorAttachment 01----/  
+```  
 
-It is worth noting that Render Pass does not directly reference an attachment's handle, but only through *Attachment Description* and *Attachment Reference*, which can exist before the attachment is even created. The actual correspondence is done through the frame buffer (or descriptor sets if not managed by render pass).
+Render Pass does not directly reference an attachment's handle, but only through *Attachment Description* and *Attachment Reference*, which can exist before the attachment is even created. The actual correspondence is done through the frame buffer (or descriptor sets if not managed by renderpass).
 
 ### Attachment Referencing
 
 The Render Pass system has a rather complex attachment referencing mechanism, and one little misalignment will result in painful bug hunting (one more reason to prefer render graph to ensure proper referencing).
 
 There are several orders that are important:
- 
-In shader, we have input attachment declared as follows:
-```glsl
-layout (input_attachment_index = 0, set = 1, binding = 0) uniform subpassInput inputPosition;
-```
+
+In shader, we have input attachment declared:
+```glsl  
+layout (input_attachment_index = 0, set = 1, binding = 0) uniform subpassInput inputPosition;  
+```  
 This means we expect an input attachment at 0, and the same `VkImageView` is bound at binding 0 of descriptor set 1. Now, "input attachment at 0" is a vague description. What is this "0" exactly?
 
 Turns out it is *the index of the attachment reference in Subpass description* - not the index of the attachment in frame buffer:
 
-```c++
-VkSubpassDescription Subpass::getSubpassDescription() const {
-    return {
-         // other fields are not shown 
-        .inputAttachmentCount = static_cast<uint32_t>(inputAttachments.size()),
-        .pInputAttachments = inputAttachments.data(), //<- corresponds to index in this vector/array
-    };
-}
-```
+```c++  
+VkSubpassDescription Subpass::getSubpassDescription() const {  
+    return {  
+         // other fields are not shown   
+        .inputAttachmentCount = static_cast<uint32_t>(inputAttachments.size()),  
+        .pInputAttachments = inputAttachments.data(), //<- corresponds to index in this vector/array  
+    };  
+}  
+```  
 
 Even if the attachment reference is `{.attachment = 2}`, if it is the first in the attachment reference array, in shader, `input_attachment_index` should be 0.
 
 Now, the `.attachment` in `VkAttachmentReference` points to the index of the attachment in Frame Buffer ... if configured correctly. It actually points to the `.pAttachments` array index in `VkRenderPassCreateInfo`
 
-```c++
-    VkRenderPassCreateInfo renderPassInfo{};
-    renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
-    renderPassInfo.attachmentCount = static_cast<uint32_t>(descriptions.size());
-    renderPassInfo.pAttachments = descriptions.data();
-    //...
-```
+```c++  
+    VkRenderPassCreateInfo renderPassInfo{};  
+    renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;  
+    renderPassInfo.attachmentCount = static_cast<uint32_t>(descriptions.size());  
+    renderPassInfo.pAttachments = descriptions.data();  
+    //...  
+```  
 
 The order of the `.pAttachments` should be used to create the frame buffer, or else you get a mismatch:
 
-```c++
-    VkFramebufferCreateInfo framebufferInfo{};
-    framebufferInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
-    framebufferInfo.renderPass = renderPass;
-    framebufferInfo.attachmentCount = static_cast<uint32_t>(attachments.size());
-    framebufferInfo.pAttachments = attachments.data(); //<- order should be the same as in render pass
-    //...
-```
+```c++  
+    VkFramebufferCreateInfo framebufferInfo{};  
+    framebufferInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;  
+    framebufferInfo.renderPass = renderPass;  
+    framebufferInfo.attachmentCount = static_cast<uint32_t>(attachments.size());  
+    framebufferInfo.pAttachments = attachments.data(); //<- order should be the same as in render pass  
+    //...  
+```  
 
 Since inputs are connected to some outputs, which means the order of the outputs must also follow the next input. This is again specified in Subpass:
 
-```c++
-VkSubpassDescription Subpass::getSubpassDescription() const {
-    return {
-         // other fields are not shown 
-        .colorAttachmentCount = static_cast<uint32_t>(colorAttachments.size()),
-        .pColorAttachments = colorAttachments.data(),
-    };
-}
-```
+```c++  
+VkSubpassDescription Subpass::getSubpassDescription() const {  
+    return {  
+         // other fields are not shown   
+        .colorAttachmentCount = static_cast<uint32_t>(colorAttachments.size()),  
+        .pColorAttachments = colorAttachments.data(),  
+    };  
+}  
+```  
 
-Finally, the `clearColors` in `VkRenderPassBeginInfo` should also follow the declaration order in `VkRenderPass`, and by extension, the order in frame buffer. If you accidentally give a color texture a depth clear value, then you will see weird things. 
+Finally, the `clearColors` in `VkRenderPassBeginInfo` should also follow the declaration order in `VkRenderPass`, and by extension, the order in frame buffer. If you accidentally give a color texture a depth clear value, then you will see weird things.
 
 ![schema: attachment referencing](https://github.com/user-attachments/assets/3304548c-f0ae-4503-9013-d2e9e4b13253)
 
 
-### Render Graph
+### Render Graph  (WIP)
 
-When Unity first launched Render Graph to replace the old SRP API, it was quite scary to write. I was never so certain
-why would I need to specify the resources I need to access in what way before calling rendering code. Actually, when I
-heard about Render Graph, I thought it was actually a graphical interface like Shader Graph.
+When Unity first launched Render Graph to replace the old SRP API, it was quite scary to write. I was never so certain why would I need to specify the resources I need to access in what way before calling rendering code? Actually, when I heard about Render Graph, I thought it was actually a graphical interface like Shader Graph.
 
-After diving into vulkan and its Render Passes and Subpasses, I began to see the whole picture. What Render Graph does,
-essentially, is automatically resolving dependencies between passes (synchronization) and group sub passes into a render
+After diving into vulkan and its Render Passes and Subpasses, I saw the whole picture. What Render Graph does, essentially, is automatically resolving dependencies between passes (synchronization) and group sub passes into a render  
 pass.
 
-Now, the primary source of this knowledge comes
-from [the famous 2017 post](https://themaister.net/blog/2017/08/15/render-graphs-and-vulkan-a-deep-dive/), informative,
-but also, the code is 3k lines long which is slightly daunting. To facilitate comprehension, I decided to break this
-down into...more bite-size pieces. This might not be entirely correct due to my still-limited knowledge.
+Now, the primary source of this knowledge comes from [the famous 2017 post](https://themaister.net/blog/2017/08/15/render-graphs-and-vulkan-a-deep-dive/), informative,  
+But also, the code is 3k lines long which is slightly daunting. To facilitate comprehension, I decided to break this down into... more bite-size pieces. This might not be entirely correct because of my still-limited knowledge.
 
 #### Reformulation of Goals
 
 So, what should a render graph system achieve?
 
-- A way to specify a *Subpass*, with its *input* and *output* *usages*, its *execution order* and a *render function*
-  telling what the subpass should do. Here, *Subpass* is both a Vulkan lingo and Unity lingo, except for Unity they kept
-  *Scriptable Render Pass* in code due to historic reasons. Also, the *execution order* of a subpass is often less
-  pronounced in articles I have read, as they generally use declaration order. In Unity, however, a serialized property
-  is used (e.g. "Before GBuffer" )
-- Manage resource allocations automatically, with the option to *import* externally allocated resources. To achieve
-  this, the *input* and *output* usages mentioned above should be decoupled from actual resource (means you don't
-  provide raw Vulkan handles as usage information). Instead, they should be a custom data type that contains enough
-  information for us to allocate the required resources later. And *import* would simply mean a process to bind an
-  actual resource to the custom data type and remove it from render graph's auto-management system.
-- Deduct the proper usage of resources, so that when specifying input and output usages, we only need to consider a
-  small subset of the resource's properties, such as size, memory access (read/write), format, etc. An example of
-  deducible property is `StoreOp`, which you could also verify in Unity: If a resource is accessed later in the frame
-  and there's no way to combine it with a pass that writes to the resource, the StoreOp of the resource in the writing
-  pass would become `Store`. And if it isn't used later, StoreOp becomes `Don't Care`. But, obviously, figure out what
-  properties can be deducted is tricky and often requires to think about the relationship between passes.
+- A way to specify a *Subpass*, with its *input* and *output* *usages*, its *execution order* and a *render function* telling what the subpass should do. Here, *Subpass* is both a Vulkan lingo and Unity URP lingo. Also, the *execution order* of a subpass is often less pronounced in articles I have read, as they use declaration order. In Unity, however, a serialized property is used (e.g. "Before GBuffer")
+- Manage resource allocations automatically, with the option to *import* externally allocated resources. To achieve this, the *input* and *output* usages mentioned above should be decoupled from the actual resource (means you don't provide raw Vulkan handles as usage information). Instead, they should be a custom data type that contains enough information for us to allocate the required resources later. And *import* would simply mean a process to bind an actual resource to the custom data type and remove it from render graph's auto-management system.
+- Deduct the proper usage of resources, so that when specifying input and output usages, we only need to consider a small subset of the resource's properties, such as size, memory access (read/write), format, etc. An example of deducible property is `StoreOp`, which you could also verify in Unity: If a resource is accessed later in the frame and there's no way to combine it with a pass that writes to the resource, the StoreOp of the resource in the writing pass would become `Store`. And if it isn't used later, StoreOp becomes `Don't Care`. But, obviously, figure out what properties can be deducted is tricky and often requires thinking about the relationship between passes.
 - Automatically create *Render Passes* by grouping *Subpasses*.
 - Automatically generate *barriers*.
 
 To summarize, these requirements mean:
 
 - Data structure of `RenderGraphNode`, and `RenderGraph`.
-- Data structure of `AttachmentUsageDeclaration`, and a way to use this declaration to allocate resources (similar to
-  RTHandles). Note that the Declaration might not necessarily be the datatype we use directly in allocation, it could be
+- Data structure of `AttachmentUsageDeclaration`, and a way to use this declaration to allocate resources (similar to RTHandles). Note that the Declaration might not necessarily be the datatype we use directly in allocation, it could be  
   converted into an `AttachmentAllocInfo` if that makes more sense.
-- Figure out what can be deducted from subpass relationships. (This would mean `AttachmentUsageDeclaration` will only
-  have the necessary fields while `AttachmentAllocInfo` would have deduced fields).
+- Figure out what can be deducted from subpass relationships. (This would mean `AttachmentUsageDeclaration` will only  have the necessary fields while `AttachmentAllocInfo` would have deduced fields).
 - Find the *Merge Condition* of the subpasses. (Resolve render graph into vulkan render passes)
 - Find *when to add synchronization*.
 
@@ -476,36 +373,35 @@ To summarize, these requirements mean:
 
 ##### Subpass Grouping
 
-The underlying logic in subpass Grouping is obtained from observing the raw Vulkan structs - Render Passes and Subpasses only care about *Frame Buffers*, namely, *Attachment output, Depth Stencil, Resolve, and Input Attachments*. There's a distinction between *Texture* and *Attachment* - they physically mean the same thing (`VkImage`, `VkImageView`), but an *Attachment* is used by `VkFrameBuffer` while *Texture* is more generic. 
+The underlying logic in subpass Grouping is obtained from observing the raw Vulkan structs - Render Passes and Subpasses only care about *Frame Buffers*, namely, *Attachment output, Depth Stencil, Resolve, and Input Attachments*. There's a distinction between *Texture* and *Attachment* - they physically mean the same thing (`VkImage`, `VkImageView`), but an *Attachment* is used by `VkFrameBuffer` while *Texture* is more generic.
 
-This is why in Granite, a distinction is made between *Pass Dependency* and *Pass Merge Dependency*. *Pass Dependency* would account for all types of resources, and *Pass Merge Dependency* is only built from frame buffer resources.
+Therefore in Granite, a distinction is made between *Pass Dependency* and *Pass Merge Dependency*. *Pass Dependency* would account for many resources, and *Pass Merge Dependency* is only built from frame buffer resources.
 
-Narrowing down the candidates isn't enough, because nothing stops us from creating a single render pass with all the textures we need and spam subpasses. 
+Narrowing down the candidates isn't enough, because nothing stops us from creating a single render pass with all the textures we need and spam subpasses.
 
 Render Pass and Subpasses are essentially there for Tile Based Rendering, which is commonly seen on mobile devices. When we designate something as framebuffer attachment, the frame buffers are cut into small tiles and each tile would be rendered separately in a render pass.
 
 The first constraint that can prevent us from doing this is this phrase in the Vulkan Specs (Chapter 8):
 
-    The subpasses in a render pass all render to the same dimensions, and fragments for pixel (x,y,layer) in one subpass can only read attachment contents written by previous subpasses at that same (x,y,layer) location.
-
-It means all attachments that we use in a render pass should have the same dimensions (width, height, layer). Because if we don't then we cannot cut the attachments equally.
+    The subpasses in a render pass all render to the same dimensions, and fragments for pixel (x,y,layer) in one subpass can only read attachment contents written by previous subpasses at that same (x,y,layer) location.  
+It means all attachments that we use in a render pass should have the same dimensions (width, height, layer). Because if we don't, then we cannot cut the attachments equally.
 
 This extends to a second constraint. A texture that is read as input of a subpass is not accessed as what we usually do (by sampling), but with a special syntax both in declaration and reading the data:
 
-```glsl
-layout (input_attachment_index = 0, binding = 0) uniform subpassInput inputPosition;
+```glsl  
+layout (input_attachment_index = 0, binding = 0) uniform subpassInput inputPosition;  
+  
+void main()  
+{  
+    vec3 fragPos = subpassLoad(inputPosition).rgb;  
+}  
+```  
 
-void main()
-{
-    vec3 fragPos = subpassLoad(inputPosition).rgb;
-}
-```
-
-Why can't we simply bind it to a descriptor and sample it as other normal textures? - Since tiles are rendered separately, we do not have guarantee that they all finish rendering at the same moment nor are they able to be sampled. And if we introduce inter-tile synchronization, we might just not have tile based rendering at all. Therefore, *randomly accessing (`texture(texSampler, fragTexCoord)`)* a framebuffer attachment is impossible. The only way to do it is to exit the render pass, convert the attachment into a sampled texture, and use it in a subsequent render pass.
+Why can't we simply bind it to a descriptor and sample it as other normal textures? - Since tiles are rendered separately, we do not have a guarantee that they all finish rendering at the same moment, nor are they able to be sampled. And if we introduce inter-tile synchronization, we might just not have tile based rendering at all. Therefore, *randomly accessing (`texture(texSampler, fragTexCoord)`)* a framebuffer attachment is impossible. The only way to do it is to exit the render pass, convert the attachment into a sampled texture, and use it in a subsequent render pass.
 
 To sum up:
 
-- Only *Attachments* are concerned in subpass grouping.
+- Only *Attachments* are concerned with subpass grouping.
 - All attachments in a Render Pass must have the same dimensions (width, height, layers).
 - No random access to the attachments is allowed.
 
@@ -513,21 +409,19 @@ Note that I avoided the term "Subpass Merging" despite that seems to be an appro
 
 ##### Input-Output Pairing and Submission Order
 
-Granite implementation specifically enforces that each output must have an input (could be a nullptr (placeholder)),
-otherwise an error is thrown. The API looks like this:
+Granite implementation specifically enforces that each output must have an input (could be a nullptr (placeholder)), otherwise an error is thrown. The API looks like this:
 
-```c++
-pass.add_color_output("something-comes-out", info, "something-goes-in");
-```
+```c++  
+pass.add_color_output("something-comes-out", info, "something-goes-in");  
+```  
 
 This would allocate 2 different *logical resources* from the render graph due to the different naming (Granite's render graph relies on resource names to distinguish between unique logical resources, a little "magical" to my taste). But then, when allocating physical resources, resources with this kind of explicit pairing would be mapped to the same physical resource:
 
-```c++
-pass.get_color_outputs()[i]->set_physical_index(input->get_physical_index());
-```
+```c++  
+pass.get_color_outputs()[i]->set_physical_index(input->get_physical_index());  
+```  
 
-At first, I didn't quite understand the intention behind it - we could just assign a Read-Write flag to the resource,
-rather than using some sort of pairing mechanism. Also, the implementation does not prevent naming the input and output as the same thing, which faintly suggest that it is possible to do so - yet after further inspection, it should have been prevented. (Common source of headache in reverse engineering, a slight  implementation detail that could lead to ambiguity might make you question whether that is intended).
+At first, I didn't quite understand the intention behind it - we could just assign a Read-Write flag to the resource, rather than using some sort of pairing mechanism. Also, the implementation does not prevent naming the input and output as the same thing, which faintly suggests that it is possible to do so - yet after further inspection, it should have been prevented. (Common source of headache in reverse engineering, a slight implementation detail that could lead to ambiguity might make you question whether that is intended).
 
 So let me explain this design choice in a way that I can understand it.
 
@@ -536,22 +430,177 @@ The basic assumption behind it is that the render graph is allowed to rearrange 
 - Pass 1: Reads from GBuffer1, Writes to GBuffer1
 - Pass 2: Writes to GBuffer1
 
-If we fully trust the submission order, then we know that GBuffer1 is persistent across frames, Pass 1 would be reading from the result of Pass 2.
+If we fully trust the submission order, then we know that GBuffer1 is persistent across frames, Pass 1 would read from the result of Pass 2.
 
-But if render graph can rearrange passes for optimal results, then we would certainly put Pass 2 before Pass 1, because that would actually make GBuffer1 *transient* and remove the need of LoadOp and StoreOp, similar to how we make GBuffer pass and Deferred Lighting pass as 2 sub-passes of a single render pass. (We assume that render graph is greedy, always tries to rearrange passes for best performance, the real situation may or may not be the case).
+But if render graph can rearrange passes for optimal results, then we would certainly put Pass 2 before Pass 1, because that would actually make GBuffer1 *transient* and remove the need of LoadOp and StoreOp, similar to how we make GBuffer pass and Deferred Lighting pass as 2 sub-passes of a single render pass. (We assume render graph is greedy, always tries to rearrange passes for best performance, the real situation may or may not be the case).
 
-The question is, what if we actually want to maintain the order? What if for some strange reason, we need to make that GBuffer be accessed as the submission order? 
+The question is, what if we actually want to maintain the order? What if, for some strange reason, we need to make that GBuffer be accessed as the submission order?
 
-The pairing mechanism effectively allow us to clarify our intention by reasoning with logical resources:
+The pairing mechanism effectively allows us to clarify our intention by reasoning with logical resources:
 
 - Pass 1: Reads from GBuffer1, Writes to TextureA
 - Pass 2: Writes to TextureA
 
 This may seem strange, as both passes are trying to write to TextureA, and is unclear which one should be executed first. However, a greedy render graph now has no reason to put Pass 2 before Pass 1.
 
-Now, my impression of this design is that it doesn't reduce the burden of the programmer, as if I could submit passes in arbitrary order and the render graph magically rearrange it to make it optimal. The programmer still needs to know an optimal submission order or else they would fail to come up with a meaningful name for the input and outputs. What's more, the added layer of render graph being able to reorder the passes makes it inherently more difficult to debug, as programmers can no longer trust their submission order and must draw the graph using the input and output names, and understand how the reordering works under the hood.
+Now, my impression of this design is that it doesn't reduce the burden of the programmer, as if I could submit passes in arbitrary order and the render graph magically rearranges it to make it optimal. The programmer still needs to know an optimal submission order or else they would fail to come up with a meaningful name for the input and outputs. Also, the added layer of render graph being able to reorder the passes makes it inherently more difficult to debug, as programmers can no longer trust their submission order and must draw the graph using the input and output names, and understand how the reordering works under the hood.
 
-What I would instead, is that render graph strictly follows the submission order, no pass can go before another pass submitted before that pass. This makes the render graph more predictable and easier to debug. We could still keep the rearrangement design, but that would become a "diagnostic module", outputting suggestions (print to the console) rather than actually applying it. A programmer must enable the diagnostic module and change the submission order manually if they were to accept the suggestions. 
+What I would instead, is that render graph strictly follows the submission order, no pass can go before another pass submitted before that pass? This makes the render graph more predictable and easier to debug. We could still keep the rearrangement design, but that would become a "diagnostic module", outputting suggestions (print to the console) rather than actually applying it. A programmer must enable the diagnostic module and change the submission order manually if they were to accept the suggestions.
 
-An added benefit of sticking strictly to submission order is that we can now force a pass to be executed even if they do not contribute to the swapchain image, and the render graph doesn't need to worry where to put that pass. This is useful for cases where, Camera 1 writes to an external texture in Pass A, and that texture is used by a material that is rendered by a UI camera later (Normally, Pass A would be pruned since it does not contribute to Camera 1's frame buffer). 
-After diving into vulkan and its Render Passes and Subpasses, I began to see the whole picture. What Render Graph does, essentially, is automatically resolving dependencies between passes (synchronization) and group sub passes into a render pass.
+An added benefit of sticking strictly to the submission order is that we can now force a pass to be executed even if they do not contribute to the swapchain image, and the render graph doesn't need to worry where to put that pass. This is useful for cases where, Camera 1 writes to an external texture in Pass A, and that texture is used by a material that is rendered by a UI camera later (Normally, Pass A would be pruned since it does not contribute to Camera 1's frame buffer).
+
+#### Overview of Unreal's Render Dependency Graph (RDG)
+
+Unreal's implementation of Render Graph, or RDG, is nothing like other implementations that I have seen.
+
+In this section, I will portrait a bird's-eye view of the RDG. It is only useful if you plan on making a render graph system.
+
+##### Access Declarations
+
+Unreal has a concept of **Shader Parameter Struct**, a struct that holds all the resources used in a shader, or an RDG pass. Typically, creating an RDG pass in Unreal follows these steps:
+
+- Define a shader parameter struct
+- Allocate the struct with `GraphBuilder.AllocParameters`.
+- Assign the struct members with resource handles created from the graph builder.
+- Call `GraphBuilder.AddPass`, passing the filled struct, to add a pass to the RDG.
+
+The declaration of usage is in the first step: declaring the struct, rather than calling a method later after pass creation (Unity's approach).
+
+Observe this example code from Unreal's documentations:
+
+```c++
+class FMyComputeShader: public FGlobalShader
+{
+	public:
+		DECLARE_GLOBAL_SHADER(FMyComputeShader);
+		SHADER_USE_PARAMETER_STRUCT(FMyComputeShader, FGlobalShader);
+ 
+		BEGIN_SHADER_PARAMETER_STRUCT(FParameters, )
+ 
+			// Declares read access to an FRDGTexture* which maps to 'MyTexture' in HLSL code.
+			SHADER_PARAMETER_RDG_TEXTURE(Texture2D, MyTexture)
+ 
+			// Declares read access to an FRDGTextureSRV* which maps to 'MySRV' in HLSL code.
+			SHADER_PARAMETER_RDG_TEXTURE_SRV(Texture2D, MySRV)
+ 
+			// Declares write access to an FRDGTextureUAV* which maps to 'MyUAV' in HLSL code.
+			SHADER_PARAMETER_RDG_TEXTURE_UAV(RWTexture2D, MyUAV)
+ 
+			// A float shader parameter, which maps to 'MyFloat' in HLSL code. Ignored by RDG.
+			SHADER_PARAMETER(float, MyFloat)
+ 
+		END_SHADER_PARAMETER_STRUCT()
+};
+```
+
+The access semantics are very similar to how they are declared in hlsl. A read-only texture is declared simply as `Texture2D`, and a read-write texture is declared as `RWTexture2D`. (Write-only doesn't exist, and can usually be substituted with read-write).
+
+However, Unreal also provides a slightly different, more verbose syntax when no shader is associated with a shader parameter struct:
+
+```c++
+BEGIN_SHADER_PARAMETER_STRUCT(FCopyTextureParameters, )
+ 
+	// Declares CopySrc access to an FRDGTexture*
+	RDG_TEXTURE_ACCESS(Input,  ERHIAccess::CopySrc)
+ 
+	// Declares CopyDest access to an FRDGTexture*
+	RDG_TEXTURE_ACCESS(Output, ERHIAccess::CopyDest)
+ 
+END_SHADER_PARAMETER_STRUCT()
+```
+
+The `RHIAccess` enum resembles `VkImageUsageFlags`. The macro expansion is the same, because all the above declarations use `INTERNAL_SHADER_PARAMETER_EXPLICIT` macro under the hood.
+
+In `FRDGBuilder::SetupPassResources`, we can see an `EnumerateTextureAccess` call on pass parameters which prove our previous assumptions. As for how the enumeration is done is outside of our scope, just assume that Unreal used macro magic to generate static reflection data to play with.
+
+```c++
+// the lambda receives reflection data of PassParameters
+EnumerateTextureAccess(PassParameters, PassFlags, [&](FRDGViewRef TextureView, FRDGTextureRef Texture, ERHIAccess Access, ERDGTextureAccessFlags AccessFlags, FRDGTextureSubresourceRange Range)  
+{
+ //...
+}
+```
+
+The technical choice behind this implementation is, as stated in the documentation:
+
+	The coupling of pass parameters with shader parameters is intentional. The majority of pass parameters across the Unreal Engine are also shader parameters. Declaring them both using the same API reduces boilerplate.
+
+And this can be seen in the shader binding process (or more precisely in Vulkan lingo, descriptor updates and bindings):
+
+```c++
+TShaderMapRef<FMyShaderCS> ComputeShader(View.ShaderMap);
+RHICmdList.SetComputeShader(ComputeShader.GetComputeShader());
+ 
+FMyShaderCS::FParameters ShaderParameters;
+ 
+// Assign the parameters.
+ShaderParameters.ViewportSize = View.ViewRect.Size();
+ShaderParameters.World = 1.0f;
+ShaderParameters.FooBarArray[4] = FVector(1.0f, 0.5f, 0.5f);
+ 
+// Submit the parameters.
+SetShaderParameters(RHICmdList, ComputeShader, ComputeShader.GetComputeShader(), Parameters);
+ 
+RHICmdList.DispatchComputeShader(GroupCount.X, GroupCount.Y, GroupCount.Z);
+
+```
+
+We can see that we directly assign resources to the parameter struct, and then bind the whole struct to the shader (or pipeline) with a single call. This defers from Unity's approach of needing to call `material.SetTexture("_FieldName", resource)` for each field you want to assign. This "batched" behavior is a clear indicator of batched binding call. Remember that binding calls are actually expensive, and batching would improve performance.
+
+##### Resource Allocation
+
+In render graphs, we usually have 2 different types of allocations:
+
+- **Transient**: The resource is allocated by the render graph system, and access is only guaranteed inside a pass that declares usages on it. In RDG this is called a *Pooled Resource*.
+- **External** or **Imported**: These are not managed by the render graph system, and you are responsible for allocating them your self. RDG also supports *Extracting* a resource that was allocated by the render graph to be used outside of the render graph.
+
+In RDG, all these resources are eventually represented by `FRDGResource` or one of its derived types. And this is a how we create one from the graph builder:
+
+```c++
+// allocate pass parameters
+FMyShaderCS::FParameters* PassParameters = GraphBuilder.AllocParameters<FMyShaderCS::FParameters>();
+// create an UAV and assign it to the parameters
+// NewSceneColor is an FRDGTextureUAVDesc (like create info in Vulkan)
+PassParameters->SceneColorOutput = GraphBuilder.CreateUAV(NewSceneColor);
+```
+
+Here, "create" differs from "allocate" - what is being created is just an empty shell, the actual texture is only allocated and filled in this empty shell during the **Compile** phase of the render graph.
+
+A quick revision of Unreal's abstraction on rendering resources, with the added complexity of RDG:
+
+- **RDG resources**: The highest level in the hierarchy. It may not always hold a physical resource, but they hold enough information to allocate one if needed.
+- **RHI resources**: An abstraction over the raw, API-specific resource handles. An RDG resource secr0etly stores an RHI resource handle.
+- **API-specific resources**: Derived from `FRHIResource` and hold the actual resource handles.
+
+In fact, RDG resource's type hierarchy mimics closely that of the RHI resource. You would usually find pairs by substituting RDG and RHI in type names. For instance: `FRDGTexture` and `FRHITexture`.
+
+###### External Resources
+
+Graph Builder provides `RegisterExternalTexture` methods to register an external texture. The same methods are available for buffers as well. But curiously, you cannot directly provide an RHI handle - the methods expect `TRefCountPtr<IPooledRenderTarget>`. This is commonly obtained from extracting a resource from the render graph. You could, however, convert an RHI handle to make it RDG compatible, by calling `CreateRenderTarget`:
+
+```c++
+InstanceData->TransientRDGTexture = Context.GetGraphBuilder().RegisterExternalTexture(CreateRenderTarget(ResolvedTextureRHI, TEXT("NiagaraTexture2DArray")));
+```
+
+The Graph Builder ensures that external resource is imported only once. Multiple imports will always result in getting the same RDG handle.
+
+Since we already have the physical resource here, the graph builder will directly link the RDG handle with the RHI handle (`SetPooledRenderTargetRHI` and similar).
+
+###### Pooled Resources
+
+"Pooled Resources" are simply created by calling `CreateTexture` or some other appropriate methods, passing an appropriate descriptor struct (similar to Create Info structs in Vulkan). The resource is not yet allocated, only a "shell", as I explained before.
+
+The actual process is tedious and I will only go through the basics here.
+
+In `RenderGraphBuilder::Execute()`, before scheduling pooled resource allocations, there is a collection step that determines what should be allocated. The collection step essentially transforms the access information stored in each pass into `FCollectResourceOp`. The struct references the originated pass as well as the resource index.
+
+After collection, the allocation task is scheduled as follows:
+
+```c++
+AllocatePooledTexturesTask = AddCommandListSetupTask([this, PooledTextures = MoveTemp(CollectResourceContext.PooledTextures)] (FRHICommandListBase& RHICmdListTask)  
+{  
+    AllocatePooledTextures(RHICmdListTask, PooledTextures);  
+  
+}, TaskPriority);
+```
+
