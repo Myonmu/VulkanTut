@@ -4,6 +4,12 @@ Unreal's implementation of Render Graph, or RDG, is nothing like other implement
 
 In this section, I will portrait a bird's-eye view of the RDG. It is only useful if you plan on making a render graph system.
 
+Before I dive deeper into the code, Unreal was originally coded for D3D, and that means a lot of the concepts are higher-level abstractions and do not really exist as a single concept in Vulkan. Here are some terms that I came across:
+
+- UAV (Unordered Access View): It is a resource that allows random read/write. This essentially translates to storage textures/buffers with appropriate access flags and layouts.
+- RTV (Render Target View): A texture view that serves as render target. It is read-write.
+- SRV (Shader Resource View): Textures and buffers that are bound to a shader, read-only. 
+
 ## Access Declarations
 
 Unreal has a concept of **Shader Parameter Struct**, a struct that holds all the resources used in a shader, or an RDG pass. Typically, creating an RDG pass in Unreal follows these steps:
@@ -140,11 +146,11 @@ Since we already have the physical resource here, the graph builder will directl
 
 "Pooled Resources" are simply created by calling `CreateTexture` or some other appropriate methods, passing an appropriate descriptor struct (similar to Create Info structs in Vulkan). The resource is not yet allocated, only a "shell", as I explained before.
 
+Each resource store a `FirstPass` and a `LastPass` reference, these represent the first pass in render graph where the resource is used, and the last. This information is **filled during the allocation collection steps**. The resource's scope, if not external, is clamped between these two passes. This information will come in handy when deciding resource aliasing (using the same physical resource for two different logical resources, when those two logical resource's scopes do not overlap).
+
 The actual process is tedious and I will only go through the basics here.
 
-RDG calls `CollectAllocations` on each unculled pass, and
-
-Each resource store a `FirstPass` and a `LastPass` reference, these represent the first pass in render graph where the resource is used, and the last. This information is **filled during the allocation collection steps**. The resource's scope, if not external, is clamped between these two passes. This information will come in handy when deciding resource aliasing (using the same physical resource for two different logical resources, when those two logical resource's scopes do not overlap).
+RDG calls `CollectAllocations` on each unculled pass, and this will runthrough all the resource states stored in the pass, generating allocation operations.
 
 In `RenderGraphBuilder::Execute()`, before scheduling pooled resource allocations, there is a collection step that determines what should be allocated. The collection step essentially transforms the access information stored in each pass into `FCollectResourceOp`. The struct references the originated pass as well as the resource index.
 
@@ -157,6 +163,34 @@ AllocatePooledTexturesTask = AddCommandListSetupTask([this, PooledTextures = Mov
   
 }, TaskPriority);
 ```
+
+## Graph Compilation
+
+Several things happen during the compilation phase. I will skip the less interesting steps and go straight to the juicy parts.
+
+### Pass Dependency Setup
+
+This step bookkeeps for each pass, what are their producers. When we talk about producers of a *pass*, it is essentially by looking at *who produce the resources that I use in this pass*. The producer info is directly stored in the pass (`FRDGPass`):
+
+```c++
+/** Handle of the latest cross-pipeline producer. */
+FRDGPassHandle CrossPipelineProducer;
+
+//... skip some lines
+
+/** Lists of producer passes and the full list of cross-pipeline consumer passes. */
+TArray<FRDGPassHandle, FRDGArrayAllocator> CrossPipelineConsumers;
+TArray<FRDGPass*, FRDGArrayAllocator> Producers;
+```
+
+Unreal adds extra bookkeeping for cross pipeline producers. By cross pipeline, it means from a separate queue (Graphics vs Async Compute).The `Producers` array is unordered, but `CrossPipelineConsumers` is strictly ordered by submission order (or pass id), keeps track of all the consumers from the other queue. `CrossPipelineProducer` is the producer from another queue with the largest pass id (hence latest).
+
+In `FRDGBuilder::AddPassDependency` which takes a *producer pass* and a *consumer pass*, we can see this bookkeeping in action:
+
+- if *producer* and *consumer* are not in the same pipeline (queue), then the *consumer* is added to the `CrossPipelineConsumers` array. The *producer* becomes *consumer*'s `CrossePipelineProducer` if the *producer* is later than the existing cross pipeline producer. 
+- Add the *producer* to the `Producers` array of the *consumer*.
+
+Now the interesting part is that the producer keeps an array of consumers, rather than the earliest. In theory, we only need to sync with the earliest consumer. But this step happens before *Pass Culling*, which means if we simply keep the earliest consumer, it might have been culled and we won't be able to find the next consumer and then we can't properly sync between queues. For the consumer, since it depends on the producer, when the consumer isn't culled, then the producer must be also persist, hence we do not need to keep an array like the producer does. 
 
 ## The Graph
 
