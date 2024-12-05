@@ -48,7 +48,7 @@ Here, we discuss some less obvious concepts encountered during the learning proc
 1.  [Vulkan Initialization and Surfaces](documentations/articles/Vulkan-Surfaces-and-Init.md)
 2.  [Descriptor Set Layout, Descriptor Pool, Descriptor Set](documentations/articles/Descriptor-Management.md)
 3.  [Pipeline Layout, Pipeline, Descriptor Sets  (WIP)](documentations/articles/Pipeline-Management.md)
-4.  [Render Pass and Associated Resources](documentations/articles/RenderPass-Resource-Management)
+4.  [Render Pass and Associated Resources](documentations/articles/RenderPass-Resource-Management.md)
 5.  [Attachment Referencing](documentations/articles/Attachment-Referencing.md)
 6.  [Render Graph Overview (WIP)](documentations/articles/Granite-Render-Graph.md)
 7.  [Unreal Engine's Render Dependency Graph (WIP)](documentations/articles/UnrealEngine-RDG.md)

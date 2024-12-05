@@ -69,6 +69,7 @@ EnumerateTextureAccess(PassParameters, PassFlags, [&](FRDGViewRef TextureView, F
  //...
 }
 ```
+This will store the state of the resource in the member array field of the pass `TArray<FTextureState, FRDGArrayAllocator> TextureStates`, and is used later during RDG compilation.
 
 The technical choice behind this implementation is, as stated in the documentation:
 
@@ -118,7 +119,7 @@ Here, "create" differs from "allocate" - what is being created is just an empty 
 A quick revision of Unreal's abstraction on rendering resources, with the added complexity of RDG:
 
 - **RDG resources**: The highest level in the hierarchy. It may not always hold a physical resource, but they hold enough information to allocate one if needed.
-- **RHI resources**: An abstraction over the raw, API-specific resource handles. An RDG resource secr0etly stores an RHI resource handle.
+- **RHI resources**: An abstraction over the raw, API-specific resource handles. An RDG resource secretly stores an RHI resource handle.
 - **API-specific resources**: Derived from `FRHIResource` and hold the actual resource handles.
 
 In fact, RDG resource's type hierarchy mimics closely that of the RHI resource. You would usually find pairs by substituting RDG and RHI in type names. For instance: `FRDGTexture` and `FRHITexture`.
