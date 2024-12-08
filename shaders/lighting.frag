@@ -1,8 +1,9 @@
 #version 450
 
-#extension GL_GOOGLE_include_directive : require
+#extension GL_GOOGLE_include_directive: require
 #include "input.glsl"
 #include "normal_mapping.glsl"
+#include "pbr.glsl"
 
 layout (input_attachment_index = 0, set = 1, binding = 0) uniform subpassInput inputPosition;
 layout (input_attachment_index = 1, set = 1, binding = 1) uniform subpassInput inputNormal;
@@ -19,23 +20,42 @@ void main()
     vec4 normalTex = subpassLoad(inputNormal);
     vec4 albedoTex = subpassLoad(inputAlbedo);
 
+    float linearDepth = fragPosTex.a;
     vec3 albedo = albedoTex.rgb;
     float roughness = albedoTex.a;
     vec3 normal = unpackNormal(normalTex.rgb);
-    vec3 pos = fragPosTex.rgb;
+    float metallic = normalTex.a;
+    vec3 pos = fragPosTex.rgb; // todo: this can be reconstructed from hclip (will free up 3 channels in gbuffer1)
 
-    #define ambient 0.1f
+    // shading convention: vectors pointing from shading point outwards
+    vec3 view = normalize(sceneUbo.camPos.rgb - pos);
+    vec3 light = normalize(-mainLight.direction.rgb);
+    vec3 halfway = calcHalfwayVector(view, light);
 
-    // Ambient part
-    vec3 fragcolor  = albedo.rgb * ambient;
+    float NdotL = dot(normal, light);
+    float NdotV = dot(normal, view);
+    float NdotH = dot(normal, halfway);
+    float VdotH = dot(view, halfway);
+    float ndf_ggx = NDF_TrowbridgeReitz(NdotH, roughness);
+    float gsf_ggx = GSF_SchlickGGX(NdotL, NdotV, roughness);
+    vec3 ff_schlick = FF_Schlick(VdotH, albedo, metallic);
 
-    vec3 L = mainLight.direction.rgb;
+    vec3 specular = BRDF_Specular(NdotL, NdotV, ndf_ggx, ff_schlick, gsf_ggx);
 
-    vec3 N = normalize(normal);
-    float NdotL = max(0.0, dot(N, L));
-    vec3 diff = mainLight.color.rgb * albedo.rgb * NdotL * 1;
+    vec3 diffuseColor = Diffuse_Lambert(albedo);
 
-    fragcolor += diff;
+    #define ambient 0.03f
+
+    vec3 kS = ff_schlick;
+    vec3 kD = vec3(1.0) - kS;
+    kD *= 1.0 - metallic;
+    vec3 fragcolor = albedo.rgb * ambient +
+    (kD * diffuseColor + specular) * mainLight.color.rgb * mainLight.color.a * POSITIVE(NdotL);
+
+    // gamma correction
+
+    // fragcolor /= (fragcolor + vec3(1.0));
+    // fragcolor = pow(fragcolor, vec3(1.0/2.2));
 
     outColor = vec4(fragcolor, 1.0);
 }

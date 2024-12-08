@@ -9,7 +9,7 @@
 
 struct Flycam {
     float pitch = 0, yaw = 0;
-    float mouseSensitivity = 1 / 200.f;
+    float mouseSensitivity = 1 / 250.f;
 };
 
 class FlycamSystem : public EcsSystem {

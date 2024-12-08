@@ -1,6 +1,6 @@
 #version 450
 
-#extension GL_GOOGLE_include_directive : require
+#extension GL_GOOGLE_include_directive: require
 #include "input.glsl"
 #include "normal_mapping.glsl"
 
@@ -16,9 +16,14 @@ layout (location = 1) out vec4 outPosition;
 layout (location = 2) out vec4 outNormal;
 layout (location = 3) out vec4 outAlbedo;
 
-layout(set = 1, binding = 0) uniform sampler2D baseColorSampler;
-layout(set = 1, binding = 1) uniform sampler2D normalSampler;
-layout(set = 1, binding = 2) uniform sampler2D roughnessSampler;
+layout (set = 1, binding = 0) uniform sampler2D baseColorSampler;
+layout (set = 1, binding = 1) uniform sampler2D normalSampler;
+layout (set = 1, binding = 2) uniform sampler2D roughnessSampler;
+layout (set = 1, binding = 3) uniform PerMaterialUbo {
+    /** r = metallic
+    */
+    vec4 pbrProps;
+} perMaterialUbo;
 
 float linearDepth(float depth)
 {
@@ -46,7 +51,7 @@ void main()
 
     // gl -> vulkan
     worldSpaceNormal.y = -worldSpaceNormal.y;
-    outNormal = vec4(packNormal(worldSpaceNormal), 1.0);
+    outNormal = vec4(packNormal(worldSpaceNormal), clamp(perMaterialUbo.pbrProps.r, 0.0, 1));
 
     // alpha = roughness
     outAlbedo = vec4(texture(baseColorSampler, inTexCoord).rgb, texture(roughnessSampler, inTexCoord).r);

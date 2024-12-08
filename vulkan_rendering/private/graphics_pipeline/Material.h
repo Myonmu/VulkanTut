@@ -78,7 +78,7 @@ class MaterialInstance : public ObjectNode {
     Material &srcMaterial;
     DeviceContext &ctx;
     DescriptorWriter descriptorWriter{};
-
+    cascade_map<uint32_t, uint32_t, std::unique_ptr<Buffer>> perInstanceBuffers;
 public:
     std::map<uint32_t, std::unique_ptr<DescriptorSet> > descriptorSets;
 
@@ -90,6 +90,8 @@ public:
 
 
     void updateDescriptorSet(uint32_t setId);
+
+    void setUbo(uint32_t set, uint32_t binding, size_t size,  size_t offset, void* data);
 
     void setCombinedImageSampler(uint32_t binding, const UnifiedTexture2D &unifiedT2d, const TextureSampler &sampler);
 

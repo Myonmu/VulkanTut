@@ -18,6 +18,8 @@ struct CameraUboData {
     glm::mat4 projection;
     // .x near plane, .y far plane, .z aspect, .w fov
     glm::vec4 camProps;
+    glm::vec4 camPos;
+    glm::vec4 viewDir;
 };
 
 //TODO: Support ortho camera
@@ -32,10 +34,11 @@ public:
     explicit Camera(SwapChain* swapChain): output(swapChain) {}
     ~Camera()= default;
     [[nodiscard]] static glm::mat4x4 getViewMatrix(const Position &position, const Rotation &rotation) ;
+    static glm::vec3 getWorldSpaceViewDirection(const Position &position, const Rotation &rotation);
 
     [[nodiscard]] glm::mat4x4 getProjectionMatrix();
 
     glm::vec4 getCameraPropertyVector() const {
-        return glm::vec4(nearPlane, farPlane, aspectRatio, fov);
+        return {nearPlane, farPlane, aspectRatio, fov};
     }
 };

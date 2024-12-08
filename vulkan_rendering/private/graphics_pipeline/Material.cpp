@@ -65,6 +65,20 @@ void MaterialInstance::updateDescriptorSet(uint32_t setId) {
     descriptorWriter.updateSet(ctx.getLogicalDevice(), getDescriptorSet(setId));
 }
 
+void MaterialInstance::setUbo(uint32_t set, uint32_t binding, size_t size, size_t offset, void* data) {
+    if (!perInstanceBuffers.contains(binding) || !perInstanceBuffers[set].contains(binding)) {
+        BufferInfo bufferInfo{};
+        bufferInfo.size = size;
+        bufferInfo.usageFlags = VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT;
+        bufferInfo.isStagingBuffer(false);
+        perInstanceBuffers[set][binding] = std::make_unique<Buffer>(ctx, bufferInfo);
+    }
+    auto& buffer = *perInstanceBuffers[set][binding];
+    buffer.copyToBufferMemory(data, offset, size);
+    descriptorWriter.writeBuffer(binding, buffer, size, offset, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER);
+
+}
+
 void MaterialInstance::setCombinedImageSampler(uint32_t binding, const UnifiedTexture2D &unifiedT2d,
     const TextureSampler& sampler) {
     setCombinedImageSampler(binding, unifiedT2d.get_textureImage(), sampler, unifiedT2d.get_imageView() );
