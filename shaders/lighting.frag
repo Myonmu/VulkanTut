@@ -4,6 +4,7 @@
 #include "input.glsl"
 #include "normal_mapping.glsl"
 #include "pbr.glsl"
+#include "color.glsl"
 
 layout (input_attachment_index = 0, set = 1, binding = 0) uniform subpassInput inputPosition;
 layout (input_attachment_index = 1, set = 1, binding = 1) uniform subpassInput inputNormal;
@@ -22,7 +23,7 @@ void main()
 
     float linearDepth = fragPosTex.a;
     vec3 albedo = albedoTex.rgb;
-    float roughness = albedoTex.a;
+    float roughness = albedoTex.a * albedoTex.a;
     vec3 normal = unpackNormal(normalTex.rgb);
     float metallic = normalTex.a;
     vec3 pos = fragPosTex.rgb; // todo: this can be reconstructed from hclip (will free up 3 channels in gbuffer1)
@@ -38,7 +39,7 @@ void main()
     float VdotH = dot(view, halfway);
     float ndf_ggx = NDF_TrowbridgeReitz(NdotH, roughness);
     float gsf_ggx = GSF_SchlickGGX(NdotL, NdotV, roughness);
-    vec3 ff_schlick = FF_Schlick(VdotH, albedo, metallic);
+    vec3 ff_schlick = FF_Schlick(VdotH, mainLight.color.rgb, metallic);
 
     vec3 specular = BRDF_Specular(NdotL, NdotV, ndf_ggx, ff_schlick, gsf_ggx);
 
@@ -52,10 +53,6 @@ void main()
     vec3 fragcolor = albedo.rgb * ambient +
     (kD * diffuseColor + specular) * mainLight.color.rgb * mainLight.color.a * POSITIVE(NdotL);
 
-    // gamma correction
-
-    // fragcolor /= (fragcolor + vec3(1.0));
-    // fragcolor = pow(fragcolor, vec3(1.0/2.2));
-
-    outColor = vec4(fragcolor, 1.0);
+    //fragcolor = linearTosRGB(fragcolor);
+    outColor = vec4(clamp(fragcolor, 0.0, 1.0), 1.0);
 }

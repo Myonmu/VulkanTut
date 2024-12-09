@@ -55,6 +55,10 @@ TexturePxDimensions AttachmentInfo::resolveDimensions(const TexturePxDimensions 
 // vvvvvvvvvvvvvvvvvvvvvvvvvvvv Color Attachment
 
 void ColorAttachment::create() {
+
+    auto swapchainDims = ctx.get_swapChain().getSwapChainPxDimensions();
+    info.resolveDimensions(swapchainDims);
+
     image = std::make_unique<TextureImage>(
         ctx.context, info, StagingBufferMode::NO_STAGING_BUFFER
     );
@@ -73,12 +77,14 @@ ColorAttachment::ColorAttachment(const WindowContext &ctx)
                      4, ctx.get_swapChain().swapChainImageFormat,
                      VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT) {
     info.setSampleCount(1).isGpuOnly().isInputAttachment().isTransientAttachment(); //TODO: not always
+    info.relativeDimensions.emplace(AttachmentSizeMode::SWAPCHAIN_RELATIVE, 1, 1, 1, nullptr);
     create();
 }
 
 void ColorAttachment::recreate() {
     image.reset();
     imageView.reset();
+    info.requireNewDimensionResolve();
     create();
 }
 
@@ -179,6 +185,7 @@ DepthAttachment::DepthAttachment(const WindowContext &ctx)
                VK_FORMAT_D24_UNORM_S8_UINT
            }),
            VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT) {
+    info.relativeDimensions.emplace(AttachmentSizeMode::SWAPCHAIN_RELATIVE, 1, 1, 1, nullptr);
     create();
 }
 
@@ -189,7 +196,8 @@ DepthAttachment::DepthAttachment(const WindowContext &ctx, AttachmentInfo &info)
 }
 
 void DepthAttachment::create() {
-    auto [width, height] = ctx.get_swapChain().swapChainExtent;
+    auto swapchainDims = ctx.get_swapChain().getSwapChainPxDimensions();
+    info.resolveDimensions(swapchainDims);
     TextureImageInfo info = this->info;
     info.isGpuOnly();
     depthImage = std::make_unique<TextureImage>(ctx.context, info);
@@ -221,6 +229,7 @@ VkFormat DepthAttachment::get_format() const {
 void DepthAttachment::recreate() {
     depthImageView.reset();
     depthImage.reset();
+    info.requireNewDimensionResolve();
     create();
 }
 

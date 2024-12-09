@@ -114,6 +114,7 @@ float NDF_GGX(float NdotH, float roughness){
 }
 
 float NDF_TrowbridgeReitz(float NdotH, float roughness){
+    NdotH = clamp(NdotH, 0.0, 1.0);
     float roughnessSqr = SQR(roughness);
     float dist = NdotH * (NdotH * roughnessSqr - NdotH) + 1.0;
     return roughnessSqr / (PI * SQR(dist));
@@ -141,7 +142,7 @@ float anisotropy, float roughness, vec2 axialMultiplier){
 //=========================== Geometric Shadowing Functions (GSF) ===============================
 
 float GSF_Implicit(float NdotL, float NdotV){
-    return NdotL * NdotV;
+    return POSITIVE(NdotL) * POSITIVE(NdotV);
     //return 0.25; // constant in UE
 }
 
@@ -222,7 +223,7 @@ float GSF_Schlick(float NdotL, float NdotV, float roughness){
     float roughnessSqr = SQR(roughness);
     float sl = NdotL/(NdotL * (1.0 - roughnessSqr) + roughnessSqr);
     float sv = NdotV/(NdotV * (1.0 - roughnessSqr) + roughnessSqr);
-    return clamp(sl*sv, 0.0, 1.0);
+    return sl*sv;
 }
 
 // Approx. of Beckman
@@ -238,7 +239,7 @@ float GSF_SchlickGGX(float NdotL, float NdotV, float roughness){
     float k = roughness * 0.5;
     float sl = POSITIVE(NdotL)*(1.0-k) + k;
     float sv = POSITIVE(NdotV)*(1.0-k) + k;
-    return clamp(GSF_Implicit(NdotL, NdotV)/(sl*sv), 0.0, 1.0);
+    return GSF_Implicit(NdotL, NdotV)/(sl*sv);
 }
 
 //====================== Fresnel Functions (FF) ===========================

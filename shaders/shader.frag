@@ -3,6 +3,7 @@
 #extension GL_GOOGLE_include_directive: require
 #include "input.glsl"
 #include "normal_mapping.glsl"
+#include "color.glsl"
 
 layout (location = 0) in vec3 inNormal;
 layout (location = 1) in vec3 inColor;
@@ -49,12 +50,14 @@ void main()
     // Transform the normal from tangent space to world space using the TBN matrix
     vec3 worldSpaceNormal = normalize(TBN * tangentSpaceNormal);
 
-    // gl -> vulkan
-    worldSpaceNormal.y = -worldSpaceNormal.y;
+    // gl -> vulkan // actually, depends on how the normal map was made (pas via ubo or some other magick)
+    //worldSpaceNormal.y = -worldSpaceNormal.y;
     outNormal = vec4(packNormal(worldSpaceNormal), clamp(perMaterialUbo.pbrProps.r, 0.0, 1));
 
     // alpha = roughness
-    outAlbedo = vec4(texture(baseColorSampler, inTexCoord).rgb, texture(roughnessSampler, inTexCoord).r);
+    vec3 baseColor = texture(baseColorSampler, inTexCoord).rgb;
+    float roughness = texture(roughnessSampler, inTexCoord).r;
+    outAlbedo = vec4(baseColor, roughness);
 
 
     // Store linearized depth in alpha component

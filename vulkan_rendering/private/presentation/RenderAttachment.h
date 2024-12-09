@@ -63,6 +63,10 @@ struct AttachmentInfo : public TextureImageInfo{
 
     TexturePxDimensions resolveDimensions(const TexturePxDimensions &swapchainDimensions);
 
+    void requireNewDimensionResolve() {
+        isDimensionResolved = false;
+    };
+
 private:
     bool isDimensionResolved = false;
 };

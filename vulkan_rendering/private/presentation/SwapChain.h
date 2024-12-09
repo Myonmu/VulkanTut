@@ -5,7 +5,7 @@
 #pragma once
 
 
-
+#include <TextureImage.h>
 #include <vulkan/vulkan_core.h>
 #include <vector>
 
@@ -30,6 +30,9 @@ public:
     VkFormat swapChainImageFormat {};
     void recreate();
     friend class ColorAttachment;
+    TexturePxDimensions getSwapChainPxDimensions() {
+        return { swapChainExtent.width, swapChainExtent.height, 1 };
+    }
 private:
     uint32_t imageCount;
     void createSwapChain(WindowContext& context);
