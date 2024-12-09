@@ -141,8 +141,8 @@ float anisotropy, float roughness, vec2 axialMultiplier){
 //=========================== Geometric Shadowing Functions (GSF) ===============================
 
 float GSF_Implicit(float NdotL, float NdotV){
-    //return NdotL * NdotV;
-    return 0.25; // constant in UE
+    return NdotL * NdotV;
+    //return 0.25; // constant in UE
 }
 
 float GSF_Anisotropic_AshikhminShirley(float NdotL, float NdotV, float LdotH){

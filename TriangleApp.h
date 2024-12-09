@@ -133,7 +133,7 @@ private:
         auto &light = ecs.entity("Main Light")
                 .set(MainLight{
                     .direction = glm::normalize(glm::vec3{-1.f, -2.f, -1.f}),
-                    .color = {1.f, 1.f, 1.f, 0.1f}
+                    .color = {1.f, 1.f, 1.f, 1.0f}
                 });
 
 
@@ -188,6 +188,7 @@ private:
                 continue;
             }
         }
+
         return true;
     }
 
