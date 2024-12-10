@@ -19,6 +19,7 @@ A homebrew OOP version (more specifically, custom RAII wrappers from scratch), i
 ### Engine Features
 - [X] Going through the tutorial(s)
 - [X] Multi-window rendering (proof of concept)
+![multi-window rendering (same renderpass)](https://github.com/user-attachments/assets/26518b13-2121-4658-9564-cda472b0c583)
 - [X] Shader reflection
 - [X] ECS (flecs)
 - [X] .obj file handling
@@ -33,6 +34,7 @@ A homebrew OOP version (more specifically, custom RAII wrappers from scratch), i
 - [X] MSAA
 - [X] Deferred shading
 - [X] Basic PBR (Cook-Torrance)
+![Comparison with Blender's Eevee engine](https://github.com/user-attachments/assets/174d73ce-c886-4c35-806b-008e599c0bb5)
 - [ ] Image based rendering
 - [ ] Subsurface Scattering
 - [ ] Cascade Shadow Mapping
