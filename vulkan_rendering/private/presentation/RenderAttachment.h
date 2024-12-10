@@ -4,6 +4,7 @@
 
 #pragma once
 #include <map>
+#include <optional>
 #include <vector>
 
 #include "ContextMacros.h"
@@ -12,15 +13,65 @@
 #include "Polymorphism.h"
 
 
+struct AttachmentInfo;
 struct WindowContext;
 class SwapChain;
 
 enum class AttachmentType {
-    MSAA,
     DEPTH_STENCIL,
     PRESENT,
-    TRANSIENT_COLOR
+    COLOR
 };
+
+enum class AttachmentSizeMode {
+    SWAPCHAIN_RELATIVE,
+    ABSOLUTE,
+    INPUT_RELATIVE
+};
+
+struct TextureRelativeDimensions {
+    AttachmentSizeMode sizeMode = AttachmentSizeMode::SWAPCHAIN_RELATIVE;
+    float width = 1.f;
+    float height = 1.f;
+    float depth = 0.f;
+    // If size mode is relative, this points to the texture that serves as a reference
+    AttachmentInfo* relativeTo;
+
+    TexturePxDimensions resolve(const TexturePxDimensions& swapchainDimensions);
+};
+
+struct AttachmentInfo : public TextureImageInfo{
+
+    std::optional<TextureRelativeDimensions> relativeDimensions;
+    uint32_t index{};
+    AttachmentType type{};
+    VkAttachmentDescription description{};
+    VkImageLayout layout{};
+    VkClearColorValue clearColor{};
+
+    AttachmentInfo() = default;
+
+    AttachmentInfo(uint32_t w, uint32_t h, uint32_t channels, VkFormat format, VkImageUsageFlags usage)
+        : TextureImageInfo(w, h, channels, format, usage) {
+    };
+
+    AttachmentInfo(TexturePxDimensions &dimensions, uint32_t channels, VkFormat format, VkImageUsageFlags usage)
+        : TextureImageInfo(dimensions, channels, format, usage) {
+    };
+
+    AttachmentInfo(const AttachmentInfo &other) = default;
+
+    TexturePxDimensions resolveDimensions(const TexturePxDimensions &swapchainDimensions);
+
+    void requireNewDimensionResolve() {
+        isDimensionResolved = false;
+    };
+
+private:
+    bool isDimensionResolved = false;
+};
+
+
 
 class RenderAttachment {
 public:
@@ -31,36 +82,33 @@ public:
     [[nodiscard]] virtual VkAttachmentDescription getAttachmentDescription() const = 0;
 
     [[nodiscard]] virtual AttachmentType getAttachmentType() const = 0;
+
+    bool isCompatibleWith(AttachmentInfo &ref);
 };
 
-struct AttachmentRef {
-    uint32_t index;
-    AttachmentType type;
-    VkAttachmentDescription description;
-    VkImageLayout layout;
-    VkClearColorValue clearColor{};
-
-    AttachmentRef() = default;
-    AttachmentRef(uint32_t id, const RenderAttachment& attachment, VkImageLayout layout);
-};
 
 class ColorAttachment : public RenderAttachment {
     const WindowContext &ctx;
-    AttachmentType type;
-    VkFormat format{};
-    VkSampleCountFlagBits msaaSamples{};
+    const AttachmentType type = AttachmentType::COLOR;
     CTX_PROPERTY(TextureImage, image)
     CTX_PROPERTY(ImageView, imageView)
 
 private:
     void create();
-
+    AttachmentInfo info;
 public:
-    ColorAttachment(const WindowContext &ctx, VkSampleCountFlagBits msaaSamples, AttachmentType type);
+    ColorAttachment(const WindowContext &ctx, AttachmentInfo& info);
+
+    /**
+     * @deprecated Pass AttachmentInfo explicitly instead
+     * Creates a color attachment having the same specs as a swapchain present attachment
+     * @param ctx
+     */
+    explicit ColorAttachment(const WindowContext &ctx);
 
     void recreate();
 
-    VkAttachmentDescription getAttachmentDescription() const override;
+    [[nodiscard]] VkAttachmentDescription getAttachmentDescription() const override;
 
     AttachmentType getAttachmentType() const override { return type; };
     operator VkImage() const { return *image; }
@@ -70,7 +118,7 @@ public:
 
 class PresentColorAttachment : public RenderAttachment {
     const WindowContext &ctx;
-    AttachmentType type = AttachmentType::PRESENT;
+    const AttachmentType type = AttachmentType::PRESENT;
     VkFormat format{};
     std::vector<VkImage> swapChainImages;
     std::vector<std::unique_ptr<ImageView> > swapChainImageViews;
@@ -98,9 +146,8 @@ public:
 
 class DepthAttachment : public RenderAttachment {
     const WindowContext &ctx;
-    AttachmentType type = AttachmentType::DEPTH_STENCIL;
-    VkFormat format;
-    VkSampleCountFlagBits msaaSamples;
+    AttachmentInfo info{};
+    const AttachmentType type = AttachmentType::DEPTH_STENCIL;
     std::unique_ptr<TextureImage> depthImage;
     std::unique_ptr<ImageView> depthImageView;
 
@@ -113,9 +160,13 @@ class DepthAttachment : public RenderAttachment {
     void create();
 
 public:
+    /**
+     * @deprecated Pass explicit Attachment Info instead.
+     * @param ctx
+     */
     explicit DepthAttachment(const WindowContext &ctx);
 
-    DepthAttachment(WindowContext &ctx, VkFormat depthFormat, VkSampleCountFlagBits msaaSamples);
+    DepthAttachment(const WindowContext &ctx, AttachmentInfo &info);
 
     [[nodiscard]] VkAttachmentDescription getAttachmentDescription() const override;
 
@@ -133,8 +184,13 @@ public:
  * Centralized attachment manager.
  */
 class AttachmentManager {
+    WindowContext &ctx;
     poly_vector<RenderAttachment> attachments;
+
 public:
     void recreate();
-    ImageView& getOrCreateAttachment(const AttachmentRef& attachmentRef);
+
+    RenderAttachment &getOrCreateAttachment(const AttachmentInfo &attachmentRef);
+
+    explicit AttachmentManager(WindowContext &ctx);
 };

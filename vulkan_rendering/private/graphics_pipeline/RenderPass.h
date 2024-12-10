@@ -12,7 +12,7 @@
 #include "RenderGraph.h"
 
 class RenderAttachment;
-struct AttachmentRef;
+struct AttachmentInfo;
 struct DeviceContext;
 
 class RenderPass;
@@ -31,7 +31,7 @@ public:
     Subpass(RenderPass &renderPass): renderPass(renderPass) {
     };
 
-    void useAttachment(uint32_t id, VkImageLayout layout, ResourceUsageDeclType usageType);
+    void useAttachment(uint32_t id, VkImageLayout layout, ResourceUsageType usageType);
 
     void preserveAttachment(uint32_t id);
 

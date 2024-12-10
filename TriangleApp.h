@@ -30,6 +30,10 @@
 #include "scripts/FlycamSystem.h"
 #include "scripts/MeshRotate.h"
 
+struct PbrPerMaterial {
+    glm::vec4 pbrProps;
+};
+
 class TriangleApp {
 public :
     void Run() {
@@ -55,6 +59,7 @@ private:
     std::unique_ptr<EventSystem> eventSystem;
     flecs::entity transformPrefab;
     ObjLoader obj{};
+
 
     void setup() {
         eventSystem = std::make_unique<EventSystem>(ecs);
@@ -88,16 +93,19 @@ private:
             VK_BORDER_COLOR_INT_OPAQUE_BLACK,
             VK_FALSE);
 
-        auto const &normal =
-            deviceCtx.createObject<UnifiedTexture2D>(deviceCtx, "./assets/lemon_nor_gl_4k.png", VK_FILTER_LINEAR);
-        auto const &rough =
-            deviceCtx.createObject<UnifiedTexture2D>(deviceCtx, "./assets/lemon_rough_4k.png", VK_FILTER_LINEAR);
 
+        auto const &normal =
+                deviceCtx.createObject<UnifiedTexture2D>(deviceCtx, "./assets/lemon_nor_gl_4k.png", VK_FILTER_LINEAR);
+        auto const &rough =
+                deviceCtx.createObject<UnifiedTexture2D>(deviceCtx, "./assets/lemon_rough_4k.png", VK_FILTER_LINEAR);
 
 
         materialInstance.setCombinedImageSampler(0, tex, sampler);
         materialInstance.setCombinedImageSampler(1, normal, sampler);
         materialInstance.setCombinedImageSampler(2, rough, sampler);
+        PbrPerMaterial pbr{};
+        pbr.pbrProps = {0.f, 0, 0, 0};
+        materialInstance.setUbo(1, 3,sizeof(PbrPerMaterial),0, &pbr);
         materialInstance.updateDescriptorSet(1);
 
         lightingShaders.emplace_back(FileUtility::ReadSpv("./shaders/lighting.vert.spv"), VK_SHADER_STAGE_VERTEX_BIT);
@@ -119,14 +127,15 @@ private:
                 .emplace<MeshRenderer>(deviceCtx, meshBuffer, materialInstance)
                 //.emplace<MeshRendererSplitBuffer>(deviceCtx, vertexBuffer, indexBuffer, materialInstance)
                 //.add<MeshRotate>()
-                .is_a(transformPrefab);
+                .is_a(transformPrefab).set(Scale{{10.f, 10, 10}});
 
 
         auto &light = ecs.entity("Main Light")
                 .set(MainLight{
                     .direction = glm::normalize(glm::vec3{-1.f, -2.f, -1.f}),
-                    .color = {1.f, 1.f, 1.f}
+                    .color = {1.f, 1.f, 1.f, 1.0f}
                 });
+
 
 
         mainPassRecorder = std::make_unique<RenderPassRecorder>(deviceCtx.get_renderPass_at(0));
@@ -179,6 +188,7 @@ private:
                 continue;
             }
         }
+
         return true;
     }
 
@@ -213,12 +223,12 @@ private:
                 writer.writeInputAttachment(1, normal.get_imageView());
                 writer.writeInputAttachment(2, albedo.get_imageView());
 
-                auto& layout = r.materialInstance.getMaterial().getDescriptorSetLayout(1);
+                auto &layout = r.materialInstance.getMaterial().getDescriptorSetLayout(1);
                 auto &descriptorSet = mainContext->renderer->getOrAllocatePerFrameDescriptorSet(layout);
 
                 writer.updateSet(device, descriptorSet);
                 mainPassRecorder->enqueueCommand<BindDescriptorSet>(
-                    r.materialInstance.getMaterial().get_pipelineLayout(),descriptorSet,1);
+                    r.materialInstance.getMaterial().get_pipelineLayout(), descriptorSet, 1);
                 r.enqueueDrawCall(*mainContext, *mainPassRecorder);
             });
 
@@ -229,13 +239,15 @@ private:
                 cameraData.projection = cam.getProjectionMatrix();
                 cameraData.view = Camera::getViewMatrix(p, t);
                 cameraData.camProps = cam.getCameraPropertyVector();
+                cameraData.camPos = glm::vec4(p.translation, 0.0f);
+                cameraData.viewDir = glm::vec4(Camera::getWorldSpaceViewDirection(p, t), 0.0f);
             }
         );
         //TODO: currently only support 1 main light, subsequent main lights overwrite the previous
         ecs.system<MainLight>("MainLight").kind(flecs::OnStore).each(
             [this](MainLight &l) {
                 auto &lightData = mainContext->mainLightUboData;
-                lightData.color = glm::vec4(l.color, 1.0f);
+                lightData.color = l.color;
                 lightData.direction = glm::vec4(l.direction, 0.0f);
             }
         );

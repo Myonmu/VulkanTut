@@ -13,5 +13,8 @@ struct MainLightUboData {
 
 struct MainLight {
     glm::vec3 direction;
-    glm::vec3 color;
+    /**
+     * rgb = color, a = intensity
+     */
+    glm::vec4 color;
 };

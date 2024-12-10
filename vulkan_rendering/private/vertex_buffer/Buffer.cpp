@@ -11,26 +11,33 @@
 #include "FrameInfo.h"
 
 
-Buffer::Buffer(DeviceContext &context, VkDeviceSize size, VkBufferUsageFlags usage,
-               VmaMemoryUsage memUsage, VmaAllocationCreateFlags flags)
-    : VulkanResource(context), flags(flags) {
-    this->size = size;
-    VkBufferCreateInfo bufferInfo{};
-    bufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
-    bufferInfo.size = size;
-    bufferInfo.usage = usage;
-    bufferInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+BufferInfo BufferInfo::createStagingBufferInfo(VkDeviceSize size, bool isPersistent) {
+    BufferInfo info{size, VK_BUFFER_USAGE_TRANSFER_SRC_BIT};
+    info.isStagingBuffer(isPersistent);
+    return info;
+}
 
-    VmaAllocationCreateInfo allocationInfo{};
-    allocationInfo.usage = memUsage;
-    allocationInfo.flags = flags;
 
+void Buffer::create() {
+    VkBufferCreateInfo bufferInfo = info;
+    VmaAllocationCreateInfo allocationInfo = info; // yeah, funny multiple implicit conversions
     if (vmaCreateBuffer(ctx.get_vma(), &bufferInfo, &allocationInfo,
                         &resource, &vmaAllocation, &vmaAllocationInfo) !=
         VK_SUCCESS) {
         throw std::runtime_error("failed to create buffer");
     }
+}
 
+Buffer::Buffer(DeviceContext &context, BufferInfo &info): VulkanResource(context), info(info) {
+    create();
+}
+
+Buffer::Buffer(DeviceContext &context, VkDeviceSize size, VkBufferUsageFlags usage,
+               VmaMemoryUsage memUsage, VmaAllocationCreateFlags flags)
+    : VulkanResource(context), info( size, usage ) {
+    info.memoryUsage = memUsage;
+    info.allocationFlags = flags;
+    create();
     /* Replaced by VMA
     if (vkCreateBuffer(context.getLogicalDevice(), &bufferInfo, nullptr, &resource) != VK_SUCCESS) {
         throw std::runtime_error("failed to create vertex buffer");
@@ -72,7 +79,7 @@ uint32_t Buffer::findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags prope
 
 // Uploads source data to the buffer (there will be memcpy)
 void Buffer::copyToBufferMemory(const void *sourceData, size_t offset, size_t size) const {
-    if (flags & VMA_ALLOCATION_CREATE_MAPPED_BIT) {
+    if (info.allocationFlags & VMA_ALLOCATION_CREATE_MAPPED_BIT) {
         memcpy(static_cast<char *>(vmaAllocationInfo.pMappedData) + offset, sourceData, size);
     } else {
         void *data;

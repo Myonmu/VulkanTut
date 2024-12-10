@@ -22,11 +22,11 @@ WindowContext::WindowContext(DeviceContext &ctx, const char *name, int width, in
 void WindowContext::init() {
     swapChain = std::make_unique<SwapChain>(*this);
     colorAttachment = std::make_unique<PresentColorAttachment>(*this);
-    gbufferAlbedo = std::make_unique<ColorAttachment>(*this,VK_SAMPLE_COUNT_1_BIT, AttachmentType::TRANSIENT_COLOR);
+    gbufferAlbedo = std::make_unique<ColorAttachment>(*this);
     gbufferAlbedo->name = "GBuffer_Albedo";
-    gbufferPosition = std::make_unique<ColorAttachment>(*this,VK_SAMPLE_COUNT_1_BIT, AttachmentType::TRANSIENT_COLOR);
+    gbufferPosition = std::make_unique<ColorAttachment>(*this);
     gbufferPosition->name = "GBuffer_Position";
-    gbufferNormal = std::make_unique<ColorAttachment>(*this,VK_SAMPLE_COUNT_1_BIT, AttachmentType::TRANSIENT_COLOR);
+    gbufferNormal = std::make_unique<ColorAttachment>(*this);
     gbufferNormal->name = "GBuffer_Normal";
     depthAttachment = std::make_unique<DepthAttachment>(*this);
 }

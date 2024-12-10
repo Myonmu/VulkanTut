@@ -6,17 +6,17 @@
 
 #include "DeviceContext.h"
 
-void Subpass::useAttachment(uint32_t id, VkImageLayout layout, ResourceUsageDeclType usageType) {
+void Subpass::useAttachment(uint32_t id, VkImageLayout layout, ResourceUsageType usageType) {
     auto &attachment = renderPass.attachments[id];
     switch (usageType) {
-        case ResourceUsageDeclType::INPUT:
+        case ResourceUsageType::READ:
             if (attachment->getAttachmentType() == AttachmentType::DEPTH_STENCIL) {
                 depthStencilAttachment.emplace(id, layout);
                 return;
             }
             inputAttachments.emplace_back(id, layout);
             break;
-        case ResourceUsageDeclType::OUTPUT:
+        case ResourceUsageType::WRITE:
             switch (attachment->getAttachmentType()) {
                 case AttachmentType::PRESENT:
                     if (renderPass.msaaEnabled) {
@@ -25,13 +25,10 @@ void Subpass::useAttachment(uint32_t id, VkImageLayout layout, ResourceUsageDecl
                         colorAttachments.emplace_back(id, layout);
                     }
                     break;
-                case AttachmentType::MSAA:
-                    colorAttachments.emplace_back(id, layout);
-                    break;
                 case AttachmentType::DEPTH_STENCIL:
                     depthStencilAttachment.emplace(id, layout);
                     break;
-                case AttachmentType::TRANSIENT_COLOR:
+                case AttachmentType::COLOR:
                     colorAttachments.emplace_back(id, layout);
                     break;
                 default: ;

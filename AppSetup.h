@@ -41,18 +41,18 @@ public:
 
 
         auto &gbufferPass = pass.createSubpass();
-        gbufferPass.useAttachment(colorId, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, ResourceUsageDeclType::OUTPUT);
-        gbufferPass.useAttachment(posId, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, ResourceUsageDeclType::OUTPUT);
-        gbufferPass.useAttachment(normalId, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, ResourceUsageDeclType::OUTPUT);
-        gbufferPass.useAttachment(albedoId, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, ResourceUsageDeclType::OUTPUT);
-        gbufferPass.useAttachment(depthId, VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL, ResourceUsageDeclType::OUTPUT);
+        gbufferPass.useAttachment(colorId, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, ResourceUsageType::WRITE);
+        gbufferPass.useAttachment(posId, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, ResourceUsageType::WRITE);
+        gbufferPass.useAttachment(normalId, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, ResourceUsageType::WRITE);
+        gbufferPass.useAttachment(albedoId, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, ResourceUsageType::WRITE);
+        gbufferPass.useAttachment(depthId, VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL, ResourceUsageType::WRITE);
 
         auto &lightingPass = pass.createSubpass();
-        lightingPass.useAttachment(posId, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, ResourceUsageDeclType::INPUT);
-        lightingPass.useAttachment(normalId, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, ResourceUsageDeclType::INPUT);
-        lightingPass.useAttachment(albedoId, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, ResourceUsageDeclType::INPUT);
-        lightingPass.useAttachment(depthId, VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL, ResourceUsageDeclType::INPUT);
-        lightingPass.useAttachment(colorId, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, ResourceUsageDeclType::OUTPUT);
+        lightingPass.useAttachment(posId, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, ResourceUsageType::READ);
+        lightingPass.useAttachment(normalId, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, ResourceUsageType::READ);
+        lightingPass.useAttachment(albedoId, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, ResourceUsageType::READ);
+        lightingPass.useAttachment(depthId, VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL, ResourceUsageType::READ);
+        lightingPass.useAttachment(colorId, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, ResourceUsageType::WRITE);
 
         SubpassDependency depE0_1{};
         /** NOTE

@@ -11,45 +11,84 @@
 
 struct DeviceContext;
 
+struct TexturePxDimensions {
+    uint32_t width = 0;
+    uint32_t height = 0;
+    // only makes sense for 3d textures.
+    uint32_t depth = 1;
+
+    TexturePxDimensions();
+    TexturePxDimensions(uint32_t width, uint32_t height, uint32_t depth):width(width), height(height), depth(depth) {}
+    TexturePxDimensions(uint32_t width, uint32_t height):width(width), height(height) {}
+
+    bool operator==(const TexturePxDimensions &texture_dimensions) const = default;
+
+    // Calculates the maximum mip levels
+    [[nodiscard]] uint32_t getLevels() const{
+        uint32_t levels = 0;
+        uint32_t max_dim = std::max(std::max(width, height), depth);
+        while (max_dim) {
+            levels++;
+            max_dim >>= 1;
+        }
+        return levels;
+    };
+};
+
+
 // bootstrapping VkImageCreateInfo wrapper, implicitly converts to VkImageCreateInfo
-struct TextureImageInfo {
-    int width, height;
+struct TextureImageInfo: VmaAllocatedResourceInfo<TextureImageInfo> , public ResourceDescriptor{
+    TexturePxDimensions dimensions;
+    // theoretically, we could just get channels from format, but it is tedious
+    uint32_t channels;
+    VkImageType type = VK_IMAGE_TYPE_2D;
     VkFormat format;
     VkImageUsageFlags usage;
-
     // flags added implicitly when setting other fields
-    VkImageUsageFlags implicitUsageFlags;
+    VkImageUsageFlags implicitUsageFlags = 0;
     VkSampleCountFlagBits msaaSamples = VK_SAMPLE_COUNT_1_BIT;
     VkImageTiling tiling = VK_IMAGE_TILING_OPTIMAL;
     uint32_t mipLevels = 1;
     uint32_t layers = 1;
     VkImageCreateFlags flags = 0;
 
+    TextureImageInfo() = default;
+
     // By default, creates a simple 2D image without mip nor msaa
-    TextureImageInfo(int width, int height, VkFormat format, VkImageUsageFlags usage)
-        : width(width), height(height), format(format), usage(usage) {
+    TextureImageInfo(uint32_t width, uint32_t height, uint32_t channels, VkFormat format, VkImageUsageFlags usage)
+        : dimensions(width, height),channels(channels), format(format), usage(usage) {
     }
-    ~TextureImageInfo() = default;
+
+    TextureImageInfo(TexturePxDimensions &dimensions, uint32_t channels, VkFormat format, VkImageUsageFlags usage)
+        :dimensions(dimensions), channels(channels), format(format), usage(usage) {
+    }
+
+    TextureImageInfo(const TextureImageInfo &other) = default;
+
+    ~TextureImageInfo() override = default;
+
     TextureImageInfo &setSampleCount(uint32_t count);
+
     TextureImageInfo &setMipLevels(uint32_t count);
 
-    operator VkImageCreateInfo() const {
-        VkImageCreateInfo imageInfo = {};
-        imageInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
-        imageInfo.imageType = VK_IMAGE_TYPE_2D;
-        imageInfo.extent.width = width;
-        imageInfo.extent.height = height;
-        imageInfo.extent.depth = 1;
-        imageInfo.mipLevels = mipLevels;
-        imageInfo.arrayLayers = layers;
-        imageInfo.samples = msaaSamples;
-        imageInfo.usage = usage | implicitUsageFlags;
-        imageInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
-        imageInfo.tiling = tiling;
-        imageInfo.format = format;
-        imageInfo.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-        imageInfo.flags = flags;
-        return imageInfo;
+    TextureImageInfo &setMaxMipLevels();
+
+    TextureImageInfo &setLayers(uint32_t count);
+
+    TextureImageInfo &isInputAttachment();
+
+    TextureImageInfo &isTransientAttachment();
+
+    uint32_t getSize() const;
+
+    inline operator VkImageCreateInfo() const;
+
+    inline bool operator==(const TextureImageInfo &other) const;
+
+    inline bool operator!=(const TextureImageInfo &other) const;
+
+    ResourceArchType get_archType() override {
+        return ResourceArchType::TEXTURE;
     }
 };
 
@@ -58,11 +97,14 @@ struct TextureImageInfo {
  */
 class TextureImage : public VulkanResource<VkImage, DeviceContext>, public ObjectNode {
 public:
+    TextureImage(DeviceContext &ctx, TextureImageInfo &info,
+                 StagingBufferMode stagingBufferMode = StagingBufferMode::MAP_PER_CALL);
+
     TextureImage(DeviceContext &ctx,
                  Texture2D &t2d,
                  bool generateMipMap = false,
                  VkSampleCountFlagBits msaaSamples = VK_SAMPLE_COUNT_1_BIT,
-                 bool requiresBuffer = true);
+                 StagingBufferMode stagingBufferMode = StagingBufferMode::MAP_PER_CALL);
 
     TextureImage(DeviceContext &ctx, const int &width, const int &height, const int &channels,
                  VkFormat textureFormat,
@@ -70,7 +112,7 @@ public:
                  VkMemoryPropertyFlags memoryProperties,
                  uint32_t mipLevels = 1,
                  VkSampleCountFlagBits msaaSamples = VK_SAMPLE_COUNT_1_BIT,
-                 bool requiresBuffer = true);
+                 StagingBufferMode stagingBufferMode = StagingBufferMode::MAP_PER_CALL);
 
     [[nodiscard]] uint32_t findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties) const;
 
@@ -82,20 +124,23 @@ public:
 
     void generateMipmap(uint32_t mipLevels, VkFilter filter);
 
-    [[nodiscard]] inline VkImageLayout getCurrentLayout() const {
+    [[nodiscard]] VkImageLayout getCurrentLayout() const {
         return currentLayout;
     };
-    uint32_t getMipLevels() const { return mipLevels; };
+
+    [[nodiscard]] uint32_t getMipLevels() const { return info.mipLevels; };
 
     static uint32_t calculateMaxMipLevels(uint32_t width, uint32_t height);
 
+    const TextureImageInfo& get_info() const {return info;}
+
 private:
+    void create();
+
     VkImageLayout currentLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-    int width, height, channels;
-    VkFormat format;
-    VkDeviceSize imageSize;
-    uint32_t mipLevels = 1;
-    uint32_t layers = 1;
+    TextureImageInfo info;
+    VkDeviceSize imageSize{};
     std::unique_ptr<Buffer> stagingBuffer;
     VkDeviceMemory textureImageMemory{};
+    VmaAllocation vmaAllocation{};
 };
