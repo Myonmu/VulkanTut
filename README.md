@@ -14,13 +14,29 @@ We also use Vulkan Guide as a supplementary reference.
 
 A homebrew OOP version (more specifically, custom RAII wrappers from scratch), is potentially not optimal compared to the official RAII but should allow us to understand better the inner workings of the API.
 
-The repo goes slightly beyond the tutorials by also implementing:
+## State of the Project
 
-- Player loop updates driven by flecs ECS
-- Shader reflection
-- Multi-window support
-- Deferred lighting supporting PBR rendering
+### Engine Features
+- [X] Going through the tutorial(s)
+- [X] Multi-window rendering (proof of concept)
+- [X] Shader reflection
+- [X] ECS (flecs)
+- [X] .obj file handling
+- [X] VMA for buffers and images
+- [ ] Render graph  <= *currently here, since this is the basis for all future rendering features*
+- [ ] Scene Hierarchy
+- [ ] File watch and shader hot-reload
+- [ ] Physics engine
+- [ ] glTF file handling
 
+### Rendering Features
+- [X] MSAA
+- [X] Deferred shading
+- [X] Basic PBR (Cook-Torrance)
+- [ ] Image based rendering
+- [ ] Subsurface Scattering
+- [ ] Cascade Shadow Mapping
+- [ ] Bloom
 
 ## Installation
 
@@ -32,7 +48,9 @@ The repo has changed to use **vcpkg** for package management. Follow [Tutorial: 
 
 ## Architecture
 
-Some guides and explanations on consolidated architectural choices. (Some architectural choices are under revision, and are not yet presented).
+Here are some guides and explanations on consolidated architectural choices, serve as reminders.
+
+(Some architectural choices are under revision, and are not yet presented).
 
 ### Table of Contents
 
@@ -43,7 +61,7 @@ Some guides and explanations on consolidated architectural choices. (Some archit
 
 Here, we discuss some less obvious concepts encountered during the learning process. These are usually quite lengthy and have been moved to dedicated files for clarity.
 
-## Table of Contents
+### Table of Contents
 
 1.  [Vulkan Initialization and Surfaces](documentations/articles/Vulkan-Surfaces-and-Init.md)
 2.  [Descriptor Set Layout, Descriptor Pool, Descriptor Set](documentations/articles/Descriptor-Management.md)
