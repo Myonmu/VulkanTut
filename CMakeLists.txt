@@ -11,6 +11,7 @@ set(SDL_VULKAN ON CACHE BOOL "")
 find_package(fmt CONFIG REQUIRED)
 find_package(glm CONFIG REQUIRED)
 find_package(flecs CONFIG REQUIRED)
+find_package(imgui CONFIG REQUIRED)
 
 add_subdirectory(vulkan_rendering)
 
@@ -35,6 +36,7 @@ target_link_libraries(VulkanTut
         fmt::fmt
         flecs::flecs
         SDL3::SDL3-shared
+        imgui::imgui
 )
 
 # Include directories for the app
