@@ -73,7 +73,6 @@ void SwapChain::createSwapChain(WindowContext& context){
     VkSurfaceFormatKHR surfaceFormat = chooseSwapSurfaceFormat(swapChainSupport.formats);
     VkPresentModeKHR presentMode = chooseSwapPresentMode(swapChainSupport.presentModes);
     VkExtent2D extent = chooseSwapExtend(swapChainSupport.capabilities, context);
-
     imageCount = swapChainSupport.capabilities.minImageCount + 1;
 
     if (swapChainSupport.capabilities.maxImageCount > 0 && imageCount > swapChainSupport.capabilities.maxImageCount) {

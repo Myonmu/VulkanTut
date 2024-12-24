@@ -34,3 +34,7 @@
  * @param type base or derived type of T
  */
 #define REFERENCE_CAST(ref, type) *dynamic_cast<type *>(&ref)
+
+#define NO_COPY(type)\
+    type(const type &) = delete;\
+    type &operator=(const type &) = delete;

@@ -3,13 +3,24 @@
 //
 
 #pragma once
+#include "UtilityMacros.h"
 #include "vk_mem_alloc.h"
 
 struct DeviceContext;
 
 enum class StagingBufferMode {
+    /**
+     * Do not create staging buffer. (when you don't need to transfer data from cpu)
+     */
     NO_STAGING_BUFFER,
+    /**
+     * Create a persistently mapped staging buffer (slightly slower)
+     */
     PERSISTENT,
+    /**
+     * Create but not map the staging buffer.
+     * This will result in an implicit map memory call whenever you need to transfer data.
+     */
     MAP_PER_CALL
 };
 
@@ -53,14 +64,25 @@ struct VmaAllocatedResourceInfo {
     }
 };
 
+class VmaInstance;
+
+class VmaAliasableAllocation {
+    VmaInstance& instance;
+    VmaAllocation allocation;
+public:
+    VmaAliasableAllocation(VmaInstance& instance, VmaAllocation allocation);
+    ~VmaAliasableAllocation();
+};
+
 class VmaInstance {
     VmaAllocator allocator;
 
 public:
     explicit VmaInstance(DeviceContext &ctx);
-    VmaInstance(const VmaInstance &) = delete;
-    VmaInstance &operator=(const VmaInstance &) = delete;
+    NO_COPY(VmaInstance)
     ~VmaInstance();
+
+    std::shared_ptr<VmaAliasableAllocation> allocateAliased();
 
     operator VmaAllocator() const {
         return allocator;

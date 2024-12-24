@@ -141,6 +141,6 @@ private:
     TextureImageInfo info;
     VkDeviceSize imageSize{};
     std::unique_ptr<Buffer> stagingBuffer;
-    VkDeviceMemory textureImageMemory{};
+    //VkDeviceMemory textureImageMemory{};
     VmaAllocation vmaAllocation{};
 };

@@ -7,6 +7,10 @@
 #include "DeviceContext.h"
 #include "vk_mem_alloc.h"
 
+VmaAliasableAllocation::~VmaAliasableAllocation() {
+    vmaFreeMemory(instance, allocation);
+}
+
 VmaInstance::VmaInstance(DeviceContext &ctx) {
     VmaVulkanFunctions vulkanFunctions = {};
     vulkanFunctions.vkGetInstanceProcAddr = &vkGetInstanceProcAddr;
@@ -30,3 +34,5 @@ VmaInstance::VmaInstance(DeviceContext &ctx) {
 VmaInstance::~VmaInstance() {
     vmaDestroyAllocator(allocator);
 }
+
+
