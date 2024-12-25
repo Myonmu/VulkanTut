@@ -6,6 +6,7 @@
 #include "UtilityMacros.h"
 #include "vk_mem_alloc.h"
 #include <memory>
+#include <vector>
 
 struct DeviceContext;
 
@@ -25,6 +26,17 @@ enum class StagingBufferMode {
     MAP_PER_CALL
 };
 
+enum class VmaAllocationType {
+    /**
+     * The memory is owned by *one* vulkan object exclusively
+     */
+    EXCLUSIVE,
+    /**
+     * The memory is shared between multiple vulkan objects
+     */
+    ALIASED
+};
+
 class VmaAlloc;
 
 /**
@@ -33,6 +45,7 @@ class VmaAlloc;
 */
 template<typename T>
 struct VmaAllocatedResourceInfo {
+    VmaAllocationType allocationType = VmaAllocationType::EXCLUSIVE;
     VmaMemoryUsage memoryUsage = VMA_MEMORY_USAGE_AUTO;
     VmaAllocationCreateFlags allocationFlags = 0;
     float priority = 0.f;
@@ -67,20 +80,38 @@ struct VmaAllocatedResourceInfo {
     }
 };
 
+template<typename T>
+concept VmaAllocatedResourceInfoType = std::is_base_of_v<VmaAllocatedResourceInfo<T>, T>;
+
 class VmaAllocatedResource {
 public:
+    friend class VmaInstance;
     virtual ~VmaAllocatedResource() = default;
     [[nodiscard]] virtual VkMemoryRequirements getMemoryRequirements() const = 0;
 protected:
     std::shared_ptr<VmaAlloc> allocation;
 };
 
-class VmaInstance;
-
-enum class VmaAllocationType {
-    EXCLUSIVE,
-    ALIASED
+template<VmaAllocatedResourceInfoType T>
+class VmaAllocatedResourceT : public VmaAllocatedResource{
+protected:
+    void create() {
+        if (info.allocationType == VmaAllocationType::EXCLUSIVE) {
+            createWithMemory();
+        }else {
+            createWithoutMemory();
+        }
+    }
+    virtual void createWithMemory() = 0;
+    virtual void createWithoutMemory() = 0;
+public:
+    friend class VmaInstance;
+    ~VmaAllocatedResourceT() override = default;
+protected:
+    T info;
 };
+
+class VmaInstance;
 
 /**
  * Thin wrapper around VmaAllocation to solve aliased allocation related problems.
@@ -107,7 +138,7 @@ public:
     ~VmaInstance();
 
     std::shared_ptr<VmaAlloc> createEmptyExclusiveAllocation();
-    std::shared_ptr<VmaAlloc> allocateAliased();
+    void allocateAliased(const std::vector<VmaAllocatedResource*>& resources);
 
     operator VmaAllocator() const {
         return allocator;

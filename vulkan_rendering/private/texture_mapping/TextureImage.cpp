@@ -105,8 +105,7 @@ bool TextureImageInfo::operator!=(const TextureImageInfo &other) const {
     return !(*this == other);
 }
 
-
-void TextureImage::create() {
+void TextureImage::createWithMemory() {
     VkImageCreateInfo createInfo = info;
     VmaAllocationCreateInfo allocInfo = info;
 

@@ -17,8 +17,7 @@ BufferInfo BufferInfo::createStagingBufferInfo(VkDeviceSize size, bool isPersist
     return info;
 }
 
-
-void Buffer::create() {
+void Buffer::createWithMemory() {
     VkBufferCreateInfo bufferInfo = info;
     VmaAllocationCreateInfo allocationInfo = info; // yeah, funny multiple implicit conversions
     auto& allocator = ctx.get_vma();
@@ -29,6 +28,7 @@ void Buffer::create() {
         throw std::runtime_error("failed to create buffer");
     }
 }
+
 
 void Buffer::createWithoutMemory() {
     VkBufferCreateInfo bufferInfo = info;

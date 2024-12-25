@@ -43,8 +43,22 @@ std::shared_ptr<VmaAlloc> VmaInstance::createEmptyExclusiveAllocation() {
     return std::make_shared<VmaAlloc>(*this, VmaAllocationType::EXCLUSIVE);
 }
 
-std::shared_ptr<VmaAlloc> VmaInstance::allocateAliased() {
-    return nullptr;
+void VmaInstance::allocateAliased(const std::vector<VmaAllocatedResource*>& resources) {
+    VkMemoryRequirements maxRequirements{};
+    maxRequirements.memoryTypeBits = std::numeric_limits<uint32_t>::max();
+    // Accumulate requirements
+    for (const auto res: resources) {
+        auto requirement = res->getMemoryRequirements();
+        maxRequirements.size = std::max(maxRequirements.size, requirement.size);
+        maxRequirements.alignment = std::max(maxRequirements.alignment, requirement.alignment);
+        maxRequirements.memoryTypeBits &= requirement.memoryTypeBits;
+    }
+
+    // Alloc
+    const auto alloc = std::make_shared<VmaAlloc>(*this, VmaAllocationType::ALIASED);
+    for (const auto res: resources) {
+        res->allocation = alloc;
+    }
 }
 
 

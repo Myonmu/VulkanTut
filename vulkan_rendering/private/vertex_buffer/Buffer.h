@@ -48,7 +48,7 @@ struct BufferInfo : public VmaAllocatedResourceInfo<BufferInfo>, public Resource
     }
 };
 
-class Buffer: public VulkanResource<VkBuffer, DeviceContext>, protected VmaAllocatedResource {
+class Buffer: public VulkanResource<VkBuffer, DeviceContext>, protected VmaAllocatedResourceT<BufferInfo> {
 public:
     Buffer(DeviceContext& context, BufferInfo& info);
     Buffer(DeviceContext& context, VkDeviceSize size, VkBufferUsageFlags usage, VmaMemoryUsage memUsage,
@@ -61,8 +61,8 @@ public:
     }
     [[nodiscard]] VkMemoryRequirements getMemoryRequirements() const override;
 protected:
-    void create();
-    void createWithoutMemory();
+    void createWithMemory() override;
+    void createWithoutMemory() override;
     BufferInfo info;
     VmaAllocationInfo vmaAllocationInfo{};
     [[nodiscard]] uint32_t findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties) const;

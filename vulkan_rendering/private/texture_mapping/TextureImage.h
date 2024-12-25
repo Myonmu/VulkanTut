@@ -18,7 +18,7 @@ struct TexturePxDimensions {
     // only makes sense for 3d textures.
     uint32_t depth = 1;
 
-    TexturePxDimensions();
+    TexturePxDimensions() = default;
     TexturePxDimensions(uint32_t width, uint32_t height, uint32_t depth):width(width), height(height), depth(depth) {}
     TexturePxDimensions(uint32_t width, uint32_t height):width(width), height(height) {}
 
@@ -96,7 +96,7 @@ struct TextureImageInfo: VmaAllocatedResourceInfo<TextureImageInfo> , public Res
 /*
  * Texture2D but on the GPU side
  */
-class TextureImage : public VulkanResource<VkImage, DeviceContext>, public ObjectNode, protected VmaAllocatedResource {
+class TextureImage : public VulkanResource<VkImage, DeviceContext>, public ObjectNode, protected VmaAllocatedResourceT<TextureImageInfo> {
 public:
     TextureImage(DeviceContext &ctx, TextureImageInfo &info,
                  StagingBufferMode stagingBufferMode = StagingBufferMode::MAP_PER_CALL);
@@ -138,8 +138,8 @@ public:
     [[nodiscard]] VkMemoryRequirements getMemoryRequirements() const override;
 
 private:
-    void create();
-    void createWithoutMemory();
+    void createWithMemory() override;
+    void createWithoutMemory() override;
 
     VkImageLayout currentLayout = VK_IMAGE_LAYOUT_UNDEFINED;
     TextureImageInfo info;
