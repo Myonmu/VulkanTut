@@ -21,12 +21,22 @@ BufferInfo BufferInfo::createStagingBufferInfo(VkDeviceSize size, bool isPersist
 void Buffer::create() {
     VkBufferCreateInfo bufferInfo = info;
     VmaAllocationCreateInfo allocationInfo = info; // yeah, funny multiple implicit conversions
+    auto& allocator = ctx.get_vma();
+    allocation = allocator.createEmptyExclusiveAllocation();
     if (vmaCreateBuffer(ctx.get_vma(), &bufferInfo, &allocationInfo,
-                        &resource, &vmaAllocation, &vmaAllocationInfo) !=
+                        &resource, *allocation, &vmaAllocationInfo) !=
         VK_SUCCESS) {
         throw std::runtime_error("failed to create buffer");
     }
 }
+
+void Buffer::createWithoutMemory() {
+    VkBufferCreateInfo bufferInfo = info;
+    if (vkCreateBuffer(ctx.getLogicalDevice(), &bufferInfo, nullptr, &resource) != VK_SUCCESS) {
+        throw std::runtime_error("failed to create vertex buffer");
+    }
+}
+
 
 Buffer::Buffer(DeviceContext &context, BufferInfo &info): VulkanResource(context), info(info) {
     create();
@@ -59,8 +69,11 @@ Buffer::Buffer(DeviceContext &context, VkDeviceSize size, VkBufferUsageFlags usa
 }
 
 Buffer::~Buffer() {
-    vmaDestroyBuffer(ctx.get_vma(), resource, vmaAllocation);
-    //vkDestroyBuffer(ctx.getLogicalDevice(), resource, nullptr);
+    if (allocation->get_type() == VmaAllocationType::EXCLUSIVE) {
+        vmaDestroyBuffer(ctx.get_vma(), resource, *allocation);
+    }else {
+        vkDestroyBuffer(ctx.getLogicalDevice(), resource, nullptr);
+    }
     //vkFreeMemory(ctx.getLogicalDevice(), bufferMemory, nullptr);
 }
 
@@ -83,9 +96,9 @@ void Buffer::copyToBufferMemory(const void *sourceData, size_t offset, size_t si
         memcpy(static_cast<char *>(vmaAllocationInfo.pMappedData) + offset, sourceData, size);
     } else {
         void *data;
-        vmaMapMemory(ctx.get_vma(), vmaAllocation, &data);
+        vmaMapMemory(ctx.get_vma(), *allocation, &data);
         memcpy(static_cast<char *>(data) + offset, sourceData, size);
-        vmaUnmapMemory(ctx.get_vma(), vmaAllocation);
+        vmaUnmapMemory(ctx.get_vma(), *allocation);
     }
 }
 
@@ -97,4 +110,10 @@ void Buffer::copyBuffer(Buffer &srcBuffer, Buffer &dstBuffer, DeviceContext &ctx
     recorder.recordCommandBuffer(cmd, ctx, FrameInfo::DONT_CARE);
 
     cmd.executeImmediate();
+}
+
+VkMemoryRequirements Buffer::getMemoryRequirements() const {
+    VkMemoryRequirements requirements;
+    vkGetBufferMemoryRequirements(ctx.getLogicalDevice(), resource, &requirements);
+    return requirements;
 }

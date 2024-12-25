@@ -7,9 +7,13 @@
 #include "DeviceContext.h"
 #include "vk_mem_alloc.h"
 
-VmaAliasableAllocation::~VmaAliasableAllocation() {
-    vmaFreeMemory(instance, allocation);
+VmaAlloc::~VmaAlloc() {
+    // when EXCLUSIVE, the memory is likely managed by the object itself through vma calls (e.g. vmaDestroyImage)
+    if (type == VmaAllocationType::ALIASED) {
+        vmaFreeMemory(instance, allocation);
+    }
 }
+
 
 VmaInstance::VmaInstance(DeviceContext &ctx) {
     VmaVulkanFunctions vulkanFunctions = {};
@@ -33,6 +37,14 @@ VmaInstance::VmaInstance(DeviceContext &ctx) {
 
 VmaInstance::~VmaInstance() {
     vmaDestroyAllocator(allocator);
+}
+
+std::shared_ptr<VmaAlloc> VmaInstance::createEmptyExclusiveAllocation() {
+    return std::make_shared<VmaAlloc>(*this, VmaAllocationType::EXCLUSIVE);
+}
+
+std::shared_ptr<VmaAlloc> VmaInstance::allocateAliased() {
+    return nullptr;
 }
 
 

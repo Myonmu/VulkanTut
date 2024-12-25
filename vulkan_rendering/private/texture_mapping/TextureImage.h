@@ -5,6 +5,7 @@
 
 #pragma once
 #include <Buffer.h>
+#include <optional>
 #include <Texture2D.h>
 
 #include "ObjectHierarchy.h"
@@ -95,7 +96,7 @@ struct TextureImageInfo: VmaAllocatedResourceInfo<TextureImageInfo> , public Res
 /*
  * Texture2D but on the GPU side
  */
-class TextureImage : public VulkanResource<VkImage, DeviceContext>, public ObjectNode {
+class TextureImage : public VulkanResource<VkImage, DeviceContext>, public ObjectNode, protected VmaAllocatedResource {
 public:
     TextureImage(DeviceContext &ctx, TextureImageInfo &info,
                  StagingBufferMode stagingBufferMode = StagingBufferMode::MAP_PER_CALL);
@@ -134,13 +135,14 @@ public:
 
     const TextureImageInfo& get_info() const {return info;}
 
+    [[nodiscard]] VkMemoryRequirements getMemoryRequirements() const override;
+
 private:
     void create();
+    void createWithoutMemory();
 
     VkImageLayout currentLayout = VK_IMAGE_LAYOUT_UNDEFINED;
     TextureImageInfo info;
     VkDeviceSize imageSize{};
     std::unique_ptr<Buffer> stagingBuffer;
-    //VkDeviceMemory textureImageMemory{};
-    VmaAllocation vmaAllocation{};
 };

@@ -111,11 +111,19 @@ void TextureImage::create() {
     VmaAllocationCreateInfo allocInfo = info;
 
     auto &vmaAllocator = ctx.get_vma();
-    auto result = vmaCreateImage(vmaAllocator, &createInfo, &allocInfo, &resource, &vmaAllocation, nullptr);
+    allocation = vmaAllocator.createEmptyExclusiveAllocation();
+    auto result = vmaCreateImage(vmaAllocator, &createInfo, &allocInfo, &resource, *allocation, nullptr);
 
     if (result != VK_SUCCESS) {
         throw std::runtime_error("failed to create image!");
     }
+}
+
+void TextureImage::createWithoutMemory() {
+    VkImageCreateInfo createInfo = info;
+    if (vkCreateImage(ctx.getLogicalDevice(), &createInfo, nullptr, &resource) != VK_SUCCESS) {
+        throw std::runtime_error("failed to create image!");
+    };
 }
 
 
@@ -312,10 +320,20 @@ void TextureImage::generateMipmap(uint32_t mipLevels, VkFilter filter) {
 }
 
 TextureImage::~TextureImage() {
-    vmaDestroyImage(ctx.get_vma(), resource, vmaAllocation);
-    //vkDestroyImage(ctx.getLogicalDevice(), resource, nullptr);
+    if (allocation->get_type() == VmaAllocationType::EXCLUSIVE) {
+        vmaDestroyImage(ctx.get_vma(), resource, *allocation);
+    }else {
+        vkDestroyImage(ctx.getLogicalDevice(), resource, nullptr);
+    }
     //vkFreeMemory(ctx.getLogicalDevice(), textureImageMemory, nullptr);
 }
+
+VkMemoryRequirements TextureImage::getMemoryRequirements() const {
+    VkMemoryRequirements requirements;
+    vkGetImageMemoryRequirements(ctx.getLogicalDevice(), resource, &requirements);
+    return requirements;
+}
+
 
 uint32_t TextureImage::calculateMaxMipLevels(uint32_t width, uint32_t height) {
     return static_cast<uint32_t>(std::floor(std::log2(std::max(width, height))) + 1);

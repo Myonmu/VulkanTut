@@ -5,6 +5,7 @@
 #pragma once
 #include "UtilityMacros.h"
 #include "vk_mem_alloc.h"
+#include <memory>
 
 struct DeviceContext;
 
@@ -23,6 +24,8 @@ enum class StagingBufferMode {
      */
     MAP_PER_CALL
 };
+
+class VmaAlloc;
 
 /**
 * base struct for "create info" structs that should be managed by VMA
@@ -64,14 +67,35 @@ struct VmaAllocatedResourceInfo {
     }
 };
 
+class VmaAllocatedResource {
+public:
+    virtual ~VmaAllocatedResource() = default;
+    [[nodiscard]] virtual VkMemoryRequirements getMemoryRequirements() const = 0;
+protected:
+    std::shared_ptr<VmaAlloc> allocation;
+};
+
 class VmaInstance;
 
-class VmaAliasableAllocation {
+enum class VmaAllocationType {
+    EXCLUSIVE,
+    ALIASED
+};
+
+/**
+ * Thin wrapper around VmaAllocation to solve aliased allocation related problems.
+ * Non aliased allocations are "distributed",
+ * Aliased allocations are "centralized" during creation, but "distributed" during destruction.
+ */
+class VmaAlloc {
+    PROPERTY(VmaAllocationType, type, public, private)
     VmaInstance& instance;
-    VmaAllocation allocation;
+    VmaAllocation allocation{};
 public:
-    VmaAliasableAllocation(VmaInstance& instance, VmaAllocation allocation);
-    ~VmaAliasableAllocation();
+    VmaAlloc(VmaInstance& instance, const VmaAllocationType type): type(type), instance(instance) {};
+    ~VmaAlloc();
+    operator VmaAllocation*() { return &allocation;}
+    operator VmaAllocation() const { return allocation;}
 };
 
 class VmaInstance {
@@ -82,7 +106,8 @@ public:
     NO_COPY(VmaInstance)
     ~VmaInstance();
 
-    std::shared_ptr<VmaAliasableAllocation> allocateAliased();
+    std::shared_ptr<VmaAlloc> createEmptyExclusiveAllocation();
+    std::shared_ptr<VmaAlloc> allocateAliased();
 
     operator VmaAllocator() const {
         return allocator;
