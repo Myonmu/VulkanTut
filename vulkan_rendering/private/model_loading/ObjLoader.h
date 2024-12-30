@@ -7,6 +7,7 @@
 #include <string>
 #include <tiny_obj_loader.h>
 #include <vector>
+#include <future>
 
 #include "Vertex.h"
 
@@ -18,6 +19,6 @@ public:
 
     void computeTangent();
 
-    void LoadGeometry(const std::string& path);
-    void LoadTexture(const std::string& path);
+    std::future<void> loadGeometryAsync(const std::string& path);
+    void loadGeometry(const std::string& path);
 };

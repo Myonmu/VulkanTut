@@ -119,7 +119,7 @@ private:
         auto &lightingMatInstance = lightingMat.createInstance();
         auto &subpass1 = ecs.entity("Lighting Renderer").emplace<RenderFullScreenQuad>(deviceCtx, lightingMatInstance);
 
-        obj.LoadGeometry("./assets/lemon_4k.obj");
+        obj.loadGeometryAsync("./assets/lemon_4k.obj").wait();
         auto &meshBuffer = deviceCtx.createObject<MeshBuffer>(deviceCtx, obj.vertices, obj.indices);
         //auto &vertexBuffer = deviceCtx.createObject<VertexBuffer>(deviceCtx, obj.vertices);
         //auto &indexBuffer = deviceCtx.createObject<IndexBuffer>(deviceCtx,obj.indices);

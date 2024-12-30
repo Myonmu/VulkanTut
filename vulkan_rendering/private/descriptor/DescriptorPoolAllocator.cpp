@@ -10,129 +10,147 @@
 #include "DeviceContext.h"
 
 DescriptorAllocator::DescriptorAllocator(DeviceContext &ctx): ctx(ctx) {
-
 }
 
 DescriptorAllocator::~DescriptorAllocator() = default;
 
 
-void DescriptorAllocator::init(uint32_t initialSets, std::vector<PoolSizeRatio>& poolRatios)
-{
+void DescriptorAllocator::init(uint32_t initialSets, std::vector<PoolSizeRatio> &poolRatios) {
     ratios.clear();
-	uniqueTypes.clear();
-    for (auto r : poolRatios) {
-        ratios.push_back(r);
-    	uniqueTypes.insert(r.type);
+    uniqueTypes.clear();
+    for (auto r: poolRatios) {
+        ratios.emplace(r.type, r);
+        uniqueTypes.insert(r.type);
     }
-    readyPools.push_back(createPool(initialSets, poolRatios));
+    readyPools.push_back(createPool(initialSets, ratios));
     setsPerPool = initialSets * growth; //grow it next allocation
 }
 
-void DescriptorAllocator::clear()
-{
-    for (const auto& p : readyPools) {
+void DescriptorAllocator::clear() {
+    for (const auto &p: readyPools) {
         p->reset(0);
     }
-    for (auto& p : fullPools) {
+    for (auto &p: fullPools) {
         p->reset(0);
         readyPools.push_back(std::move(p));
     }
     fullPools.clear();
 }
 
-void DescriptorAllocator::destroy()
-{
+void DescriptorAllocator::destroy() {
     readyPools.clear();
     fullPools.clear();
 }
 
-std::unique_ptr<DescriptorPool> DescriptorAllocator::getPool()
-{
+std::unique_ptr<DescriptorPool> DescriptorAllocator::getPool() {
     if (!readyPools.empty()) {
-    	auto p = std::move(readyPools.back());
-    	readyPools.pop_back();
+        auto p = std::move(readyPools.back());
+        readyPools.pop_back();
         return p;
-    }
-    else {
-	    //need to create a new pool
-	    auto newPool = createPool(setsPerPool, ratios);
+    } else {
+        //need to create a new pool
+        auto newPool = createPool(setsPerPool, ratios);
 
-	    setsPerPool *= growth;
-	    if (setsPerPool > 4092) {
-		    setsPerPool = 4092;
-	    }
-    	return newPool;
+        setsPerPool *= growth;
+        if (setsPerPool > 4092) {
+            setsPerPool = 4092;
+        }
+        return newPool;
     }
 }
 
-std::unique_ptr<DescriptorPool> DescriptorAllocator::createPool(uint32_t setCount, std::vector<PoolSizeRatio>& poolRatios)
-{
-	std::vector<VkDescriptorPoolSize> poolSizes;
-	for (PoolSizeRatio ratio : poolRatios) {
-		poolSizes.push_back(VkDescriptorPoolSize{
-			.type = ratio.type,
-			.descriptorCount = static_cast<uint32_t>(ratio.ratio * setCount)
-		});
-	}
+std::unique_ptr<DescriptorPool> DescriptorAllocator::createPool(uint32_t setCount,
+                                                                std::unordered_map<VkDescriptorType, PoolSizeRatio> &
+                                                                poolRatios) {
+    std::vector<VkDescriptorPoolSize> poolSizes;
+    for (auto &ratio: poolRatios | std::views::values) {
+        poolSizes.push_back(VkDescriptorPoolSize{
+            .type = ratio.type,
+            .descriptorCount = static_cast<uint32_t>(ratio.ratio * setCount)
+        });
+    }
 
-	return std::make_unique<DescriptorPool>(ctx, setCount, poolSizes);
+    return std::make_unique<DescriptorPool>(ctx, setCount, poolSizes);
 }
 
 bool DescriptorAllocator::isCompatible(const DescriptorSetLayout &layout) const {
-	for (auto &requirements = layout.requirements;
-	     const auto &key: requirements | std::views::keys) {
-		if (!uniqueTypes.contains(key))return false;
-	}
-	return true;
+    for (auto &requirements = layout.requirements;
+         const auto &key: requirements | std::views::keys) {
+        if (!uniqueTypes.contains(key))return false;
+    }
+    return true;
+}
+
+int DescriptorAllocator::rateCompatibility(const DescriptorSetLayout &layout) const {
+    int score = 1000;
+    for (auto &requirements = layout.requirements;
+         const auto &key: requirements | std::views::keys) {
+        if (!uniqueTypes.contains(key)) return 0;
+        auto requiredCount = layout.requirements.at(key);
+        // higher score when ratio matches closely
+        // it could be fine if required count is a multiple of the ratio
+        score -= std::abs(static_cast<int>(requiredCount) % static_cast<int>(ratios.at(key).ratio));
+    }
+    score -= std::abs(static_cast<int>(uniqueTypes.size() - layout.requirements.size())) * 10;
+    return score;
 }
 
 
-std::unique_ptr<DescriptorSet> DescriptorAllocator::allocate(DescriptorSetLayout& layout, void* pNext)
-{
-	if (!isCompatible(layout)) {
-		throw std::runtime_error("Cannot allocate with this allocator due to incompatible descriptor set types");
-	}
+std::unique_ptr<DescriptorSet> DescriptorAllocator::allocate(DescriptorSetLayout &layout, void *pNext) {
+    if (!isCompatible(layout)) {
+        throw std::runtime_error("Cannot allocate with this allocator due to incompatible descriptor set types");
+    }
     //get or create a pool to allocate from
-	auto poolToUse = getPool();
-	try {
-		auto result =  std::make_unique<DescriptorSet>(ctx, *poolToUse, layout);
-		readyPools.push_back(std::move(poolToUse));
-		return result;
-	}catch (DescriptorPoolOutOfMemoryException& e) {
-		fullPools.push_back(std::move(poolToUse));
+    auto poolToUse = getPool();
+    try {
+        auto result = std::make_unique<DescriptorSet>(ctx, *poolToUse, layout);
+        readyPools.push_back(std::move(poolToUse));
+        return result;
+    } catch (DescriptorPoolOutOfMemoryException &e) {
+        fullPools.push_back(std::move(poolToUse));
         return allocate(layout, pNext);
-	}catch (std::exception& e) {
-		throw;
-	}
+    }catch (std::exception &e) {
+        throw;
+    }
 }
 
 
 DescriptorAllocatorCollection::DescriptorAllocatorCollection(DeviceContext &ctx): ctx(ctx) {
-
 }
 
 
 std::unique_ptr<DescriptorSet> DescriptorAllocatorCollection::allocate(DescriptorSetLayout &layout, void *pNext) {
-	for (auto& allocator: allocators) {
-		if (allocator->isCompatible(layout)) {
-			return allocator->allocate(layout, pNext);
-		}
-	}
-	std::vector<DescriptorAllocator::PoolSizeRatio> ratios;
-	for (auto [type, cnt]: layout.requirements) {
-		ratios.emplace_back(type, cnt);
-	}
-	auto& allocator = allocators.emplace_back(std::make_unique<DescriptorAllocator>(ctx));
-	allocator->init(10, ratios);
-	return allocator->allocate(layout, pNext);
+
+    DescriptorAllocator* bestAllocator = nullptr;
+    int bestScore = 0;
+
+    for (auto &allocator: allocators) {
+        auto score = allocator->rateCompatibility(layout);
+        if (score > bestScore) {
+            bestScore = score;
+            bestAllocator = allocator.get();
+        }
+    }
+
+    if (bestScore > 0 && bestAllocator != nullptr) {
+        return bestAllocator->allocate(layout, pNext);
+    }
+
+    std::vector<DescriptorAllocator::PoolSizeRatio> ratios;
+    for (auto [type, cnt]: layout.requirements) {
+        ratios.emplace_back(type, cnt);
+    }
+    auto &allocator = allocators.emplace_back(std::make_unique<DescriptorAllocator>(ctx));
+    allocator->init(10, ratios);
+    return allocator->allocate(layout, pNext);
 }
 
 void DescriptorAllocatorCollection::reset() const {
-	for (auto& allocator: allocators) {
-		allocator->clear();
-	}
+    for (auto &allocator: allocators) {
+        allocator->clear();
+    }
 }
 
 VulkanFrame &VulkanRenderer::getCurrentFrame() const {
-	return *frames[currentFrame];
+    return *frames[currentFrame];
 }

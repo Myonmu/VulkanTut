@@ -42,7 +42,7 @@ void ObjLoader::computeTangent() {
         // Compute the tangent and bitangent
         float f = 1.0f / det;
         glm::vec3 tangent = f * (deltaUV2.y * edge1 - deltaUV1.y * edge2);
-        glm::vec3 bitangent = f * (-deltaUV2.x * edge1 + deltaUV1.x * edge2);
+        //glm::vec3 bitangent = f * (-deltaUV2.x * edge1 + deltaUV1.x * edge2);
 
         // Add the computed tangents and bitangents to the correct vertices
         vertices[idx0].tangent += tangent;
@@ -66,7 +66,7 @@ void ObjLoader::computeTangent() {
     }
 }
 
-void ObjLoader::LoadGeometry(const std::string &path) {
+void ObjLoader::loadGeometry(const std::string &path) {
     tinyobj::ObjReader reader{};
     reader.ParseFromFile(path);
     if (!reader.Valid()) {
@@ -111,5 +111,9 @@ void ObjLoader::LoadGeometry(const std::string &path) {
     computeTangent();
 }
 
-void ObjLoader::LoadTexture(const std::string &path) {
+std::future<void> ObjLoader::loadGeometryAsync(const std::string &path) {
+    return std::async(std::launch::async, [&]() {
+        loadGeometry(path);
+    });
 }
+

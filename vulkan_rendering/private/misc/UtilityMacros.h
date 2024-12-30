@@ -38,3 +38,7 @@
 #define NO_COPY(type)\
     type(const type &) = delete;\
     type &operator=(const type &) = delete;
+
+#define NO_MOVE(type)\
+    type(type&&) = delete;\
+    type &operator=(type&&) = delete;
